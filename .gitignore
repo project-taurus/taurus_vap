@@ -1,0 +1,11 @@
+wrk/
+exe/ 
+src/obj/
+src/mod/ 
+extras/*aux    
+extras/*log    
+extras/*out    
+examples/gradient_mg24/results_*
+examples/gradient_mg24/out/
+examples/minima_usdb/results
+examples/minima_usdb/out/

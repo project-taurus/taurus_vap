@@ -1,0 +1,20 @@
+* Z = number of protons 
+* N = number of neutrons
+* M = number of discretization points in the PNP 
+  if M=1 : HFB calculations                      
+  if M>1 : VAPNP calculations (the values are the expectation
+  values of the projected state) 
+* Energy = total energy
+* Epair = particle-particle part of the energy
+* Beta = triaxial beta deformation
+* Gamma = triaxial gamma deformation
+  (the orientation of the nucleus is not fixed such that you
+  might obtain same results for Gamma=X<60 and Gamma=n*60 +- X)
+ 
+  Z      N    M    Energy      Epair      Beta      Gamma  
+4.000  4.000  1  -80.959671  -0.000000  0.281757  131.981591
+4.000  4.000  7  -82.854070  -2.857264  0.268496  0.207269
+4.000  5.000  1  -89.191968  -0.581863  0.239989  141.853997
+4.000  5.000  7  -90.732247  -3.712463  0.213382  124.278771
+5.000  5.000  1  -103.288483  -2.675039  0.235567  277.695087
+5.000  5.000  7  -102.711331  -3.002646  0.183843  334.688967

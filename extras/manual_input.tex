@@ -1,0 +1,487 @@
+%=======================================================================
+% Manual concerning the format of the hamiltonian files.
+%=======================================================================
+%
+%= Document class, packages and commands ===============================
+%
+\documentclass[a4paper,11pt]{article}
+%
+\usepackage[left=2.0cm,right=2.0cm,top=2.0cm,bottom=2.0cm,includefoot,includehead,headheight=13.6pt]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage[colorlinks,urlcolor=blue,linkcolor=blue]{hyperref}
+
+\newcommand{\TAURUSvap}{$\text{TAURUS}_{\text{vap}}$}
+\newcommand{\TAURUSvapt}{$\text{TAURUS}_{\text{vap}}$~}
+\newcommand{\ttt}[1]{\texttt{#1}}
+
+\newcommand{\bra}[1]{\langle #1 \vert}
+\newcommand{\ket}[1]{\vert #1 \rangle}
+\newcommand{\elma}[3]{\bra{#1} #2 \ket{#3}}
+
+% 
+% 
+%= Begin document ======================================================
+%
+\begin{document}
+
+%
+%= Title =======================================
+% 
+\begin{center}
+ {\LARGE \textbf{\TAURUSvap: Manual for the input file}} \\
+ {\large 09/10/2020}
+\end{center}
+
+%
+%= Section: Types of Hamiltonian =======================================
+% 
+\section{Structure of the input file}
+
+The input file is read by the code as STDIN and therefore has no fixed naming convention. 
+On the other hand, the format of the file is fixed. We describe in this manual how to write a proper input file for \TAURUSvap~
+and the different options that the code offers.
+Because the input file is somewhat lenghty, we will present its different section separately (but remember that they
+are all part of the same file).
+ 
+\noindent Before going further, a few remark are in order:
+\begin{itemize}
+  \item We use here the Fortran convention for the format of variables, e.g.\ 1i5 or 1a30, assuming that the reader
+  know their meaning. If it is not the case, we encourage the reader to search for a tutorial somewhere else.
+  There is a large body of Fortran documentation available online therefore it should not be too difficult.
+
+  \item All lines starts with the reading of an element of an array, \ttt{input\_names} or \ttt{input\_block},
+  made of \ttt{character(30)} variables. 
+  As they only play a cosmetic/descriptive role, we are not going to comment them further. 
+
+  \item The number of lines in the input files depends on the number of quasi-particle one wants to block. Here, we will give
+  the line numbers considering an input without any blocking.
+\end{itemize}
+
+%
+%= subsection: hamiltonian =============================================
+%
+\subsection{Section about the Hamiltonian}
+
+\subsubsection*{Description}
+\begin{center}
+\begin{tabular}{|c|l|l|}
+\hline
+Line & Format & Data \\
+\hline
+ \textbf{1}   & 1a             & \tt input\_names(1)                   \\
+ \textbf{2}   & 1a             & \tt input\_names(2)                   \\
+ \textbf{3}   & 1a30, 1a100    & \tt input\_names(3), hamil\_file      \\
+ \textbf{4}   & 1a30, 1i1      & \tt input\_names(4), hamil\_com       \\
+ \textbf{5}   & 1a30, 1i1      & \tt input\_names(5), hamil\_read      \\
+ \textbf{6}   & 1a30, 1i5      & \tt input\_names(6), paral\_teamssize \\
+ \textbf{7}   & 1a             & \tt input\_names(7)                   \\
+\hline
+\end{tabular}
+\end{center}
+where 
+\begin{itemize}
+\item \ttt{hamil\_file}: common name of the Hamiltonian input files. It is used by the code to determine all the possible
+ hamiltonian files: \ttt{hamil\_file.sho}, \ttt{hamil\_file.01b}, \ttt{hamil\_file.2b}, \ttt{hamil\_file.com}, \ttt{hamil\_file.red}
+\item \ttt{hamil\_com}: option to take into account the center-of-mass correction when doing calculations with general Hamiltonians
+ (\ttt{hamil\_type = 3 or 4}).\\[0.05cm]
+ \ttt{= 0\:}  w/o center-of-mass correction. \\[0.05cm]
+ \ttt{= 1\:}  with center-of-mass correction, whose two-body matrix elements are read from \ttt{hamil\_file.com}.
+\item \ttt{hamil\_read}: option to read the Hamiltonian from the normal files or from a ``reduced'' file. \\[0.05cm]
+ \ttt{= 0\:}  reads the Hamiltonian from the normal Hamiltonian files (\ttt{hamil\_file.sho}, \ttt{hamil\_file.01b}, \ttt{hamil\_file.2b}, 
+           \ttt{hamil\_file.com})  \\[0.05cm]
+ \ttt{= 1\:}  reads the Hamiltonian from the reduced file \ttt{hamil\_file.red} containing the $m$-scheme matrix elements written 
+           in binary (to be faster and have a smaller size). Note that the file \ttt{hamil\_file.sho} is still needed and read by the code.
+           By contrast, \ttt{hamil\_file.com} will not be read even if \ttt{hamil\_com = 1}, so the center-of-mass correction has to be
+           already included in the reduced file.
+\item \ttt{paral\_teamssize}: number of MPI processes in a team. Within a team, each process stores only a certain subset of the two-body matrix
+ elements of the Hamiltonian and computes with them the fields $h$, $\Gamma$ and $\Delta$. Then they all synchronize through a \ttt{mpi\_reduce}. This option is needed
+ for large model spaces when the storage of the two-body matrix elements in the SHO basis becomes a problem. \\[0.05cm]
+ \ttt{= 0 or 1\:} all processes have access to all matrix elements. \\[0.05cm]
+ \ttt{> 1\:} the number of matrix elements managed by a process, \ttt{hamil\_H2dim}, is obtained by performing the euclidean division
+             of the total number of matrix elements, $\ttt{hamil\_H2dim\_all}$, by the number of processes within the team, \ttt{paral\_myteamsize}.
+             The rest of the division is distributed among the first processes in the team (i.e.\ the processes with a rank in the team,
+             \ttt{paral\_myteamrank}, strictly lower than the rest).
+             Note that if \ttt{paral\_teamssize} is not a divisor of the total number of MPI processes, \ttt{paral\_worldsize}, then the last team
+             will only be made of modulo(\ttt{paral\_worldsize},\ttt{paral\_teamssize}) processes. Therefore, the actual size of the team is not 
+             necessarily equal to the input \ttt{paral\_teamssize}.
+             Obviously, \ttt{paral\_teamssize} has to be lower than or equal to \ttt{paral\_worldsize}. \\[0.05cm]
+\end{itemize}
+
+\subsubsection*{Example}
+\begin{center}
+\tt
+\begin{tabular}{|ll|}
+\hline
+Interaction                   &     \\
+----------------------        &     \\
+Master name hamil.\ files     &usdb \\
+Center-of-mass correction     &0    \\
+Read reduced hamiltonian      &0    \\
+No. of MPI proc per H team    &0    \\
+                              &     \\
+\hline
+\end{tabular}
+\end{center}
+
+%
+%= subsection: hamiltonian =============================================
+%
+\subsection{Section about the particle number}
+
+\subsubsection*{Description}
+\begin{center}
+\begin{tabular}{|c|l|l|}
+\hline
+Line & Format & Data \\
+\hline
+ \textbf{ 8}   & 1a           & \tt input\_names( 8)              \\
+ \textbf{ 9}   & 1a           & \tt input\_names( 9)              \\
+ \textbf{10}   & 1a30, 1f7.2  & \tt input\_names(10), valence\_Z  \\
+ \textbf{11}   & 1a30, 1f7.2  & \tt input\_names(11), valence\_N  \\
+ \textbf{12}   & 1a30, 1i5    & \tt input\_names(12), proj\_Mphip \\
+ \textbf{13}   & 1a30, 1i5    & \tt input\_names(13), proj\_Mphin \\
+ \textbf{14}   & 1a           & \tt input\_names(14)              \\
+\hline
+\end{tabular}
+\end{center}
+where
+\begin{itemize}
+ \item \ttt{valence\_Z}: number of active protons, either on average (HFB) or exact (VAPNP). For no-core calculations, this is the total number
+  of protons in the nucleus. Note that for VAPNP calculations, this number has to be an ``integer'' (e.g.\ \ttt{4.00}).
+ \item \ttt{valence\_N}: same for the number of active neutrons. 
+ \item \ttt{proj\_Mphip}: number of points in the discretization (à la Fomenko) of the integral over proton gauge angles. \\[0.05cm]
+  \ttt{= 0\:} no particle-number projection is performed for this particle species. Note that this is equal to the case \ttt{proj\_Mphip = 1}. \\[0.05cm]
+  \ttt{> 0 and odd\:} use a Fomenko discretization with the $n$-th point being located at the angle $(n-1)/(\ttt{proj\_Mphip})$. \\[0.05cm]
+  \ttt{> 0 and even\:} use a Fomenko discretization with the $n$-th point being located at the angle $(n-1/2)/(\ttt{proj\_Mphip})$ 
+ \item \ttt{proj\_Mphin}: same for the integral over neutron gauge angles. 
+
+\end{itemize}
+
+\subsubsection*{Example}
+\begin{center}
+\tt
+\begin{tabular}{|ll|}
+\hline
+Particle Number                &      \\
+------------------------------ &      \\
+Number of active protons       &4.00  \\
+Number of active neutrons      &5.00  \\
+No.\ of gauge angles protons   &5     \\
+No.\ of gauge angles neutrons  &5     \\
+                               &      \\
+\hline
+\end{tabular}
+\end{center}
+
+%
+%= subsection: hamiltonian =============================================
+%
+\subsection{Section about the wave function}
+
+\subsubsection*{Description}
+\begin{center}
+\begin{tabular}{|c|l|l|}
+\hline
+Line & Format & Data \\
+\hline
+ \textbf{15}   & 1a    & \tt input\_names(15)                        \\
+ \textbf{16}   & 1a    & \tt input\_names(16)                        \\
+ \textbf{17}   & 1a30, 1i1 & \tt input\_names(17), seed\_type        \\
+ \textbf{18}   & 1a30, 1i5 & \tt input\_names(18), blocking\_dim     \\
+               &           & \tt do i=1, blocking\_dim               \\
+ \textbf{  }   & 1a30, 1i5 & \:\: \tt input\_block(i),  blocking\_id(i) \\
+               &           & \tt enddo                               \\
+ \textbf{19}   & 1a30, 1i1 & \tt input\_names(19), seed\_symm        \\
+ \textbf{20}   & 1a30, 1i1 & \tt input\_names(20), seed\_text        \\
+ \textbf{21}   & 1a30, 1es10.3 & \tt input\_names(21), seed\_occeps  \\
+ \textbf{22}   & 1a30, 1i1 & \tt input\_names(22), seed\_allemp      \\
+ \textbf{23}   & 1a    & \tt input\_names(23)                        \\
+\hline
+\end{tabular}
+\end{center}
+where
+\begin{itemize}
+\item \ttt{seed\_type}: option to select the type of seed used as initial wave function. \\[0.05cm]
+ \ttt{= 0\:} random symmetry-unrestricted general quasi-particle state. \\[0.05cm]
+ \ttt{= 1\:} read from the file \ttt{initial\_wf.bin/txt}. \\[0.05cm]
+ \ttt{= 2\:} random spherical BCS state (with good parity, good angular momentum and w/o proton-neutron mixing). \\[0.05cm]
+ \ttt{= 3\:} random axial BCS state (with good parity, good third component of the angular momentum and w/o proton-neutron mixing). \\[0.05cm]
+ \ttt{= 4\:} random general quasi-particle state with good parity. \\[0.05cm]
+ \ttt{= 5\:} random general quasi-particle state w/o proton-neutron mixing. \\[0.05cm]
+ \ttt{= 6\:} random general quasi-particle state with good parity and w/o proton-neutron mixing. \\[0.05cm]
+ \ttt{= 7\:} random Slater determinant. \\[0.05cm]
+ \ttt{= 8\:} random Slater determinant with good parity. \\[0.05cm]
+ \ttt{= 9\:} random Slater determiant built from HO single-particle states (with good parity and good third component of the angular momentum).
+\item \ttt{blocking\_dim}: number of quasi-particle to block before the iterative procedure.
+\item \ttt{blocking\_id(i)}: index of the $i$-th quasi-particle to block. Note that each quasi-particle index is read on a different line and
+ that no index is read if \ttt{blocking\_dim = 0}.
+\item \ttt{seed\_symm}: option to switch on/off the eventual simplifications of the particle-number projection resulting from the symmetries of the 
+ initial wave function. \\[0.05cm]
+ \ttt{= 0\:} the simplifications are performed if possible: i) \ttt{proj\_Mphip} and \ttt{proj\_Mphip} can be set to \ttt{1} if the initial wave function
+ has a good number of protons and neutrons, respectively, and ii) the integration over gauge angles can be reduced to $[0,\pi]$ if there is no
+ mixing between protons and neutrons. The code will also checks that there is no symmetry-breaking constraint before doing the 
+ simplifications. \\[0.05cm]
+ \ttt{= 1\:} no simplification is performed.
+\item \ttt{seed\_text}: option to read/write the initial/final wave function as a binary (.bin) or text (.txt) file. \\[0.05cm]
+ \ttt{= 0\:} reads the file \ttt{initial\_wf.bin} and writes the file \ttt{final\_wf.bin}. \\[0.05cm]
+ \ttt{= 1\:} reads the file \ttt{initial\_wf.txt} and writes the file \ttt{final\_wf.txt}. \\[0.05cm]
+ \ttt{= 2\:} reads the file \ttt{initial\_wf.bin} and writes the file \ttt{final\_wf.txt}. \\[0.05cm]
+ \ttt{= 3\:} reads the file \ttt{initial\_wf.txt} and writes the file \ttt{final\_wf.bin}. 
+\item \ttt{seed\_occeps}: cutoff to determine the fully occupied/empty single-particle states in the canonical basis. 
+ This is needed to compute the overlap using the Pfaffian method. We recommend changing this parameter only when observing
+ serious numerical problems or inaccuracies. \\[0.05cm]
+ \ttt{= 0.0\:} the code will assume the value \ttt{seed\_occeps = ${\ttt{10}}^{\ttt{-8}}$}. \\[0.05cm]
+ \ttt{> 0.0\:} the code will consider single-particles states with $v^2 \ge 1.0 - \ttt{seed\_occeps}$ as fully occupied and 
+ the ones with $v^2 \le \ttt{seed\_occeps}$ as fully empty. 
+\item \ttt{seed\_allemp}: option to take into account the fully empty single-particle states in the calculation of the overlap. As for the previous option, we recommend to switch on this 
+ option only if you encounter numerical problems or if the code crashes with an error messsage linked to the evaluation of the overlap. \\[0.05cm]
+ \ttt{= 0\:} eliminates the maximum number of empty states possible. \\[0.05cm]
+ \ttt{= 1\:} takes into account all the empty states.
+\end{itemize}
+
+\subsubsection*{Example}
+\begin{center}
+\tt
+\begin{tabular}{|ll|}
+\hline
+Wave Function                 &          \\
+--------------------------    &          \\
+Type of seed wave function    &0         \\
+Number of QP to block         &1         \\
+Index QP to block             &13        \\
+No symmetry simplifications   &0         \\
+Read/write wf file as text    &0         \\
+Cutoff occupied s.-p.\ states &0.000E+00 \\
+Include all empty sp states   &0         \\
+                              &          \\
+\hline
+\end{tabular}
+\end{center}
+
+%
+%= subsection: hamiltonian =============================================
+%
+\subsection{Section about the iterative procedure}
+
+\subsubsection*{Description}
+\begin{center}
+\begin{tabular}{|c|l|l|}
+\hline
+Line & Format & Data \\
+\hline
+ \textbf{24}   & 1a            & \tt input\_names(24)                 \\
+ \textbf{25}   & 1a            & \tt input\_names(25)                 \\
+ \textbf{26}   & 1a30, 1i5     & \tt input\_names(26), iter\_max      \\
+ \textbf{27}   & 1a30, 1i5     & \tt input\_names(27), iter\_write    \\
+ \textbf{28}   & 1a30, 1i1     & \tt input\_names(28), iter\_print    \\
+ \textbf{29}   & 1a30, 1i1     & \tt input\_names(29), gradient\_type \\
+ \textbf{30}   & 1a30, 1es10.3 & \tt input\_names(30), gradient\_eta  \\
+ \textbf{31}   & 1a30, 1es10.3 & \tt input\_names(31), gradient\_mu   \\
+ \textbf{32}   & 1a30, 1es10.3 & \tt input\_names(32), gradient\_eps  \\
+ \textbf{33}   & 1a            & \tt input\_names(33)                 \\
+\hline
+\end{tabular}
+\end{center}
+where 
+\begin{itemize}
+\item \ttt{iter\_max}: maximum number of iterations in the minimization procedure. \\[0.05cm]
+ \ttt{= 0\:} no iterations are performed but the wave function is still read/generated and the constraints adjusted. The code still performs the final
+             printing of the properties (with and w/o projection). \\[0.05cm]
+ \ttt{> 0\:} perfoms at maxmimum \ttt{iter\_max} iterations, and less if the calculation is converged.
+\item \ttt{iter\_write}: number of iterations separating two intermediate writing of the wave function. \\[0.05cm]
+ \ttt{= 0\:} the code does not perform any intermediate writing of the wave function. \\[0.05cm]
+ \ttt{> 0\:} the codes writes every \ttt{iter\_write} iterations the wave function of the current iteration to the file
+             \ttt{intermediate\_wf.bin/txt} (the file follows the same rule as \ttt{final\_wf.bin/txt}).
+\item \ttt{iter\_print}: option to ask more intermediate printing at each iteration (requires more CPU time). \\[0.05cm]
+ \ttt{= 0\:} prints the minimum amout of informations at each iterations \\[0.05cm]
+ \ttt{= 1\:} prints in addition the expectation value of the parity and average triaxial deformations.
+\item \ttt{gradient\_type}: option to select the weight factors in the gradient+momentum algorithm, with the gradient at iteration $i$ being 
+  defined as $G(i) = \eta(i) H^{20}(i) + \mu(i) G(i-1)$. \\[0.05cm]
+ \ttt{= 0\:} The weights are fixed with $\eta(i) = \ttt{gradient\_eta}$ and $\mu(i) = \ttt{gradient\_mu}$. \\[0.05cm]
+ \ttt{= 1\:} The weights are adapted at each iteration using an approximation of the eigenvalues of the Hessian matrix based on
+             the diagonalization of $H^{11}$ (see the article for more details). 
+             This is an empiral recipe and we do not guarantee it will work for every calculation. \\[0.05cm]
+ \ttt{= 2\:} same as above but using the diagonalization of the single-particle hamiltonian $h$ instead. This method seems 
+              more stable for odd-mass nuclei.
+             This is an empiral recipe and we do not guarantee it will work for every calculation. 
+\item \ttt{gradient\_eta}: value of $\eta(i)$ if the weights are fixed or if the intermediate diagonalizations performed
+             for the recipes \ttt{gradient\_type = 1 or 2} fail.
+\item \ttt{gradient\_mu}: same for $\mu(i)$. 
+\item \ttt{gradient\_eps}: convergence criterion for the gradient. The calculation will stop at iteration $i$ if 
+      $||G(i)||_F / \eta(i) \le \ttt{gradient\_eps}$.
+ 
+\end{itemize}
+
+\subsubsection*{Example}
+\begin{center}
+\tt
+\begin{tabular}{|ll|}
+\hline
+Iterative Procedure           &          \\
+-------------------------------------- & \\
+Maximum no. of iterations     &250       \\
+Step intermediate wf writing  &0         \\
+More intermediate printing    &1         \\
+Type of gradient              &2         \\
+Parameter eta for gradient    &1.000E-02 \\
+Parameter mu  for gradient    &0.500E-03 \\
+Tolerance for gradient        &1.000E-04 \\
+                              &          \\
+\hline
+\end{tabular}
+\end{center}
+
+%
+%= subsection: hamiltonian =============================================
+%
+\subsection{Section about the constraints}
+
+\subsubsection*{Description}
+\begin{center}
+\begin{tabular}{|c|l|l|}
+\hline
+Line & Format & Data \\
+\hline
+ \textbf{34}   & 1a            & \tt input\_names(34)                  \\
+ \textbf{35}   & 1a            & \tt input\_names(35)                  \\
+ \textbf{36}   & 1a30, 1i1     & \tt input\_names(36), enforce\_NZ     \\
+ \textbf{37}   & 1a30, 1i1     & \tt input\_names(37), opt\_betalm     \\
+ \textbf{38}   & 1a30, 1i1     & \tt input\_names(38), pairs\_scheme   \\
+ \textbf{39}   & 1a30, 1es10.3 & \tt input\_names(39), constraint\_eps \\
+ \textbf{40}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(40), constraint\_switch( 3), 1x, constraint\_read( 3) \\
+ \textbf{41}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(41), constraint\_switch( 4), 1x, constraint\_read( 4) \\
+% \textbf{42}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(42), constraint\_switch( 5), 1x, constraint\_read( 5) \\
+% \textbf{43}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(43), constraint\_switch( 6), 1x, constraint\_read( 6) \\
+% \textbf{44}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(44), constraint\_switch( 7), 1x, constraint\_read( 7) \\
+% \textbf{45}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(45), constraint\_switch( 8), 1x, constraint\_read( 8) \\
+% \textbf{46}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(46), constraint\_switch( 9), 1x, constraint\_read( 9) \\
+% \textbf{47}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(47), constraint\_switch(10), 1x, constraint\_read(10) \\
+% \textbf{48}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(48), constraint\_switch(11), 1x, constraint\_read(11) \\
+% \textbf{49}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(49), constraint\_switch(12), 1x, constraint\_read(12) \\
+% \textbf{50}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(50), constraint\_switch(13), 1x, constraint\_read(13) \\
+% \textbf{51}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(51), constraint\_switch(14), 1x, constraint\_read(14) \\
+% \textbf{52}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(52), constraint\_switch(15), 1x, constraint\_read(15) \\
+% \textbf{53}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(53), constraint\_switch(16), 1x, constraint\_read(16) \\
+% \textbf{54}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(54), constraint\_switch(17), 1x, constraint\_read(17) \\
+% \textbf{55}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(55), constraint\_switch(18), 1x, constraint\_read(19) \\
+% \textbf{56}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(56), constraint\_switch(19), 1x, constraint\_read(19) \\
+% \textbf{57}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(57), constraint\_switch(20), 1x, constraint\_read(20) \\
+% \textbf{58}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(58), constraint\_switch(21), 1x, constraint\_read(21) \\
+% \textbf{59}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(59), constraint\_switch(22), 1x, constraint\_read(22) \\
+% \textbf{60}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(60), constraint\_switch(23), 1x, constraint\_read(23) \\
+% \textbf{61}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(61), constraint\_switch(24), 1x, constraint\_read(24) \\
+ $\vdots$      & $\hfill \vdots \hfill$ & $\hfill \vdots \hfill$       \\
+ \textbf{62}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(62), constraint\_switch(25), 1x, constraint\_read(25) \\
+ \textbf{63}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(63), constraint\_switch(26), 1x, constraint\_read(26) \\
+\hline
+\end{tabular}
+\end{center}
+\pagebreak
+where 
+\begin{itemize}
+\item \ttt{enforce\_NZ}: option to enforce the constraint on the average particle numbers even when doing VAPNP calculations. This may
+  be useful to stabilize the VAPNP convergence when using a few discretization points for the projection and large steps for the gradient.\\[0.05cm]
+  \ttt{= 0\:} no constraint on the average particle numbers is enforced when doing VAPNP. \\[0.05cm]
+  \ttt{= 1\:} the code enforces a constraint on the average particle numbers of the underlying quasi-particle states.
+\item \ttt{opt\_betalm}: option to select the kind of deformation constraints used. \\[0.05cm]
+  \ttt{= 0\:} the constraints are applied to the expectation values of $\tilde{Q}_{lm}$ directly. \\[0.05cm]
+  \ttt{= 1\:} the constraints are applied to the dimensionless parameters $\tilde{\beta}_{lm}$ (see article). \\[0.05cm]
+  \ttt{= 2\:} same as \ttt{opt\_betalm = 1} except for $lm=20$ and $lm=22$ that are defined as the triaxial parameters
+              $\beta$ and $\gamma$, respectively (see article).
+\item \ttt{pairs\_scheme}: option to select the kind of pair constraints used. \\[0.05cm]
+  \ttt{= 0\:} the pair operator is defined using the ``agnostic'' scheme (see article).  \\[0.05cm]
+  \ttt{= 1\:} the pair operator is defined using the seniority scheme (see article).  %\\[0.05cm]
+%  \ttt{= 2\:} the pair operator is defined using the $LST$ scheme (see article). 
+\item \ttt{constraint\_eps}: convergence criterion during the iterative adjustement of the constraints performed at each iteration. 
+  The adjustment will stop after 100 iterations even if the criterion is not met.
+\item \ttt{constraint\_switch(j)}: option to switch on/off the constraint \ttt{j}. \\[0.05cm]
+  \ttt{= 0\:} the constraint \ttt{j} is switched off. \\[0.05cm]
+  \ttt{= 1\:} the constraint \ttt{j} is switched on. 
+\item \ttt{constraint\_read(j)}: the expectation value targeted for the constraint \ttt{j}. 
+      Note that if \ttt{constraint\_switch(j) = 0}, this value is not used in the code.
+\end{itemize}
+
+The physical correspondance for the indices \ttt{j} is the following:
+\begin{center}
+\begin{tabular}{|r|ll|}
+\hline
+ \ttt{j} & Physical quantity &\\
+\hline
+ \ttt{ 1} & $Z$ &(read as \ttt{valence\_Z}) \\
+ \ttt{ 2} & $N$ &(read as \ttt{valence\_N}) \\
+ \ttt{ 3} & $\tilde{Q}_{10}$ or $\tilde{\beta}_{10}$ &\\
+ \ttt{ 4} & $\tilde{Q}_{11}$ or $\tilde{\beta}_{11}$ &\\
+ \ttt{ 5} & $\tilde{Q}_{20}$ or $\tilde{\beta}_{20}$ or $\beta$ &\\
+ \ttt{ 6} & $\tilde{Q}_{21}$ or $\tilde{\beta}_{21}$ &\\
+ \ttt{ 7} & $\tilde{Q}_{22}$ or $\tilde{\beta}_{22}$ or $\gamma$ &\\
+ \ttt{ 8} & $\tilde{Q}_{30}$ or $\tilde{\beta}_{30}$ &\\
+ \ttt{ 9} & $\tilde{Q}_{31}$ or $\tilde{\beta}_{31}$ &\\
+ \ttt{10} & $\tilde{Q}_{32}$ or $\tilde{\beta}_{32}$ &\\
+ \ttt{11} & $\tilde{Q}_{33}$ or $\tilde{\beta}_{33}$ &\\
+ \ttt{12} & $\tilde{Q}_{40}$ or $\tilde{\beta}_{40}$ &\\
+ \ttt{13} & $\tilde{Q}_{41}$ or $\tilde{\beta}_{41}$ &\\
+ \ttt{14} & $\tilde{Q}_{42}$ or $\tilde{\beta}_{42}$ &\\
+ \ttt{15} & $\tilde{Q}_{43}$ or $\tilde{\beta}_{43}$ &\\
+ \ttt{16} & $\tilde{Q}_{44}$ or $\tilde{\beta}_{44}$ &\\
+ \ttt{17} & $J_x$ & \\
+ \ttt{18} & $J_y$ & (not active) \\
+ \ttt{19} & $J_z$ & \\
+ \ttt{20} & $\vphantom{\Bigg(} \left[ \tilde{P}^\dagger_{\text{x}} \right]^{J=1,\, T=0}_{M_J =0,\,  M_T =0}$ &with x = agn or sen \\
+ \ttt{21} & $\vphantom{\Bigg(} \left[ \tilde{P}^\dagger_{\text{x}} \right]^{J=1,\, T=0}_{M_J =-1,\, M_T =0}$ &with x = agn or sen \\
+ \ttt{22} & $\vphantom{\Bigg(} \left[ \tilde{P}^\dagger_{\text{x}} \right]^{J=1,\, T=0}_{M_J =+1,\, M_T =0}$ &with x = agn or sen \\
+ \ttt{23} & $\vphantom{\Bigg(} \left[ \tilde{P}^\dagger_{\text{x}} \right]^{J=0,\, T=1}_{M_J =0,\, M_T =0}$  &with x = agn or sen \\
+ \ttt{24} & $\vphantom{\Bigg(} \left[ \tilde{P}^\dagger_{\text{x}} \right]^{J=0,\, T=1}_{M_J =0,\, M_T =-1}$ &with x = agn or sen \\
+ \ttt{25} & $\vphantom{\Bigg(} \left[ \tilde{P}^\dagger_{\text{x}} \right]^{J=0,\, T=1}_{M_J =0,\, M_T =+1}$ &with x = agn or sen \\
+ \ttt{26} & $\Delta$ (HFB field) & \\
+\hline
+\end{tabular}
+\end{center}
+
+
+\subsubsection*{Example}
+\begin{center}
+\tt
+\begin{tabular}{|ll|}
+\hline
+Constraints                     &          \\
+----------------------          &          \\
+Force constraint N/Z            &1         \\
+Constraint beta\_lm             &2         \\
+Pair coupling scheme            &1         \\
+Tolerence for constraints       &1.000E-06 \\
+Constraint multipole Q10        &0 0.000   \\
+Constraint multipole Q11        &0 0.000   \\
+Constraint multipole Q20        &1 0.100   \\
+Constraint multipole Q21        &1 0.000   \\
+Constraint multipole Q22        &1 10.00   \\
+Constraint multipole Q30        &0 0.400   \\
+Constraint multipole Q31        &0 0.100   \\
+Constraint multipole Q32        &0 0.100   \\
+Constraint multipole Q33        &0 0.100   \\
+Constraint multipole Q40        &0 0.000   \\
+Constraint multipole Q41        &0 0.000   \\
+Constraint multipole Q42        &0 0.000   \\
+Constraint multipole Q43        &0 0.000   \\
+Constraint multipole Q44        &0 0.000   \\
+Constraint ang.\ mom.\ Jx       &0 1.000   \\
+Constraint ang.\ mom.\ Jy       &0 1.000   \\
+Constraint ang.\ mom.\ Jz       &0 1.000   \\
+Constraint pair P\_T00\_J10     &0 1.000   \\
+Constraint pair P\_T00\_J1m1    &0 2.000   \\
+Constraint pair P\_T00\_J1p1    &0 2.000   \\
+Constraint pair P\_T10\_J00     &0 1.000   \\
+Constraint pair P\_T1m1\_J00    &0 1.000   \\
+Constraint pair P\_T1p1\_J00    &0 1.000   \\
+Constraint field Delta          &0 0.050   \\
+\hline
+\end{tabular}
+\end{center}
+
+%
+%= End document ======================================================
+%
+\end{document}
+%
+%=====================================================================

@@ -1,0 +1,270 @@
+%=======================================================================
+% Manual concerning the format of the hamiltonian files.
+%=======================================================================
+%
+%= Document class, packages and commands ===============================
+%
+\documentclass[a4paper,11pt]{article}
+%
+\usepackage[left=2.0cm,right=2.0cm,top=2.0cm,bottom=2.0cm,includefoot,includehead,headheight=13.6pt]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage[colorlinks,urlcolor=blue,linkcolor=blue]{hyperref}
+
+\newcommand{\TAURUSvap}{$\text{TAURUS}_{\text{vap}}$}
+\newcommand{\TAURUSvapt}{$\text{TAURUS}_{\text{vap}}$~}
+\renewcommand{\tt}[1]{\texttt{#1}}
+
+\newcommand{\bra}[1]{\langle #1 \vert}
+\newcommand{\ket}[1]{\vert #1 \rangle}
+\newcommand{\elma}[3]{\bra{#1} #2 \ket{#3}}
+
+% 
+% 
+%= Begin document ======================================================
+%
+\begin{document}
+
+%
+%= Title =======================================
+% 
+\begin{center}
+ {\LARGE \textbf{\TAURUSvap: Manual for the Hamiltonian files}} \\
+ {\large 09/10/2020}
+\end{center}
+
+%
+%= Section: Types of Hamiltonian =======================================
+% 
+\section{Types of Hamiltonian}
+
+The code \TAURUSvapt requires as input one or several files containing the informations about the model space and the Hamiltonian matrix elements.
+The precise number of files required depends on the type of Hamiltonian considered as well as the parameters entered in the STDIN file.
+One crucial parameter is the name of the Hamiltonian file, stored in the variable \tt{hamil\_file}, that determines the name of the files that the code will open.
+As of today, the code supports 4 types of Hamiltonian associated in the code with the variable \tt{hamil\_type}:
+
+\begin{itemize}
+  \item \tt{hamil\_type = 1 or 2}: valence-space Hamiltonian in $JT$-scheme written in the format of the shell-model code ANTOINE.
+  In this case, the code will require only one Hamiltonian file containing the model space, the single-particle energies and the 
+  two-body matrix elements. 
+  In the case \tt{hamil\_type = 1}, the single-particle energies of protons and neutrons are the same, while for 
+  \tt{hamil\_type = 2} they are different. \\
+  Naming convention for the files: \tt{hamil\_file.sho}
+  
+  \item \tt{hamil\_type = 3}: general Hamiltonian in $J$-scheme. In this case, the code will require
+  3 files: 1 file containing the model space, 1 file containing the zero- and one-body parts of the Hamiltonian and 1 file containing the
+  two-body part of the Hamiltonian. This is the most general type of Hamiltonian considered that allows one to define all the matrix elements
+  manually. \\
+  Naming convention for the files: \tt{hamil\_file.sho}, \tt{hamil\_file.01b}, \tt{hamil\_file.2b} 
+
+  \item \tt{hamil\_type = 4}: ``bare'' Hamiltonian in $J$-scheme. In this case, the code will require
+  2 files: 1 file containing the model space and 1 file containg two-body part of the Hamiltonian. For such Hamiltonians, the zero-body part
+  is assumed to be equal to zero and the one-body part is built from the kinetic-energy one-body operator $T$. \\
+  Naming convention for the files: \tt{hamil\_file.sho}, \tt{hamil\_file.2b} 
+  
+\end{itemize}
+
+\subsubsection*{Center-of-mass correction}
+For \tt{hamil\_type = 3 or 4}, it is possible to add a center-of-mass correction by setting \tt{hamil\_com = 1} in the
+STDIN file. In that case, the code will require an additional file containing the two-body matrix elements for the center-of-mass correction.
+The one-body part is automatically computed as $-\frac{T}{A}$ taking $A$ equal to the average number of nucleons targeted. \\
+Naming convention for the files: \tt{hamil\_file.com} 
+
+\subsubsection*{Reduced format}
+For all types of Hamiltonian, it is possible to read the matrix elements  in a so-called ``reduced'' format from a binary file.
+This is is done by setting \tt{hamil\_read = 1} in the STDIN file. In that case, the code will \emph{always} require 2 files: 1 file containing
+the model space (\tt{hamil\_file.sho}) and 1 file containing all the matrix elements of the Hamiltonians in the Spherical Harmonic 
+Oscillator (SHO) single-particle basis written in binary (more compact and faster to read). 
+While the reduced format will not be explained here,\footnote{We provide in the directory \tt{extras/codes} a small code that can write Hamiltonians in the reduced format.} 
+a reduced file will automatically be generated when using the code with \tt{hamil\_read = 0}. \\
+Naming convention for the files: \tt{hamil\_file.red} 
+
+%
+%= Section: Antoine files ==============================================
+%
+\section{Valence-space $JT$-coupled Hamiltonian à la ANTOINE}
+
+For those Hamiltonians, we follow almost exactly the format of the shell-model code ANTOINE as described on their
+\href{http://www.iphc.cnrs.fr/nutheo/code\_antoine/menu.html}{website}. 
+The only differences are:
+\begin{itemize}
+  \item The name of the interaction can accept up to 100 characters.
+  \item The code does not handle different valence spaces for protons and neutrons (we need a space invariant under
+  isospin rotation in order to be able to perform a subsequent isospin projection).
+  \item It is possible to include a value for the oscillator frequency $\hbar \omega$ after the list of shells included in the model space (same line).
+  For example, for the $sd$-shell: \tt{1 3 205  1001  203  12.50}. If the frequency is missing, the code will set its values ussing the
+  formula: $\hbar \omega = 45 A^{-1/3} - 25 A^{-2/3}$ MeV.\footnote{See equation (3.45) of the book \textit{From Nucleons to Nucleus} by J. Suhonen.}
+\end{itemize}
+To learn more about this format, go visit the ``Manual'' section of their
+\href{http://www.iphc.cnrs.fr/nutheo/code\_antoine/menu.html}{website}. 
+ 
+
+%
+%= Section: Vapes of Hamiltonian =======================================
+%
+\section{General $J$-coupled Hamiltonian}
+
+\subsection{SHO model space (.sho)}
+
+The file \tt{hamil\_file.sho} has the following format: 
+\begin{center}
+\begin{tabular}{|c|c|l|}
+\hline
+Line & \ Type \hfill & Data \\
+\hline
+ \textbf{1}   & character  & \tt{hamil\_name} \\
+ \textbf{2}   & integer    & \tt{hamil\_type} \\
+ \textbf{3}   & integers   & \tt{HOsh\_dim}  \: \tt{(HOsh\_na(i), i=1, HOsh\_dim)} \\
+ \textbf{4}   & real       & \tt{HO\_hw} \\
+\hline
+\end{tabular}
+\end{center}
+where in each line we have:
+\begin{itemize}
+%\noindent
+\item[\textbf{1}] \tt{hamil\_name}: a name to describe the Hamiltonian. Only the first 100 characters will be stored.
+\item[\textbf{2}] \tt{hamil\_type}: the type of Hamiltonian (see the first section). 
+\item[\textbf{3}] \tt{HOsh\_dim}: the number of shells in the  model space. \\
+                  \tt{(HOsh\_na(i), i=1, HOsh\_dim)}: loop to read the name of the shells. For a shell with quantum numbers $n,l,j$, the
+                  name is $\tt{HOsh\_na} = 10000n + 100l + 2j$. Note that $n$ begins at 0. This is similar to the ANTOINE format except
+                   that the first factor is 10000 (because $l$ can be larger than 10 in no-core calculations).
+\item[\textbf{4}] \tt{HO\_hw}: the frequency of the Harmonic Oscillator.
+\end{itemize}
+
+\subsubsection*{Example}
+\begin{center}
+\begin{tabular}{|l|}
+\hline
+  \tt{My Chiral EFT Hamiltionian for emax=4 and hw=20} \\
+  \tt{3} \\
+  \tt{15      1    103    101  10001    205    203  10103  10101    307    305  20001  10205  10203    409    407} \\
+  \tt{20.0} \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Zero- and one-body parts (.01b)}
+
+The file \tt{hamil\_file.01b}, read only if \tt{hamil\_type = 3}, has the following format: 
+\begin{center}
+\begin{tabular}{|c|c|l|}
+\hline
+Line & \ Type \hfill & Data \\
+\hline
+\textbf{1}    & character         & \tt{hname1} \\
+\textbf{2}    & real              & \tt{hamil\_H0} \\
+\textbf{3}    & int. int. real real & \tt{a} \:\tt{b} \:\tt{hamil\_H1cpd\_p} \:\tt{hamil\_H1cpd\_n} \\
+\textbf{etc.} &     etc.          &        \phantom{000000} \tt{etc.}  \\
+\hline
+\end{tabular}
+\end{center}
+where in each line we have:
+\begin{itemize}
+\item[\textbf{1}] \tt{hname1}: dummy variable but has to be the \emph{same} name as \tt{hamil\_name}.
+\item[\textbf{2}] \tt{hamil\_H0}: zero-body part $H^{0b}$ of the Hamiltonian.
+\item[\textbf{3}] \tt{a}: left shell $a$ \\
+                  \tt{b}: right shell $b$ \\
+                  \tt{hamil\_H1cpd\_p}: one-body matrix element $\elma{a}{H^{1b}}{b}$ for proton shells. 
+                  They will be attributed to all proton matrix elements $\elma{k}{H^{1b}}{l}$
+                  between \emph{single-particle} states $k$ and $l$ that satisfy $k \in a$, $l \in b$ and $m_{j_k} = m_{j_l}$. \\
+                  \tt{hamil\_H1cpd\_n}: same for neutrons.
+\item[\textbf{etc.}] same for other combinations of shells.
+\end{itemize}
+Note that the order in which the matrix elements are written is not important, nor it is required to write all the matrix elements equal to zero.
+
+\subsubsection*{Example}
+\begin{center}
+\begin{tabular}{|l|}
+\hline
+\tt{My Chiral EFT Hamiltionian for emax=4 and hw=20} \\
+\tt{42.11792} \\
+\tt{   \phantom{10}1      $\phantom{1000}$1   2.5330250        2.5675970} \\
+\tt{   \phantom{10}1                  10001   5.5514280        5.5809940} \\
+\tt{             103        \phantom{10}103   18.364205        18.366125} \\
+        \phantom{00000000000} etc.  \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Two-body part (.2b)}
+
+The file \tt{hamil\_file.2b} has the following format:
+\begin{center}
+\begin{tabular}{|c|c|l|}
+\hline
+Line & \ Type \hfill & Data \\
+\hline
+\textbf{1}   & character       & \tt{hname2} \\
+\textbf{2}   & integers        & \tt{tmin} \:\tt{tmax} \:\tt{a} \:\tt{b} \:\tt{c} \:\tt{d} \:\tt{jmin} \:\tt{jmax} \\
+\textbf{3}   & real            & \tt{(hamil\_H2cpd(t,j=jmin,a,b,c,d), t=tmin,tmax)} \\
+$\vdots$     &   $\vdots$      &             \phantom{000000000000} $\vdots$ \\
+\textbf{$\Delta = 3+\tt{jmax}-\tt{jmin}$}  & real   & \tt{(hamil\_H2cpd(t,j=jmax,a,b,c,d), t=tmin,tmax)} \\
+  \textbf{etc.}       &     etc.        &        \phantom{00000000000}\tt{etc.}  \\
+\hline
+\end{tabular}
+\end{center}
+where in each line we have:
+\begin{itemize}
+\item[\textbf{1}] \tt{hname2}: dummy variable but has to be the \emph{same} name as \tt{hamil\_name}.
+\item[\textbf{2}] \tt{tmin}: lowest isospin index. It has to be equal to 0. \\
+                  \tt{tmax}: highest isospin index. It has to be equal to 5. \\
+                  \tt{a}: left  shell $a$ \\
+                  \tt{b}: left  shell $b$ \\
+                  \tt{c}: right shell $c$ \\
+                  \tt{d}: right shell $d$ \\
+                  \tt{jmin}: minimum possible value for angular momentum coupling. \\
+                  \tt{jmax}: maximum possible value for angular momentum coupling. 
+\item[\textbf{3-$\Delta$}] \tt{hamil\_H2cpd(t,j,a,b,c,d)}: double loop over \tt{t=tmin,tmax} (horizontal) and \tt{j=jmin,jmax} (vertical) for the
+                  matrix element $\elma{ab,jt}{H^{2b}}{cd,jt}$ in $J$-scheme. 
+\item[\textbf{etc.}] same for other combinations of shells.
+\end{itemize}
+The value of the isospin index \tt{t} depends on the particle species (protons: $p$, neutrons: $n$) of the shells:
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+ \tt{t} & $a$ & $b$ & $c$ & $d$ \\
+\hline                   
+ \tt{0} & $p$ & $p$ & $p$ & $p$ \\
+ \tt{1} & $p$ & $n$ & $p$ & $n$ \\
+ \tt{2} & $p$ & $n$ & $n$ & $p$ \\
+ \tt{3} & $n$ & $p$ & $p$ & $n$ \\
+ \tt{4} & $n$ & $p$ & $n$ & $p$ \\
+ \tt{5} & $n$ & $n$ & $n$ & $n$ \\
+\hline
+\end{tabular}
+\end{center}
+
+Note that the order in which the \emph{blocks} of matrix elements for different values of (\tt{a}, \tt{b}, \tt{c}, \tt{d}) are written is not important, 
+nor it is required to write a given block if all the matrix elements are zero. In addition, only one permutation of (\tt{a}, \tt{b}, \tt{c}, \tt{d}) 
+is required.
+
+\subsubsection*{Example}
+\begin{center}
+\begin{tabular}{|l|}
+\hline
+ \tt{My Chiral EFT Hamiltionian for emax=4 and hw=20} \\
+ \tt{0   5       \phantom{10}1      \phantom{10}1      \phantom{1000}1      \phantom{1000}1    0   1} \\
+ \tt{-8.23779E+00 -9.37161E+00 -9.37161E+00 -9.37161E+00 -9.37161E+00 -9.10953E+00} \\
+ \tt{\phantom{-}0.00000E+00 -1.35045E+01 \phantom{-}1.35045E+01 \phantom{-}1.35045E+01 -1.35045E+01 \phantom{-}0.00000E+00} \\
+ \tt{0   5     205    407  10103  10103    1   3} \\
+ \tt{\phantom{-}0.00000E+00 -2.35514E-01 \phantom{-}2.35514E-01 \phantom{-}2.35514E-01 -2.35514E-01 \phantom{-}0.00000E+00} \\
+ \tt{-2.76313E-01 -1.99398E-01 -1.99398E-01 -1.99398E-01 -1.99398E-01 -2.81405E-01} \\
+ \tt{\phantom{-}0.00000E+00 \phantom{-}3.62107E-01 -3.62107E-01 -3.62107E-01 \phantom{-}3.62107E-01 \phantom{-}0.00000E+00} \\
+        \phantom{00000000000} etc.  \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Center-of-mass correction (.com)}
+The file containing the center-of-mass correction, \tt{hamil\_file.com}, has exactly the same format as the file containing 
+the two-body part of the Hamiltonian. The only difference is that the first line containing the description of the file is never used
+and can therefore be different from \tt{hamil\_name}. \\
+Note that the matrix elements read will be multiplied by the factor $\frac{\hbar \omega}{A} \left( \frac{\hbar^2}{2 m} \right)^{-1}$.
+
+%
+%= End document ======================================================
+%
+\end{document}
+%
+%=====================================================================
