@@ -121,6 +121,7 @@ To run an example calculation, go the appropriate subdirectory and execute the s
 ```
 bash launch_example.sh
 ```
+Note that the examples have to be launched using a version of the code compiled *without* MPI.
 The first example takes about 3 minutes to be completed on a recent desktop computer. The second example is slightly more intensive and may take 15 to 20 minutes
 before completion.
 
