@@ -113,8 +113,10 @@ do
                                        I600$eta  E600$eta  \
                                        I900$eta  E900$eta  >> $result
       else
-        sed -i "s/I${mu}${eta}/ $iter/g" $result
-        sed -i "s/E${mu}${eta}/ $ener/g" $result
+        sed "s/I${mu}${eta}/ $iter/g" $result > temp2
+        mv temp2 $result
+        sed "s/E${mu}${eta}/ $ener/g" $result > temp2
+        mv temp2 $result
       fi
   
       mv output.$xo.$eta.$mu.$ggg.txt $outdir/

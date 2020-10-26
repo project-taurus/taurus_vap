@@ -86,7 +86,8 @@ $(code): $(OBJ90) $(OBJ77) | $(OBJDIR)/ $(MODDIR)/ $(EXEDIR)/
 $(OBJDIR)/%.o: $(SRCDIR)/%.f90 | $(OBJDIR)/ $(MODDIR)/
 	@cp $< $(OBJDIR)/tmp.f90
 	@if [ $(FC) = "mpiifort" ] || [ $(FC) = "mpif90" ]; then \
- 	   sed -i "s/\!cmpi /     /g" $(OBJDIR)/tmp.f90 ; \
+ 	   sed "s/\!cmpi /     /g" $(OBJDIR)/tmp.f90 > $(OBJDIR)/tmp2.f90 ; \
+ 	   mv $(OBJDIR)/tmp2.f90 $(OBJDIR)/tmp.f90 ; \
 	 fi 
 	$(FC) $(OPT) -o $@ -c $(OBJDIR)/tmp.f90
 	@rm -f $(OBJDIR)/tmp.f90

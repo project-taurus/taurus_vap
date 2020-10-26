@@ -123,13 +123,15 @@ for file in $filef90
 do 
   cp $srcdir/$file $wrkdir/
   if [ $FC = "mpiifort" ] || [ $FC = "mpif90" ]; then 
-    sed -i "s/\!cmpi /     /g" $wrkdir/$file 
+    sed "s/\!cmpi /     /g" $wrkdir/$file > $wrkdir/tmp.f90
+    mv $wrkdir/tmp.f90 $wrkdir/$file 
   fi
 done
 
 cp $srcdir/${code}.f90 $wrkdir/
 if [ $FC = "mpiifort" ] || [ $FC = "mpif90" ]; then 
-  sed -i "s/\!cmpi /     /g" $wrkdir/${code}.f90
+  sed "s/\!cmpi /     /g" $wrkdir/${code}.f90 > $wrkdir/tmp.f90 
+  mv $wrkdir/tmp.f90 $wrkdir/${code}.f90
 fi
 
 echo "source files copied"

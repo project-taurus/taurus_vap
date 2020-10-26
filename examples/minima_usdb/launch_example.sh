@@ -38,14 +38,16 @@ do
     bbb=0
     bb1=0 
     bb2=0 
-    sed -i '19,20d' temp
+    sed '19,20d' temp > temp2
+    mv temp2 temp
   elif [ $nucl -eq 2 ]; then 
     zzz=4.00
     nnn=5.00
     bbb=1
     bb1=13
     bb2=0 
-    sed -i '20d' temp
+    sed '20d' temp > temp2
+    mv temp2 temp
   else
     zzz=5.00
     nnn=5.00

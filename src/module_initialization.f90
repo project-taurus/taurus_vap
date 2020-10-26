@@ -52,16 +52,16 @@ subroutine print_version
 print '("  _________________________________________________________ ",/, &
         " |                                                         |",/, &
         " |  (______)  TAURUS_vap                Benjamin Bally     |",/, &
-        " |  <(0  0)>  2020.10.16                Tomás R. Rodríguez |",/, &
+        " |  <(0  0)>  2020.10.25                Tomás R. Rodríguez |",/, &
         " |    (°°)                              Adrián Sánchez     |",/, &
         " |                                                         |",/, &
         " | This code performs the particle-number variation after  |",/, &
         " | projection of arbitrary Bogoliubov quasiparticle states |",/, &
         " | in a spherical harmonic oscillator basis.               |",/, &
         " |                                                         |",/, &
-        " | Licence: GNU General Public License version 3           |",/, &
-        " | Article:                                                |",/, &
-        " | Git: https://github.com/taurus-physics/taurus_vap.git   |",/, &
+        " | Licence: GNU General Public License version 3 or later  |",/, &
+        " | DOI: https://doi.org/10.5281/zenodo.4130680             |",/, &
+        " | Git: https://github.com/project-taurus/taurus_vap.git   |",/, &
         " |_________________________________________________________|",/)' 
 !cmpi endif
 

@@ -1,5 +1,8 @@
 # TAURUS_vap 
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4130680.svg)](https://doi.org/10.5281/zenodo.4130680)
+[![License: GPL v3](https://img.shields.io/github/license/project-taurus/taurus_vap)](https://www.gnu.org/licenses/gpl-3.0)
+
 ## Presentation
 We present the numerical code TAURUS_vap that solves the variation after particle-number projection (VAPNP) equations for symmetry-unrestricted real Bogoliubov quasi-particle states in a
 Spherical Harmonic Oscillator (SHO) basis. The model space considered is invariant under spatial and isospin rotations but no specific SHO basis is assumed such that the code can carry out
@@ -45,7 +48,7 @@ To compile the code, go to the main directory and enter the command
 ```
 make all FC= TH=
 ```
-where `FC` and `TH` are the same argument as above. The arguments have to be entered *with* the name of the variable.
+where `FC` and `TH` are the same arguments as above. The arguments have to be entered *with* the name of the variable.
 
 For example, to compile using the intel compiler and OpenMP, execute the command
 ```
@@ -105,14 +108,14 @@ bash launch.sh > ouput.txt
 
 Additionally, the code will produce other files containing relevant informations such as the occupation numbers or the eigenvalues of the single-particle hamiltonian.
 More importantly, the code will write the final wave function obtained at the end of the iterative procedure in a file.
-The names of the all files produced during a run are recalled in the STDOUT.
+The names of all the files produced during a run are recalled in the STDOUT.
 
 See the file `extras/manual_input.pdf` for more details.
 
 ## Examples
 We provide 2 examples of simple calculations in the `examples` directory:
 * Calculation of the HFB/PNVAP minima for the nuclei Mg24, Mg25 and Al26 in the sd-shell using the USDB interation.
-* Analysis of the rate of convergence for the gradient+momentum algorithm for Mg24 in the sd-shell with USDB interaction.
+* Analysis of the rate of convergence for the gradient+momentum algorithm for Mg24 in the sd-shell with the USDB interaction.
 
 To run an example calculation, go the appropriate subdirectory and execute the script
 ```
@@ -139,7 +142,7 @@ TAURUS_vap is licensed under GNU General Public License version 3 (see LICENSE.t
 
 ### Funding
 The project TAURUS is supported by the the European Union’s Horizon 2020 research and innovation programme under the Marie Skłodowska-Curie grant agreement No. 839847.  
-https://cordis.europa.eu/project/id/839847/fr
+https://cordis.europa.eu/project/id/839847
 
 ### Contributors 
 For the time being, the people that contributed to the code are:
@@ -147,7 +150,7 @@ For the time being, the people that contributed to the code are:
 * Tomás R. Rodríguez Frutos (Universidad Autónoma de Madrid)
 * Adrían Sánchez-Fernández (Universidad Autónoma de Madrid)
 
-We also thank the people that helped us benchmark the code in its early versions.
+We also thank the people that helped us benchmark and test the code in its early versions.
 
 
 
