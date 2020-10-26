@@ -53,7 +53,7 @@ print '("  _________________________________________________________ ",/, &
         " |                                                         |",/, &
         " |  (______)  TAURUS_vap                Benjamin Bally     |",/, &
         " |  <(0  0)>  2020.10.26                Tomás R. Rodríguez |",/, &
-        " |    (°°)                              Adrián Sánchez     |",/, &
+        " |    (°°)                              Adrián Sánchez-F.  |",/, &
         " |                                                         |",/, &
         " | This code performs the particle-number variation after  |",/, &
         " | projection of arbitrary Bogoliubov quasiparticle states |",/, &
