@@ -173,11 +173,11 @@ integer, intent(in) :: j1, j2, j3, m1, m2, m3
 real(r64), intent(out) :: cg 
 integer :: n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, k1, k2, k3, k4, k5, k6, &
            l, l1, l2
-real(r64) :: c, g, p, q, h, hl, hlm1
+real(r64) :: p, q, h, hl, hlm1
 
 cg = zero
 
-!!! Computes the factor c
+!!! Computes the ingredients for the factor c
 n1 = 1 + (j1 + j2 - j3)/2
 n2 = 1 + (j2 + j3 - j1)/2
 n3 = 1 + (j3 + j1 - j2)/2
@@ -196,9 +196,7 @@ p =  log_gamma(n1+zero) + log_gamma(n2+zero) + log_gamma(n3+zero) &
    + log_gamma(n7+zero) + log_gamma(n8+zero) + log_gamma(n9+zero) &
    - log_gamma(n10+zero)
 
-c = exp(0.5d0*p)
-
-!!! Computes the factor g
+!!! Computes the ingredients for the factor g
 k1 = n1
 k2 = n4
 k3 = n5
@@ -227,10 +225,8 @@ k6 = l1 + 1
 q =  log_gamma(k1+zero) + log_gamma(k2+zero) + log_gamma(k3+zero) &
    + log_gamma(k4+zero) + log_gamma(k5+zero) + log_gamma(k6+zero)
 
-g = sqrt(j3 + one) * (-1)**l1 * exp(-q) * h
-
 !!! Computes the final value combining the two parts.
-cg = c * g
+cg = sqrt(j3 + one) * (-1)**l1 * exp(0.5d0*p - q) * h
 
 end subroutine ClebschGordan
 
