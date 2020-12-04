@@ -155,7 +155,7 @@ constraint_read(1) = valence_Z
 constraint_switch(2) = 1
 constraint_read(2) = valence_N
 
-constraint_dim = sum(constraint_switch) - constraint_switch(24)
+constraint_dim = sum(constraint_switch) - constraint_switch(26)
 where (constraint_switch == 0) constraint_read = 0.d0
 
 !!! Assigns the value 1 to the number of gauge angles if 0 is read
