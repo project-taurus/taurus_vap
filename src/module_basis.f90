@@ -204,9 +204,6 @@ do i = 1, HOsh_dim
   shinc = shinc + 1
 enddo
 
-!!! Initialization of the seed for random generation
-call random_seed() 
-
 !!! Prints the basis informations in the standard output
 !cmpi if ( paral_myrank == 0 ) then        
 call print_basis

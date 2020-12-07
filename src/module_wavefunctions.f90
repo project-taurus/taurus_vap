@@ -7,6 +7,7 @@
 ! List of routines and functions:                                              !
 ! - subroutine set_wavefunctions                                               !
 ! - subroutine generate_wavefunction                                           !
+! - subroutine set_random_generation                                           !
 ! - subroutine generate_wavefunction_BCS                                       !
 ! - subroutine generate_wavefunction_slater                                    !
 ! - subroutine generate_unitary_matrix                                         !
@@ -30,6 +31,7 @@ integer(i64) :: bogo_label
 
 !!! Parameters that determines the seed wave function
 integer :: seed_type,   & ! type of seed
+           seed_rand,   & ! seed to initialize the random generation
            seed_text,   & ! format of seed 
            seed_symm,   & ! option to check the symmetries
            seed_allemp, & ! option to include the empty states (overlap)
@@ -133,6 +135,9 @@ real(r64) :: ovac0
 real(r64), dimension(ndim,ndim) :: A1, A2, A3
 !cmpi integer :: ierr=0
 
+!!! Sets the pseudo random number generation
+call set_random_generation
+
 !cmpi if ( paral_myrank == 0 ) then        
 select case (seed_type)
 
@@ -193,6 +198,37 @@ call print_wavefunction(nocc0)
 !cmpi endif
 
 end subroutine generate_wavefunction
+
+!------------------------------------------------------------------------------!
+! subroutine generate_wavefunction_BCS                                         !
+!                                                                              ! 
+! This subroutine sets the seed for the pseudo random generation using the     ! 
+! input parameter seed_rand.                                                   ! 
+!                                                                              ! 
+! seed_rand = 0 uses the state of the processor (changes with each run)        ! 
+!           > 0 uses the values given in input + a small algorithm             ! 
+!------------------------------------------------------------------------------!
+subroutine set_random_generation
+
+integer :: i, mdim
+integer, dimension(:), allocatable :: mentry 
+
+!!! Initialization using the state of the processor
+call random_seed()
+
+!!! Sets a seed with a little bit of variability using seed_rand
+if ( seed_rand > 0 ) then
+  call random_seed(size=mdim)
+  allocate (mentry(mdim))
+
+  do i = 1, mdim
+    mentry(i) = seed_rand + (i-1) * (2020 + mod(i,2)*10 + mod(i,3)*27)
+  enddo
+
+  call random_seed(put=mentry(1:mdim))
+endif
+
+end subroutine set_random_generation
 
 !------------------------------------------------------------------------------!
 ! subroutine generate_wavefunction_BCS                                         !

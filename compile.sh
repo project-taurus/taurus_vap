@@ -43,7 +43,7 @@ if [ $FC = "ifort" ] || [ $FC = "mpiifort" ]; then
   LIB=""
   OPT="-O3 -mkl" 
 elif [ $FC = "gfortran" ] || [ $FC = "mpif90" ]; then
-  LIB="-L/usr/lib -llapack -lblas"
+  LIB="-L/usr/lib/x86_64-linux-gnu/liblapack.so.3 -L/usr/lib/x86_64-linux-gnu/libblas.so.3"
   OPT="-O3" 
 else
   echo "Wrong compiler ('gfortran', 'ifort', 'mpif90' or 'mpiifort'). Exiting."
