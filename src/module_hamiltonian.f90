@@ -199,7 +199,7 @@ end subroutine read_hamiltonian_1body_antoine
 !------------------------------------------------------------------------------!
 subroutine read_hamiltonian_1body_general
   
-integer(i32) :: k, l, mjk, mjl, a, b, iexit, ialloc=0
+integer(i32) :: k, l, mjk, mjl, a, b, iexit !, ialloc=0
 real(r64) :: H0, hamil_H1cpd_p, hamil_H1cpd_n
 
 !!! Allocate hamil_H1cpd (not raelly needed but prettier)
@@ -247,10 +247,9 @@ end subroutine read_hamiltonian_1body_general
 subroutine set_hamiltonian_2body
 
 integer(i16) :: ared, bred, cred, dred
-integer(i32) :: ht, j, t, tmin, tmax, jmin, jmax, ialloc=0,  &
-                a, ja, ma, la, ta, b, jb, mb, lb, tb, bmax, &
-                c, jc, mc, lc, tc, d, jd, md, ld, td, &
-                uth6=uth+6, uth7=uth+7, fac_ht
+integer(i32) :: ht, j, t, tmax, uth6=uth+6, uth7=uth+7, fac_ht, ialloc=0, &
+                a, ma, la, ta, b, mb, lb, tb, bmax, &
+                c, mc, lc, tc, d, md, ld, td
 integer(i64) :: kk
 real(r64) :: xja, xjb, xjc, xjd, xjtot, xttot, phasab, phascd, Vtmp, &
              Vcut, Vdec
@@ -534,8 +533,8 @@ end subroutine read_hamiltonian_2body_com
 subroutine read_hamiltonian_reduced
   
 integer(i32) :: i, j, bytes_H2, ialloc=0
-integer(i64) :: kk, divide, rest, pos_ini, pos_abcd, pos_H2, pos_perm
-character(100) :: hname      
+integer(i64) :: kk, pos_ini, pos_abcd, pos_H2, pos_perm
+!cmpi integer(i64) :: divide, rest
   
 read(uthr, pos=1) hamil_name
 read(uthr) hamil_type     
@@ -666,7 +665,7 @@ select case (hamil_read)
 end select 
 
 print '(/,60("%"),/,25x,"HAMILTONIAN",24x,/,60("%"),//, &
-      3x,"Description",8x,"Value",/,27("-"))'
+      & 3x,"Description",8x,"Value",/,27("-"))'
 print format1, 'Main name of files ', hamil_file
 print format1, 'Name of hamiltonian', trim(adjustl(hamil_name))
 print format2, 'Type of hamiltonian', hamil_type, info_type

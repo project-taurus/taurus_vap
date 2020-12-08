@@ -431,19 +431,19 @@ real(r64) :: ener, pari, prot, neut, prot2, neut2, beta, gamm, &
              q20_p, q20_n, q20_a, q22_p, q22_n, q22_a
 character(len=*), parameter :: format1 = "(1i6,5x,1es12.5,2x,5f12.6)", &
                                format2 = "(1i6,5x,1es12.5,2x,5f12.6,1f11.6, &  
-                                           1f8.3,1f8.2)"
+                                         & 1f8.3,1f8.2)"
 
 !!! Prints the "caption"
 if ( iter == 1 ) then
   if ( iter_print == 0 ) then
     print '(" ")'
     print '("Iteration",5x,"Gradient",7x,"Energy",6x,"Protons",4x,"Var(Prot)", &
-            4x,"Neutrons",3x,"Var(Neut)",/,85("-"))'
+          & 4x,"Neutrons",3x,"Var(Neut)",/,85("-"))'
   elseif ( iter_print == 1 ) then
     print '(99x,"(unprojected)")'
     print '("Iteration",5x,"Gradient",7x,"Energy",6x,"Protons",4x,"Var(Prot)", &
-            4x,"Neutrons",3x,"Var(Neut)",4x,"Parity",5x,"Beta",3x,"Gamma", &
-            /,112("-"))'
+          & 4x,"Neutrons",3x,"Var(Neut)",4x,"Parity",5x,"Beta",3x,"Gamma", &
+          & /,112("-"))'
   endif
 endif
 

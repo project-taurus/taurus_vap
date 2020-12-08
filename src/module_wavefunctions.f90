@@ -619,7 +619,7 @@ do i = 1, min(HOsh_dim,HOsh_dim0)
 enddo
 if ( icheck /= 0 ) then
   print '(/,"The model space of the seed wave function is not consistent", & 
-          " with the one of the interaction.")'
+        & " with the one of the interaction.")'
   print*, 'Inter:', HOsh_dim, (HOsh_na(i), i=1,HOsh_dim)
   print*, 'State:', HOsh_dim0, (HOsh_na0(i), i=1,HOsh_dim0)
   stop 
@@ -853,7 +853,7 @@ do while ( k < ndim - nocc )
     !print*, k, subdim(k)
     subdim(k) = 2
     print*,"Warning: subspace of odd dimension when building kappa canonical. &
-           Intenting the calculation assuming dim = 2."
+          & Intenting the calculation assuming dim = 2."
   endif
   k = k + subdim(k)
 enddo
@@ -944,7 +944,7 @@ subroutine block_quasiparticle (nidx,U,V,ndim)
 
 integer, intent(in) :: nidx, ndim
 real(r64), dimension(ndim,ndim), intent(inout) :: U, V
-integer :: i, tblock, numpar
+integer :: i
 real(r64), dimension(ndim,ndim) :: Ub, Vb
 
 !!! Exits the routine if no blocking is required
@@ -953,7 +953,7 @@ if ( nidx == 0 ) return
 !!! Checks if the blocking index is consistent with the model space 
 if ( nidx > ndim ) then
  print '(1a,1x,1i5,1a,1i5)', 'The blocking index = ',nidx,' is greater than &
-         the dimension of the single-particle space = ',ndim  
+       & the dimension of the single-particle space = ',ndim  
  stop 
 endif 
 
@@ -1013,7 +1013,7 @@ select case (seed_type)
 end select 
 
 print '(/,60("%"),/,24x,"WAVE FUNCTION",23x,/,60("%"),//, &
-        3x,"Description",9x,"Value",/,28("-"))'
+      & 3x,"Description",9x,"Value",/,28("-"))'
 print format1, 'Initial type of seed', seed_type, info_type  
 print format2, 'Number of qp blocked', blocking_dim
 if ( blocking_dim /= 0 ) then 

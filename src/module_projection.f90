@@ -289,7 +289,7 @@ do nangle = nangle_min, nangle_max
 !cmpi  if ( paral_myteamrank > 0 ) cycle 
 
   if ( iopt+iprint > 0 ) then
-    call generate_rotation_parity(1,ROTG,ROTG,ndim)
+    call generate_rotation_parity(1,zone*ROTG,ROTG,ndim)
     call calculate_overlap(nocc0,nemp0,ovac0,voveru0,bogo_zD0, &
                            nocc0,nemp0,ovac0,voveru0,bogo_zD0, &
                            ROTG,rot_pari,ndim)
@@ -738,7 +738,7 @@ subroutine calculate_thouless(U,V,Ubar,Vbar,Aphi,Utilde,Vtilde,ndim)
 integer, intent(in) :: ndim
 complex(r64), dimension(ndim,ndim), intent(in) :: U, V, Ubar, Vbar
 complex(r64), dimension(ndim,ndim), intent(out) :: Utilde, Vtilde, Aphi 
-integer :: i, j, info1, info2
+integer :: info1, info2
 integer, dimension(ndim) :: ipiv
 complex(r64), dimension(ndim) :: work
 complex(r64), dimension(ndim,ndim) :: Uphi, Vphi, Uinv, A1, A2
@@ -1041,8 +1041,6 @@ end subroutine calculate_norm
 !------------------------------------------------------------------------------!
 subroutine print_results(Mphip,Mphin)
 
-use Nucleus, only: nucleus_A
-
 integer, intent(in) :: Mphip, Mphin
 integer :: i, j, ialloc=0
 real(r64) :: over, pari, ra2p, ra2n, ra2a, ra2ch, prot, neut, prot2, neut2, & 
@@ -1133,7 +1131,7 @@ energy_p     = real( pnp_ecomp(11)/ pnp_over )
 energy_n     = real( pnp_ecomp(12)/ pnp_over ) 
 
 print '(/,"ENERGY DECOMPOSITION",/,20("="),//, &
-          "Part \ Iso",6x,"p-p",10x,"n-n",10x,"p-n",10x,"Total",/,61("-"))'
+        & "Part \ Iso",6x,"p-p",10x,"n-n",10x,"p-n",10x,"Total",/,61("-"))'
 write(uto,format2) 'Zero-body', ener_0b
 write(uto,format3) 'One-body ', ener_1b_p, ener_1b_n, (ener_1b_p + ener_1b_n)
 write(uto,format4) ' ph part ', ener_2bPH_pp, ener_2bPH_nn, &
@@ -1158,7 +1156,7 @@ write(uto,format4)  'Full H   ', (ener_1b_p + ener_2bPH_pp + ener_2bPP_pp), &
 !!! Multipole deformation
 !!!
 print '(/,"MULTIPOLE DEFORMATIONS",/,22("="),//, &
-        "Qlm",5x,"Protons",4x,"Neutrons",5x,"Total",7x,"Beta_lm"/,51("-"))'
+       &"Qlm",5x,"Protons",4x,"Neutrons",5x,"Total",7x,"Beta_lm"/,51("-"))'
 
 q1p = real( pnp_q1p / pnp_over )
 q1n = real( pnp_q1n / pnp_over )
@@ -1218,7 +1216,7 @@ ra2n = ra2n / neut
 ra2ch = ra2p + 0.88d0 - 0.11d0 * (prot / neut ) + 0.75d0 * (hbarc / mass_mp)**2
 
 print '(/,"RADIUS",/,6("="),//, &
-        2x,"i",3x,"<r_i^2>^1/2",/,17("-"))'
+      & 2x,"i",3x,"<r_i^2>^1/2",/,17("-"))'
 write(uto,format12) '  p  ', sqrt(ra2p)
 write(uto,format12) '  n  ', sqrt(ra2n)
 write(uto,format12) '  a  ', sqrt(ra2a)
@@ -1231,7 +1229,7 @@ amj  = real( pnp_amj  / pnp_over )
 amj2 = real( pnp_amj2 / pnp_over )
 
 print '(/,"ANGULAR MOMENTUM",/,16("="),//, &
-        2x,"i",8x,"J_i",9x,"J_i^2",5x,"Var(J_i)",/,41("-"))'
+      & 2x,"i",8x,"J_i",9x,"J_i^2",5x,"Var(J_i)",/,41("-"))'
 write(uto,format8) '  X  ', amj(1), amj2(1), amj2(1) - amj(1)**2
 write(uto,format8) '  Y  ', amj(2), amj2(2), amj2(2) - amj(2)**2
 write(uto,format8) '  Z  ', amj(3), amj2(3), amj2(3) - amj(3)**2
@@ -1249,7 +1247,7 @@ if ( max(Mphip,Mphin) == 1 ) then
   call calculate_expectval_pair(dens_kappaRR,pairs_T1p1_J00,P_T1p1_J00,HOsp_dim)
 
   print '(/,"PAIR COUPLING",/,13("="),//, & 
-         3x,"MJ or MT =",7x,"-1",10x," 0",10x,"+1",/,49("-"))'
+        & 3x,"MJ or MT =",7x,"-1",10x," 0",10x,"+1",/,49("-"))'
   write(uto,format10) 'T = 0 ; J = 1', abs(P_T00_J1m1), abs(P_T00_J10), & 
                                        abs(P_T00_J1p1)
   write(uto,format10) 'T = 1 ; J = 0', abs(P_T1m1_J00), abs(P_T10_J00), &

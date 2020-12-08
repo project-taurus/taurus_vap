@@ -407,7 +407,7 @@ enddo
 
 if ( info /= 0 ) then
   print*, 'Warning: impossible to obtain the new lagrange multipliers. Using &
-           the one of the previous iteration instead.' 
+         & the one of the previous iteration instead.' 
   do i = 1, constraint_dim
     lagrange_lambda1(i) = lagrange_lambda0(i)
   enddo
@@ -566,8 +566,8 @@ if ( max(proj_Mphip,proj_Mphin) > 1 ) then
   if ( nparity /= bogo_nparity ) then
     !cmpi if ( paral_myrank == 0 ) then        
     print '(/,1a)', "Critical warning: the number parity of the seed wave &
-                    function is not consistent with the particle number in &
-                    the projection operator."
+                  & function is not consistent with the particle number in &
+                  & the projection operator."
     !cmpi endif
     stop
   endif
