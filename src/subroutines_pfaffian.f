@@ -222,7 +222,7 @@
 *     Accumulate the determinant of the Householder reflection
                TEMP = RONE
                DO 40 K=1, I-1
-                  TEMP = TEMP + CONJG(A(K,I+1))*A(K,I+1)
+                  TEMP = TEMP + REAL(CONJG(A(K,I+1))*A(K,I+1))
  40            CONTINUE
 
                PFAFF = PFAFF * (ONE - WORK( I ) * TEMP)
@@ -237,7 +237,7 @@
 *     Accumulate the determinant of the Householder reflection
                TEMP = RONE
                DO 60 K=I+2, N
-                  TEMP = TEMP + CONJG(A(K,I))*A(K,I)
+                  TEMP = TEMP + REAL(CONJG(A(K,I))*A(K,I))
  60            CONTINUE
 
             PFAFF = PFAFF * (ONE - WORK( I ) * TEMP)
@@ -1571,7 +1571,7 @@
 *
                ALPHA = A( I-1, I )
                CALL ZLARFG( I-1, ALPHA, A( 1, I ), 1, TAU( I-1 ) )
-               E( I-1 ) = ALPHA
+               E( I-1 ) = REAL(ALPHA)
                A( I-1, I ) = ONE
 *
 *              Compute W(1:i-1,i)
@@ -1645,7 +1645,7 @@
                ALPHA = A( I+1, I )
                CALL ZLARFG( N-I, ALPHA, A( MIN( I+2, N ), I ), 1,
      $                      TAU( I ) )
-               E( I ) = ALPHA
+               E( I ) = REAL(ALPHA)
                A( I+1, I ) = ONE
 *
 *              Compute W(i+1:n,i)
@@ -2292,7 +2292,7 @@
 *
             ALPHA = A( I, I+1 )
             CALL ZLARFG( I, ALPHA, A( 1, I+1 ), 1, TAUI )
-            E( I ) = ALPHA
+            E( I ) = REAL(ALPHA)
 *
             IF( TAUI.NE.ZERO ) THEN
 *
@@ -2338,7 +2338,7 @@
 *
             ALPHA = A( I+1, I )
             CALL ZLARFG( N-I, ALPHA, A( MIN( I+2, N ), I ), 1, TAUI )
-            E( I ) = ALPHA
+            E( I ) = REAL(ALPHA)
 *
             IF( TAUI.NE.ZERO ) THEN
 *

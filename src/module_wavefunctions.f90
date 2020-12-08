@@ -678,7 +678,7 @@ logical :: is_binary
 
 !!! Determines a random integer to label the state
 call random_number(xrand)                                                
-bogo_label = dint(xrand*(10.0d0**12))
+bogo_label = int(xrand*(10.0d0**12),i64)
 
 !!! Opens the file depending if intermediate or final writing and if binary
 !!! or text writing
@@ -766,7 +766,7 @@ integer, intent(out) :: nocc, nemp
 real(r64), intent(out) :: ovacc       
 complex(r64), dimension(ndim,ndim), intent(out) :: zUc, zVc, zDc
 integer :: i, j, k, m, info, sdim, ialloc=0
-integer(r64), dimension(ndim) :: submax, subdim
+integer, dimension(ndim) :: submax, subdim
 real(r64) :: occu_u, occu_v, occu_v2, eps
 real(r64), dimension(ndim) :: eigen_rho
 real(r64), dimension(3*ndim-1) :: work1   

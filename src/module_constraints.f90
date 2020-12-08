@@ -64,7 +64,8 @@ CONTAINS
 !------------------------------------------------------------------------------!
 subroutine set_constraints
 
-integer :: i, j, k, ialloc=0
+integer :: i, j, ialloc=0
+integer(i64) :: k
 real(r64) :: constraint_beta, constraint_gamma
 real(r64), dimension(:), allocatable :: Q
 
@@ -139,7 +140,7 @@ j = 0
 do i = 1, constraint_max
   if ( constraint_switch(i) == 1 ) then
     j = j + 1
-    k = (j - 1) * HOsp_dim2
+    k = (j - 1) * HOsp_dim2 
     if ( (i >= 20) .and. (i < 26) ) constraint_pair = constraint_pair + 1
    
     if ( i ==  1 ) Q = partnumb_Z
@@ -321,7 +322,8 @@ end subroutine adjust_constraints
 !------------------------------------------------------------------------------!
 subroutine update_constraints_qpbasis
 
-integer :: i, j
+integer :: i
+integer(i64) :: j
 
 do i = 1, constraint_dim                 
   j = (i-1)*HOsp_dim2 + 1
@@ -621,9 +623,9 @@ voveru0 = zero
 j = 1
 do i = 1+nemp0, ndim-nocc0
   if ( (-1)**j == -1 ) then 
-    voveru0(i) =  bogo_zV0c(i,i+1) / bogo_zU0c(i,i)
+    voveru0(i) = real( bogo_zV0c(i,i+1) / bogo_zU0c(i,i) )
   else
-    voveru0(i) =  bogo_zV0c(i,i-1) / bogo_zU0c(i,i)
+    voveru0(i) = real( bogo_zV0c(i,i-1) / bogo_zU0c(i,i) )
   endif
   j = j + 1
 enddo

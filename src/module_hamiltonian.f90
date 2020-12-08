@@ -363,11 +363,11 @@ do a = 1, HOsp_dim
         !!! CPU time and storage
         if ( abs(Vdec) > Vcut ) then 
           hamil_H2dim = hamil_H2dim + 1
-          ared = a
-          bred = b
-          cred = c
-          dred = d
-          Vred = Vdec
+          ared = int(a,i16)
+          bred = int(b,i16)
+          cred = int(c,i16)
+          dred = int(d,i16)
+          Vred = real(Vdec,r32)
           write(uth6) ared, bred, cred, dred      
           write(uth7) Vred      
         endif  
@@ -996,7 +996,7 @@ do kk = 1, hamil_H2dim
     ta = tb
     tb = tmp
     phase = -phase
-    hamil_trperm(kk) = hamil_trperm(kk) + 1
+    hamil_trperm(kk) = hamil_trperm(kk) + int(1,i8)
   endif
     
   if ( tc > td ) then
@@ -1004,14 +1004,14 @@ do kk = 1, hamil_H2dim
     tc = td
     td = tmp
     phase = -phase
-    hamil_trperm(kk) = hamil_trperm(kk) + 2
+    hamil_trperm(kk) = hamil_trperm(kk) + int(2,i8)
   endif
     
   if ( (ta > tc) .or. ((ta == tc) .and. (tb > td)) ) then 
-    hamil_trperm(kk) = hamil_trperm(kk) + 4
+    hamil_trperm(kk) = hamil_trperm(kk) + int(4,i8)
   endif
 
-  if ( phase < 0.d0 ) hamil_trperm(kk) = hamil_trperm(kk) - 8
+  if ( phase < 0.d0 ) hamil_trperm(kk) = hamil_trperm(kk) - int(8,i8)
 
 enddo
 

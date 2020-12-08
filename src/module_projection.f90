@@ -238,9 +238,9 @@ if ( ialloc /= 0 ) stop 'Error during allocation of array for the overlap'
 j = 1
 do i = 1+nemp0, ndim-nocc0
   if ( (-1)**j == -1 ) then 
-    voveru0(i) =  bogo_zV0c(i,i+1) / bogo_zU0c(i,i)
+    voveru0(i) = real( bogo_zV0c(i,i+1) / bogo_zU0c(i,i) )
   else
-    voveru0(i) =  bogo_zV0c(i,i-1) / bogo_zU0c(i,i)
+    voveru0(i) = real( bogo_zV0c(i,i-1) / bogo_zU0c(i,i) )
   endif
   j = j + 1
 enddo
