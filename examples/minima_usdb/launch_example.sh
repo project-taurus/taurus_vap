@@ -57,7 +57,7 @@ do
   fi
 
   # Loop for HFB/VAPNP
-  for ggg in 1 7
+  for ggg in 1 11
   do
 
     enermin=666.0
