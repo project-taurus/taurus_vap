@@ -294,24 +294,6 @@ enddo
 bogo_U0 = bogo_U1
 bogo_V0 = bogo_V1
 
-!!! Stop the code when the average particle numbers are too far away from
-!!! the constraints
-diff_prot = 0.d0
-diff_neut = 0.d0
-k = constraint_switch(1)
-if ( constraint_switch(1) == 1 ) diff_prot = abs(expecval(1) &
-                                                 - constraint_val(1))
-if ( constraint_switch(2) == 1 ) diff_neut = abs(expecval(1+k) &
-                                                 - constraint_val(1+k)) 
-
-if ( (diff_prot >= 0.5) .or. (diff_neut >= 0.5) ) then
-  print*,'Problem with the constraints on particle number. The values are ', &
-         'out of reach.'
-  print*,'<Z> - Zc = ', diff_prot
-  print*,'<N> - Nc = ', diff_neut
-  stop
-end if
-
 end subroutine adjust_constraints
 
 !------------------------------------------------------------------------------!
