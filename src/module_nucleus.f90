@@ -86,7 +86,7 @@ subroutine print_nucleus
 character(len=*), parameter :: format1 = "(1a7,1x,1f10.2,1x,1f10.2,1x,1f10.2)"
 
 print '(60("%"),/,27x,"NUCLEUS",26x,/,60("%"),//, &
-       "Part \ No.",5x,"Z",10x,"N",10x,"A",/,40("-"))'
+      & "Part \ No.",5x,"Z",10x,"N",10x,"A",/,40("-"))'
 print format1, 'Valence', valence_Z, valence_N, valence_A
 print format1, 'Core   ',    core_Z,    core_N,    core_A
 print format1, 'Nucleus', nucleus_Z, nucleus_N, nucleus_A

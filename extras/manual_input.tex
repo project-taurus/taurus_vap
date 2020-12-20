@@ -31,7 +31,7 @@
 % 
 \begin{center}
  {\LARGE \textbf{\TAURUSvap: Manual for the input file}} \\
- {\large 09/10/2020}
+ {\large 07/12/2020}
 \end{center}
 
 %
@@ -53,7 +53,8 @@ are all part of the same file).
 
   \item All lines starts with the reading of an element of an array, \ttt{input\_names} or \ttt{input\_block},
   made of \ttt{character(30)} variables. 
-  As they only play a cosmetic/descriptive role, we are not going to comment them further. 
+  These variables only play a cosmetic/descriptive role when reading or printing the input parameters and can be
+  set to any desired value by the user. Therefore, we are not going to comment them further.
 
   \item The number of lines in the input files depends on the number of quasi-particle one wants to block. Here, we will give
   the line numbers considering an input without any blocking.
@@ -194,10 +195,11 @@ Line & Format & Data \\
  \textbf{  }   & 1a30, 1i5 & \:\: \tt input\_block(i),  blocking\_id(i) \\
                &           & \tt enddo                               \\
  \textbf{19}   & 1a30, 1i1 & \tt input\_names(19), seed\_symm        \\
- \textbf{20}   & 1a30, 1i1 & \tt input\_names(20), seed\_text        \\
- \textbf{21}   & 1a30, 1es10.3 & \tt input\_names(21), seed\_occeps  \\
- \textbf{22}   & 1a30, 1i1 & \tt input\_names(22), seed\_allemp      \\
- \textbf{23}   & 1a    & \tt input\_names(23)                        \\
+ \textbf{20}   & 1a30, 1i5 & \tt input\_names(20), seed\_rand        \\
+ \textbf{21}   & 1a30, 1i1 & \tt input\_names(21), seed\_text        \\
+ \textbf{22}   & 1a30, 1es10.3 & \tt input\_names(22), seed\_occeps  \\
+ \textbf{23}   & 1a30, 1i1 & \tt input\_names(23), seed\_allemp      \\
+ \textbf{24}   & 1a    & \tt input\_names(24)                        \\
 \hline
 \end{tabular}
 \end{center}
@@ -224,6 +226,9 @@ where
  mixing between protons and neutrons. The code will also checks that there is no symmetry-breaking constraint before doing the 
  simplifications. \\[0.05cm]
  \ttt{= 1\:} no simplification is performed.
+\item \ttt{seed\_rand}: option to manually set the seed of the random number generation. \\[0.05cm]
+ \ttt{= 0\:} the seed is generated using the state of the processor during the execution. The seed will be different in each run. \\[0.05cm]
+ \ttt{> 0\:} the seed is generated using the input parameter and a small deterministic algorithm. The seed may still be different when using different compilers or processors. 
 \item \ttt{seed\_text}: option to read/write the initial/final wave function as a binary (.bin) or text (.txt) file. \\[0.05cm]
  \ttt{= 0\:} reads the file \ttt{initial\_wf.bin} and writes the file \ttt{final\_wf.bin}. \\[0.05cm]
  \ttt{= 1\:} reads the file \ttt{initial\_wf.txt} and writes the file \ttt{final\_wf.txt}. \\[0.05cm]
@@ -271,16 +276,16 @@ Include all empty sp states   &0         \\
 \hline
 Line & Format & Data \\
 \hline
- \textbf{24}   & 1a            & \tt input\_names(24)                 \\
  \textbf{25}   & 1a            & \tt input\_names(25)                 \\
- \textbf{26}   & 1a30, 1i5     & \tt input\_names(26), iter\_max      \\
- \textbf{27}   & 1a30, 1i5     & \tt input\_names(27), iter\_write    \\
- \textbf{28}   & 1a30, 1i1     & \tt input\_names(28), iter\_print    \\
- \textbf{29}   & 1a30, 1i1     & \tt input\_names(29), gradient\_type \\
- \textbf{30}   & 1a30, 1es10.3 & \tt input\_names(30), gradient\_eta  \\
- \textbf{31}   & 1a30, 1es10.3 & \tt input\_names(31), gradient\_mu   \\
- \textbf{32}   & 1a30, 1es10.3 & \tt input\_names(32), gradient\_eps  \\
- \textbf{33}   & 1a            & \tt input\_names(33)                 \\
+ \textbf{26}   & 1a            & \tt input\_names(26)                 \\
+ \textbf{27}   & 1a30, 1i5     & \tt input\_names(27), iter\_max      \\
+ \textbf{28}   & 1a30, 1i5     & \tt input\_names(28), iter\_write    \\
+ \textbf{29}   & 1a30, 1i1     & \tt input\_names(29), iter\_print    \\
+ \textbf{30}   & 1a30, 1i1     & \tt input\_names(30), gradient\_type \\
+ \textbf{31}   & 1a30, 1es10.3 & \tt input\_names(31), gradient\_eta  \\
+ \textbf{32}   & 1a30, 1es10.3 & \tt input\_names(32), gradient\_mu   \\
+ \textbf{33}   & 1a30, 1es10.3 & \tt input\_names(33), gradient\_eps  \\
+ \textbf{34}   & 1a            & \tt input\_names(34)                 \\
 \hline
 \end{tabular}
 \end{center}
@@ -344,14 +349,14 @@ Tolerance for gradient        &1.000E-04 \\
 \hline
 Line & Format & Data \\
 \hline
- \textbf{34}   & 1a            & \tt input\_names(34)                  \\
  \textbf{35}   & 1a            & \tt input\_names(35)                  \\
- \textbf{36}   & 1a30, 1i1     & \tt input\_names(36), enforce\_NZ     \\
- \textbf{37}   & 1a30, 1i1     & \tt input\_names(37), opt\_betalm     \\
- \textbf{38}   & 1a30, 1i1     & \tt input\_names(38), pairs\_scheme   \\
- \textbf{39}   & 1a30, 1es10.3 & \tt input\_names(39), constraint\_eps \\
- \textbf{40}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(40), constraint\_switch( 3), 1x, constraint\_read( 3) \\
- \textbf{41}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(41), constraint\_switch( 4), 1x, constraint\_read( 4) \\
+ \textbf{36}   & 1a            & \tt input\_names(36)                  \\
+ \textbf{37}   & 1a30, 1i1     & \tt input\_names(37), enforce\_NZ     \\
+ \textbf{38}   & 1a30, 1i1     & \tt input\_names(38), opt\_betalm     \\
+ \textbf{39}   & 1a30, 1i1     & \tt input\_names(39), pairs\_scheme   \\
+ \textbf{40}   & 1a30, 1es10.3 & \tt input\_names(40), constraint\_eps \\
+ \textbf{41}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(41), constraint\_switch( 3), 1x, constraint\_read( 3) \\
+ \textbf{42}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(42), constraint\_switch( 4), 1x, constraint\_read( 4) \\
 % \textbf{42}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(42), constraint\_switch( 5), 1x, constraint\_read( 5) \\
 % \textbf{43}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(43), constraint\_switch( 6), 1x, constraint\_read( 6) \\
 % \textbf{44}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(44), constraint\_switch( 7), 1x, constraint\_read( 7) \\
@@ -373,8 +378,8 @@ Line & Format & Data \\
 % \textbf{60}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(60), constraint\_switch(23), 1x, constraint\_read(23) \\
 % \textbf{61}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(61), constraint\_switch(24), 1x, constraint\_read(24) \\
  $\vdots$      & $\hfill \vdots \hfill$ & $\hfill \vdots \hfill$       \\
- \textbf{62}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(62), constraint\_switch(25), 1x, constraint\_read(25) \\
- \textbf{63}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(63), constraint\_switch(26), 1x, constraint\_read(26) \\
+ \textbf{63}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(63), constraint\_switch(25), 1x, constraint\_read(25) \\
+ \textbf{64}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(64), constraint\_switch(26), 1x, constraint\_read(26) \\
 \hline
 \end{tabular}
 \end{center}

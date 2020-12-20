@@ -64,7 +64,8 @@ CONTAINS
 !------------------------------------------------------------------------------!
 subroutine set_constraints
 
-integer :: i, j, k, ialloc=0
+integer :: i, j, ialloc=0
+integer(i64) :: k
 real(r64) :: constraint_beta, constraint_gamma
 real(r64), dimension(:), allocatable :: Q
 
@@ -139,7 +140,7 @@ j = 0
 do i = 1, constraint_max
   if ( constraint_switch(i) == 1 ) then
     j = j + 1
-    k = (j - 1) * HOsp_dim2
+    k = (j - 1) * HOsp_dim2 
     if ( (i >= 20) .and. (i < 26) ) constraint_pair = constraint_pair + 1
    
     if ( i ==  1 ) Q = partnumb_Z
@@ -293,24 +294,6 @@ enddo
 bogo_U0 = bogo_U1
 bogo_V0 = bogo_V1
 
-!!! Stop the code when the average particle numbers are too far away from
-!!! the constraints
-diff_prot = 0.d0
-diff_neut = 0.d0
-k = constraint_switch(1)
-if ( constraint_switch(1) == 1 ) diff_prot = abs(expecval(1) &
-                                                 - constraint_val(1))
-if ( constraint_switch(2) == 1 ) diff_neut = abs(expecval(1+k) &
-                                                 - constraint_val(1+k)) 
-
-if ( (diff_prot >= 0.5) .or. (diff_neut >= 0.5) ) then
-  print*,'Problem with the constraints on particle number. The values are ', &
-         'out of reach.'
-  print*,'<Z> - Zc = ', diff_prot
-  print*,'<N> - Nc = ', diff_neut
-  stop
-end if
-
 end subroutine adjust_constraints
 
 !------------------------------------------------------------------------------!
@@ -321,7 +304,8 @@ end subroutine adjust_constraints
 !------------------------------------------------------------------------------!
 subroutine update_constraints_qpbasis
 
-integer :: i, j
+integer :: i
+integer(i64) :: j
 
 do i = 1, constraint_dim                 
   j = (i-1)*HOsp_dim2 + 1
@@ -407,7 +391,7 @@ enddo
 
 if ( info /= 0 ) then
   print*, 'Warning: impossible to obtain the new lagrange multipliers. Using &
-           the one of the previous iteration instead.' 
+         & the one of the previous iteration instead.' 
   do i = 1, constraint_dim
     lagrange_lambda1(i) = lagrange_lambda0(i)
   enddo
@@ -566,8 +550,8 @@ if ( max(proj_Mphip,proj_Mphin) > 1 ) then
   if ( nparity /= bogo_nparity ) then
     !cmpi if ( paral_myrank == 0 ) then        
     print '(/,1a)', "Critical warning: the number parity of the seed wave &
-                    function is not consistent with the particle number in &
-                    the projection operator."
+                  & function is not consistent with the particle number in &
+                  & the projection operator."
     !cmpi endif
     stop
   endif
@@ -621,9 +605,9 @@ voveru0 = zero
 j = 1
 do i = 1+nemp0, ndim-nocc0
   if ( (-1)**j == -1 ) then 
-    voveru0(i) =  bogo_zV0c(i,i+1) / bogo_zU0c(i,i)
+    voveru0(i) = real( bogo_zV0c(i,i+1) / bogo_zU0c(i,i) )
   else
-    voveru0(i) =  bogo_zV0c(i,i-1) / bogo_zU0c(i,i)
+    voveru0(i) = real( bogo_zV0c(i,i-1) / bogo_zU0c(i,i) )
   endif
   j = j + 1
 enddo

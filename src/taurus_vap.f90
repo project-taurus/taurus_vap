@@ -24,7 +24,8 @@ use Initialization
 
 implicit none
 
-integer :: iter=0, iter_max, iter_write, iter_print, ierr=0
+integer :: iter=0, iter_max, iter_write, iter_print
+!cmpi integer :: ierr=0
 
 !!!
 !!! INITIALIZATION
@@ -68,7 +69,7 @@ endif
 
 !cmpi if ( paral_myrank == 0 ) then        
 if ( iter_max > 0 ) print '(/,60("%"),/,19x,"ITERATIVE MINIMIZATION",19x,/, &
-                            60("%"))'
+                            & 60("%"))'
 !cmpi endif
 
 !!! Loop for the gradient 

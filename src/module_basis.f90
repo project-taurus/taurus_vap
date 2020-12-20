@@ -204,9 +204,6 @@ do i = 1, HOsh_dim
   shinc = shinc + 1
 enddo
 
-!!! Initialization of the seed for random generation
-call random_seed() 
-
 !!! Prints the basis informations in the standard output
 !cmpi if ( paral_myrank == 0 ) then        
 call print_basis
@@ -230,7 +227,7 @@ nline = HOsh_dim/5 + 1
 if ( mod(HOsh_dim,5) == 0 ) nline = nline - 1
 
 print '(/,60("%"),/,26x,"HO BASIS",26x,/,60("%"),//, & 
-        4x,"Quantity",10x,"Value",/,27("-"))'
+      & 4x,"Quantity",10x,"Value",/,27("-"))'
 print format1, 'No. of sp states  ', HOsp_dim
 print format1, 'Max. value of N   ', HO_Nmax 
 print format1, 'Max. value of l   ', HO_lmax  

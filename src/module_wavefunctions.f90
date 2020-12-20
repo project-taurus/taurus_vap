@@ -7,6 +7,7 @@
 ! List of routines and functions:                                              !
 ! - subroutine set_wavefunctions                                               !
 ! - subroutine generate_wavefunction                                           !
+! - subroutine set_random_generation                                           !
 ! - subroutine generate_wavefunction_BCS                                       !
 ! - subroutine generate_wavefunction_slater                                    !
 ! - subroutine generate_unitary_matrix                                         !
@@ -30,6 +31,7 @@ integer(i64) :: bogo_label
 
 !!! Parameters that determines the seed wave function
 integer :: seed_type,   & ! type of seed
+           seed_rand,   & ! seed to initialize the random generation
            seed_text,   & ! format of seed 
            seed_symm,   & ! option to check the symmetries
            seed_allemp, & ! option to include the empty states (overlap)
@@ -133,6 +135,9 @@ real(r64) :: ovac0
 real(r64), dimension(ndim,ndim) :: A1, A2, A3
 !cmpi integer :: ierr=0
 
+!!! Sets the pseudo random number generation
+call set_random_generation
+
 !cmpi if ( paral_myrank == 0 ) then        
 select case (seed_type)
 
@@ -193,6 +198,37 @@ call print_wavefunction(nocc0)
 !cmpi endif
 
 end subroutine generate_wavefunction
+
+!------------------------------------------------------------------------------!
+! subroutine generate_wavefunction_BCS                                         !
+!                                                                              ! 
+! This subroutine sets the seed for the pseudo random generation using the     ! 
+! input parameter seed_rand.                                                   ! 
+!                                                                              ! 
+! seed_rand = 0 uses the state of the processor (changes with each run)        ! 
+!           > 0 uses the values given in input + a small algorithm             ! 
+!------------------------------------------------------------------------------!
+subroutine set_random_generation
+
+integer :: i, mdim
+integer, dimension(:), allocatable :: mentry 
+
+!!! Initialization using the state of the processor
+call random_seed()
+
+!!! Sets a seed with a little bit of variability using seed_rand
+if ( seed_rand > 0 ) then
+  call random_seed(size=mdim)
+  allocate (mentry(mdim))
+
+  do i = 1, mdim
+    mentry(i) = seed_rand + (i-1) * (2020 + mod(i,2)*10 + mod(i,3)*27)
+  enddo
+
+  call random_seed(put=mentry(1:mdim))
+endif
+
+end subroutine set_random_generation
 
 !------------------------------------------------------------------------------!
 ! subroutine generate_wavefunction_BCS                                         !
@@ -583,7 +619,7 @@ do i = 1, min(HOsh_dim,HOsh_dim0)
 enddo
 if ( icheck /= 0 ) then
   print '(/,"The model space of the seed wave function is not consistent", & 
-          " with the one of the interaction.")'
+        & " with the one of the interaction.")'
   print*, 'Inter:', HOsh_dim, (HOsh_na(i), i=1,HOsh_dim)
   print*, 'State:', HOsh_dim0, (HOsh_na0(i), i=1,HOsh_dim0)
   stop 
@@ -642,7 +678,7 @@ logical :: is_binary
 
 !!! Determines a random integer to label the state
 call random_number(xrand)                                                
-bogo_label = dint(xrand*(10.0d0**12))
+bogo_label = int(xrand*(10.0d0**12),i64)
 
 !!! Opens the file depending if intermediate or final writing and if binary
 !!! or text writing
@@ -730,7 +766,7 @@ integer, intent(out) :: nocc, nemp
 real(r64), intent(out) :: ovacc       
 complex(r64), dimension(ndim,ndim), intent(out) :: zUc, zVc, zDc
 integer :: i, j, k, m, info, sdim, ialloc=0
-integer(r64), dimension(ndim) :: submax, subdim
+integer, dimension(ndim) :: submax, subdim
 real(r64) :: occu_u, occu_v, occu_v2, eps
 real(r64), dimension(ndim) :: eigen_rho
 real(r64), dimension(3*ndim-1) :: work1   
@@ -817,7 +853,7 @@ do while ( k < ndim - nocc )
     !print*, k, subdim(k)
     subdim(k) = 2
     print*,"Warning: subspace of odd dimension when building kappa canonical. &
-           Intenting the calculation assuming dim = 2."
+          & Intenting the calculation assuming dim = 2."
   endif
   k = k + subdim(k)
 enddo
@@ -908,7 +944,7 @@ subroutine block_quasiparticle (nidx,U,V,ndim)
 
 integer, intent(in) :: nidx, ndim
 real(r64), dimension(ndim,ndim), intent(inout) :: U, V
-integer :: i, tblock, numpar
+integer :: i
 real(r64), dimension(ndim,ndim) :: Ub, Vb
 
 !!! Exits the routine if no blocking is required
@@ -917,7 +953,7 @@ if ( nidx == 0 ) return
 !!! Checks if the blocking index is consistent with the model space 
 if ( nidx > ndim ) then
  print '(1a,1x,1i5,1a,1i5)', 'The blocking index = ',nidx,' is greater than &
-         the dimension of the single-particle space = ',ndim  
+       & the dimension of the single-particle space = ',ndim  
  stop 
 endif 
 
@@ -977,7 +1013,7 @@ select case (seed_type)
 end select 
 
 print '(/,60("%"),/,24x,"WAVE FUNCTION",23x,/,60("%"),//, &
-        3x,"Description",9x,"Value",/,28("-"))'
+      & 3x,"Description",9x,"Value",/,28("-"))'
 print format1, 'Initial type of seed', seed_type, info_type  
 print format2, 'Number of qp blocked', blocking_dim
 if ( blocking_dim /= 0 ) then 

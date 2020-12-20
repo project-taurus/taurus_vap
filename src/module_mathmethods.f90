@@ -240,6 +240,10 @@ function lapack_sel(wr,wi) result(selec)
 
 logical :: selec
 real(r64), intent(in) :: wr, wi
+real(r64) :: dummy  
+
+!!! Just to remove the "unused-dummy-argument" during compilation
+dummy = wr + wi 
 
 !!! Set to false because the function is only used as dummy argument
 selec=.false.

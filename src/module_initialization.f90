@@ -22,7 +22,7 @@ use Hamiltonian, only: hamil_file, hamil_fsho, hamil_f01b, hamil_f2b, &
                        hamil_fred, hamil_fcom, hamil_com, hamil_type, &
                        hamil_read 
 use WaveFunctions, only: seed_type, blocking_dim, blocking_id, seed_text, &
-                         seed_symm, seed_occeps, seed_allemp
+                         seed_rand, seed_symm, seed_occeps, seed_allemp
 use Pairs, only: pairs_scheme
 use Projection, only: proj_Mphip, proj_Mphin
 use Constraints, only: constraint_eps, constraint_max, constraint_dim, &
@@ -32,7 +32,7 @@ use Gradient, only: gradient_type, gradient_eta, gradient_mu, gradient_eps
 implicit none
 private 
 
-character(30), dimension(63) :: input_names ! Name of inputs
+character(30), dimension(64) :: input_names ! Name of inputs
 character(30), dimension(:), allocatable :: input_block ! Name for blocking
 
 !!! Public routines
@@ -50,19 +50,19 @@ subroutine print_version
 
 !cmpi if ( paral_myrank == 0 ) then        
 print '("  _________________________________________________________ ",/, &
-        " |                                                         |",/, &
-        " |  (______)  TAURUS_vap                Benjamin Bally     |",/, &
-        " |  <(0  0)>  2020.10.26                Tomás R. Rodríguez |",/, &
-        " |    (°°)                              Adrián Sánchez-F.  |",/, &
-        " |                                                         |",/, &
-        " | This code performs the particle-number variation after  |",/, &
-        " | projection of arbitrary Bogoliubov quasiparticle states |",/, &
-        " | in a spherical harmonic oscillator basis.               |",/, &
-        " |                                                         |",/, &
-        " | Licence: GNU General Public License version 3 or later  |",/, &
-        " | DOI: https://doi.org/10.5281/zenodo.4130680             |",/, &
-        " | Git: https://github.com/project-taurus/taurus_vap.git   |",/, &
-        " |_________________________________________________________|",/)' 
+      & " |                                                         |",/, &
+      & " |  (______)  TAURUS_vap                Benjamin Bally     |",/, &
+      & " |  <(0  0)>  2020.12.07                Tomás R. Rodríguez |",/, &
+      & " |    (°°)                              Adrián Sánchez-F.  |",/, &
+      & " |                                                         |",/, &
+      & " | This code performs the particle-number variation after  |",/, &
+      & " | projection of arbitrary Bogoliubov quasiparticle states |",/, &
+      & " | in a spherical harmonic oscillator basis.               |",/, &
+      & " |                                                         |",/, &
+      & " | Licence: GNU General Public License version 3 or later  |",/, &
+      & " | DOI: https://doi.org/10.5281/zenodo.4130680             |",/, &
+      & " | Git: https://github.com/project-taurus/taurus_vap.git   |",/, &
+      & " |_________________________________________________________|",/)' 
 !cmpi endif
 
 end subroutine print_version
@@ -118,28 +118,29 @@ do i = 1, blocking_dim
   read(uti,format4) input_block(i), blocking_id(i)
 enddo
 read(uti,format3) input_names(19), seed_symm    
-read(uti,format3) input_names(20), seed_text    
-read(uti,format6) input_names(21), seed_occeps   
-read(uti,format3) input_names(22), seed_allemp   
-read(uti,format1) input_names(23)
+read(uti,format4) input_names(20), seed_rand
+read(uti,format3) input_names(21), seed_text    
+read(uti,format6) input_names(22), seed_occeps   
+read(uti,format3) input_names(23), seed_allemp   
 read(uti,format1) input_names(24)
 read(uti,format1) input_names(25)
-read(uti,format4) input_names(26), iter_max
-read(uti,format4) input_names(27), iter_write
-read(uti,format3) input_names(28), iter_print
-read(uti,format3) input_names(29), gradient_type
-read(uti,format6) input_names(30), gradient_eta
-read(uti,format6) input_names(31), gradient_mu
-read(uti,format6) input_names(32), gradient_eps
-read(uti,format1) input_names(33)
+read(uti,format1) input_names(26)
+read(uti,format4) input_names(27), iter_max
+read(uti,format4) input_names(28), iter_write
+read(uti,format3) input_names(29), iter_print
+read(uti,format3) input_names(30), gradient_type
+read(uti,format6) input_names(31), gradient_eta
+read(uti,format6) input_names(32), gradient_mu
+read(uti,format6) input_names(33), gradient_eps
 read(uti,format1) input_names(34)
 read(uti,format1) input_names(35)
-read(uti,format3) input_names(36), enforce_NZ
-read(uti,format3) input_names(37), opt_betalm
-read(uti,format3) input_names(38), pairs_scheme  
-read(uti,format6) input_names(39), constraint_eps
+read(uti,format1) input_names(36)
+read(uti,format3) input_names(37), enforce_NZ
+read(uti,format3) input_names(38), opt_betalm
+read(uti,format3) input_names(39), pairs_scheme  
+read(uti,format6) input_names(40), constraint_eps
 do i = 3, constraint_max
-  j = 40 + i - 3
+  j = 41 + i - 3
   read(uti,format7) input_names(j), constraint_switch(i), constraint_read(i)
 enddo
 !cmpi endif
@@ -204,7 +205,7 @@ subroutine print_input(iter_max,iter_write,iter_print)
 integer, intent(in) :: iter_max, iter_write, iter_print
 integer :: i, dummy_teamssize=0
 character(5) :: blocking_dim_ch, iter_max_ch, iter_write_ch, proj_Mphip_ch, &
-                proj_Mphin_ch, paral_teamssize_ch
+                proj_Mphin_ch, paral_teamssize_ch, seed_rand_ch
 character(10) :: gradient_eta_ch, gradient_mu_ch, gradient_eps_ch, &
                  constraint_eps_ch, valence_N_ch, valence_Z_ch, &
                  seed_occeps_ch
@@ -241,7 +242,9 @@ do i = 1, blocking_dim
   blocking_id_ch(i) = adjustl(blocking_id_ch(i))
 enddo
 
+write(seed_rand_ch,'(1i5)') seed_rand
 write(seed_occeps_ch,'(1es10.3)') seed_occeps
+seed_rand_ch = adjustl(seed_rand_ch)
 seed_occeps_ch = adjustl(seed_occeps_ch)
 
 write(iter_max_ch,'(1i5)') iter_max
@@ -289,28 +292,29 @@ do i = 1, blocking_dim
   write(uto,format4) input_block(i), blocking_id_ch(i)
 enddo
 write(uto,format3) input_names(19), seed_symm    
-write(uto,format3) input_names(20), seed_text    
-write(uto,format5) input_names(21), seed_occeps_ch
-write(uto,format3) input_names(22), seed_allemp  
-write(uto,format1) input_names(23)
+write(uto,format4) input_names(20), seed_rand_ch
+write(uto,format3) input_names(21), seed_text    
+write(uto,format5) input_names(22), seed_occeps_ch
+write(uto,format3) input_names(23), seed_allemp  
 write(uto,format1) input_names(24)
 write(uto,format1) input_names(25)
-write(uto,format4) input_names(26), iter_max_ch
-write(uto,format4) input_names(27), iter_write_ch
-write(uto,format3) input_names(28), iter_print
-write(uto,format3) input_names(29), gradient_type
-write(uto,format5) input_names(30), gradient_eta_ch
-write(uto,format5) input_names(31), gradient_mu_ch
-write(uto,format5) input_names(32), gradient_eps_ch
-write(uto,format1) input_names(33)
+write(uto,format1) input_names(26)
+write(uto,format4) input_names(27), iter_max_ch
+write(uto,format4) input_names(28), iter_write_ch
+write(uto,format3) input_names(29), iter_print
+write(uto,format3) input_names(20), gradient_type
+write(uto,format5) input_names(31), gradient_eta_ch
+write(uto,format5) input_names(32), gradient_mu_ch
+write(uto,format5) input_names(33), gradient_eps_ch
 write(uto,format1) input_names(34)
 write(uto,format1) input_names(35)
-write(uto,format3) input_names(36), enforce_NZ
-write(uto,format3) input_names(37), opt_betalm
-write(uto,format3) input_names(38), pairs_scheme  
-write(uto,format5) input_names(39), constraint_eps_ch
+write(uto,format1) input_names(36)
+write(uto,format3) input_names(37), enforce_NZ
+write(uto,format3) input_names(38), opt_betalm
+write(uto,format3) input_names(39), pairs_scheme  
+write(uto,format5) input_names(40), constraint_eps_ch
 do i = 3, constraint_max
-  write(uto,format6) input_names(40-3+i), constraint_switch(i), &
+  write(uto,format6) input_names(41-3+i), constraint_switch(i), &
                                           constraint_read_ch(i)
 enddo
 print*,' '
@@ -444,7 +448,7 @@ endif
 if ( (abs(valence_Z) + abs(valence_N)) == zero ) then
   ierror = ierror + 1
   print "(a,1f10.3,a)","The number of active nucleons (valence_Z + valence_N) &
-         = ",valence_Z+valence_N," should be strictly positive."
+       & = ",valence_Z+valence_N," should be strictly positive."
 endif 
 
 if ( proj_Mphip < 0 ) then
@@ -495,7 +499,7 @@ do i = 1, blocking_dim
   if ( blocking_id(i) < 0 ) then
     ierror = ierror + 1
     print "(a,1i5,a,1i5)","The index of the blocked quasiparticle &
-           (blocking_id(i)) = ", blocking_id(i), " for i = ", i
+         & (blocking_id(i)) = ", blocking_id(i), " for i = ", i
   endif
 enddo
 
@@ -503,6 +507,12 @@ if ( (seed_symm < 0) .or. (seed_symm > 1) ) then
   ierror = ierror + 1
   print "(a,1i1,a)","The option for checking the symmetries (seed_symm) = ", & 
          seed_symm," should be 0 or 1."
+endif 
+
+if ( seed_rand < 0 ) then
+  ierror = ierror + 1
+  print "(a,1i5,a)","The seed for the random number generation (seed_rand) = ",& 
+         seed_rand," should be positive or null."
 endif 
 
 if ( (seed_text < 0) .or. (seed_text > 3) ) then
@@ -514,13 +524,13 @@ endif
 if ( seed_occeps < 0.0d0 ) then
   ierror = ierror + 1
   print "(a,1es10.3,a)","The cutoff for the occupied single-particle states ", &
-         "(seed_occeps) = ", seed_occeps," should be positive."
+       & "(seed_occeps) = ", seed_occeps," should be positive."
 endif 
 
 if ( (seed_allemp < 0) .or. (seed_allemp > 1) ) then
   ierror = ierror + 1
   print "(a,1i1,a)","The option for including all the empty states &
-         (seed_allemp) = ", seed_allemp," should be 0 or 1."
+       & (seed_allemp) = ", seed_allemp," should be 0 or 1."
 endif 
 
 !!!
@@ -597,7 +607,7 @@ endif
 if ( constraint_switch(18) == 1 ) then
   ierror = ierror + 1
   print "(a)", "The constraint on <Jy> has to be switched off for now as the &
-         wave functions are real."
+       & wave functions are real."
 endif 
 
 if ( constraint_eps <= 0.0d0 ) then
@@ -609,7 +619,7 @@ endif
 if ( isum /= 0 ) then
   ierror = ierror + 1
   print "(a,1i1,a)", "The flags to switch on/off the constraints & 
-         (constraint_switch) should be 0 or 1."
+       & (constraint_switch) should be 0 or 1."
 endif
 !cmpi endif 
 
@@ -622,7 +632,7 @@ endif
 if ( ierror /= 0 ) then
 !cmpi   if ( paral_myrank == 0 ) then
   print "(a,1i2,a)", "The code has dectected ",ierror," problem(s) with the &
-         input parameters and will stop. Please check the manual."
+       & input parameters and will stop. Please check the manual."
 !cmpi   endif 
   stop 
 endif
@@ -641,7 +651,7 @@ end subroutine check_input
 !------------------------------------------------------------------------------!
 subroutine open_files_hamiltonian
 
-integer :: htype, htyper, ierror, iwarn
+integer :: htype, ierror, iwarn
 character(100) :: hname, hname1, hname2, hnamer
 logical :: is_exist            
 
@@ -758,7 +768,7 @@ end select
 
 if ( ierror /= 0 ) then
   print "(a,1i1,a)", "The code has dectected ",ierror," problem(s) with the &
-         hamiltonian files and will stop. Please check the files."
+       & hamiltonian files and will stop. Please check the files."
   stop 
 endif
 

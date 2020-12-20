@@ -199,7 +199,7 @@ end subroutine read_hamiltonian_1body_antoine
 !------------------------------------------------------------------------------!
 subroutine read_hamiltonian_1body_general
   
-integer(i32) :: k, l, mjk, mjl, a, b, iexit, ialloc=0
+integer(i32) :: k, l, mjk, mjl, a, b, iexit !, ialloc=0
 real(r64) :: H0, hamil_H1cpd_p, hamil_H1cpd_n
 
 !!! Allocate hamil_H1cpd (not raelly needed but prettier)
@@ -247,10 +247,9 @@ end subroutine read_hamiltonian_1body_general
 subroutine set_hamiltonian_2body
 
 integer(i16) :: ared, bred, cred, dred
-integer(i32) :: ht, j, t, tmin, tmax, jmin, jmax, ialloc=0,  &
-                a, ja, ma, la, ta, b, jb, mb, lb, tb, bmax, &
-                c, jc, mc, lc, tc, d, jd, md, ld, td, &
-                uth6=uth+6, uth7=uth+7, fac_ht
+integer(i32) :: ht, j, t, tmax, uth6=uth+6, uth7=uth+7, fac_ht, ialloc=0, &
+                a, ma, la, ta, b, mb, lb, tb, bmax, &
+                c, mc, lc, tc, d, md, ld, td
 integer(i64) :: kk
 real(r64) :: xja, xjb, xjc, xjd, xjtot, xttot, phasab, phascd, Vtmp, &
              Vcut, Vdec
@@ -364,11 +363,11 @@ do a = 1, HOsp_dim
         !!! CPU time and storage
         if ( abs(Vdec) > Vcut ) then 
           hamil_H2dim = hamil_H2dim + 1
-          ared = a
-          bred = b
-          cred = c
-          dred = d
-          Vred = Vdec
+          ared = int(a,i16)
+          bred = int(b,i16)
+          cred = int(c,i16)
+          dred = int(d,i16)
+          Vred = real(Vdec,r32)
           write(uth6) ared, bred, cred, dred      
           write(uth7) Vred      
         endif  
@@ -534,8 +533,8 @@ end subroutine read_hamiltonian_2body_com
 subroutine read_hamiltonian_reduced
   
 integer(i32) :: i, j, bytes_H2, ialloc=0
-integer(i64) :: kk, divide, rest, pos_ini, pos_abcd, pos_H2, pos_perm
-character(100) :: hname      
+integer(i64) :: kk, pos_ini, pos_abcd, pos_H2, pos_perm
+!cmpi integer(i64) :: divide, rest
   
 read(uthr, pos=1) hamil_name
 read(uthr) hamil_type     
@@ -666,7 +665,7 @@ select case (hamil_read)
 end select 
 
 print '(/,60("%"),/,25x,"HAMILTONIAN",24x,/,60("%"),//, &
-      3x,"Description",8x,"Value",/,27("-"))'
+      & 3x,"Description",8x,"Value",/,27("-"))'
 print format1, 'Main name of files ', hamil_file
 print format1, 'Name of hamiltonian', trim(adjustl(hamil_name))
 print format2, 'Type of hamiltonian', hamil_type, info_type
@@ -997,7 +996,7 @@ do kk = 1, hamil_H2dim
     ta = tb
     tb = tmp
     phase = -phase
-    hamil_trperm(kk) = hamil_trperm(kk) + 1
+    hamil_trperm(kk) = hamil_trperm(kk) + int(1,i8)
   endif
     
   if ( tc > td ) then
@@ -1005,14 +1004,14 @@ do kk = 1, hamil_H2dim
     tc = td
     td = tmp
     phase = -phase
-    hamil_trperm(kk) = hamil_trperm(kk) + 2
+    hamil_trperm(kk) = hamil_trperm(kk) + int(2,i8)
   endif
     
   if ( (ta > tc) .or. ((ta == tc) .and. (tb > td)) ) then 
-    hamil_trperm(kk) = hamil_trperm(kk) + 4
+    hamil_trperm(kk) = hamil_trperm(kk) + int(4,i8)
   endif
 
-  if ( phase < 0.d0 ) hamil_trperm(kk) = hamil_trperm(kk) - 8
+  if ( phase < 0.d0 ) hamil_trperm(kk) = hamil_trperm(kk) - int(8,i8)
 
 enddo
 

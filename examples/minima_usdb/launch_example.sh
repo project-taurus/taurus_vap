@@ -24,7 +24,7 @@ echo "* Gamma = triaxial gamma deformation" >> results
 echo "  (the orientation of the nucleus is not fixed such that you"    >> results
 echo "  might obtain same results for Gamma=X<60 and Gamma=n*60 +- X)" >> results
 echo " " >> results
-echo "  Z      N    M    Energy      Epair      Beta      Gamma  " >> results
+echo "  Z     N    M    Energy      Epair      Beta      Gamma  " >> results
 
 # Loop for nuclei
 for nucl in 1 2 3
@@ -57,7 +57,7 @@ do
   fi
 
   # Loop for HFB/VAPNP
-  for ggg in 1 7
+  for ggg in 1 11
   do
 
     enermin=666.0
@@ -98,8 +98,12 @@ do
       
       mv output.$zzz.$nnn.$ggg.$i.txt $outdir/
     done
- 
-    echo $zzz ' '$nnn ' '$ggg  ' '$enermin ' '$epaimin ' '$betamin ' '$gammmin >> results
+
+    if [[ $ggg -eq 1 ]]; then
+      echo $zzz ' '$nnn '  '$ggg  ' '$enermin ' '$epaimin ' '$betamin ' '$gammmin >> results
+    else
+      echo $zzz ' '$nnn ' '$ggg  ' '$enermin ' '$epaimin ' '$betamin ' '$gammmin >> results
+    fi 
 
     echo Z=$zzz N=$nnn M=$ggg finished 
   done

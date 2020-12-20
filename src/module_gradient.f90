@@ -34,6 +34,7 @@ integer, private :: info_H11, & ! check if problem during diag(field_H11)
                     info_hsp    !   "   "     "      "    diag(field_hspRR)
 real(r64), dimension(:), allocatable, private :: eigen_hsp, & ! sp energies 
                                                  eigen_H11    ! qp    "      
+integer, dimension(:), private :: control_NZ(5)=0
 
 CONTAINS
 
@@ -427,23 +428,24 @@ use Projection, only : pnp_over, pnp_ener, pnp_pari, pnp_prot, pnp_neut, &
                        pnp_prot2, pnp_neut2 
 
 integer, intent(in) :: iter_print, iter
+integer :: i
 real(r64) :: ener, pari, prot, neut, prot2, neut2, beta, gamm, &
              q20_p, q20_n, q20_a, q22_p, q22_n, q22_a
 character(len=*), parameter :: format1 = "(1i6,5x,1es12.5,2x,5f12.6)", &
                                format2 = "(1i6,5x,1es12.5,2x,5f12.6,1f11.6, &  
-                                           1f8.3,1f8.2)"
+                                         & 1f8.3,1f8.2)"
 
 !!! Prints the "caption"
 if ( iter == 1 ) then
   if ( iter_print == 0 ) then
     print '(" ")'
     print '("Iteration",5x,"Gradient",7x,"Energy",6x,"Protons",4x,"Var(Prot)", &
-            4x,"Neutrons",3x,"Var(Neut)",/,85("-"))'
+          & 4x,"Neutrons",3x,"Var(Neut)",/,85("-"))'
   elseif ( iter_print == 1 ) then
     print '(99x,"(unprojected)")'
     print '("Iteration",5x,"Gradient",7x,"Energy",6x,"Protons",4x,"Var(Prot)", &
-            4x,"Neutrons",3x,"Var(Neut)",4x,"Parity",5x,"Beta",3x,"Gamma", &
-            /,112("-"))'
+          & 4x,"Neutrons",3x,"Var(Neut)",4x,"Parity",5x,"Beta",3x,"Gamma", &
+          & /,112("-"))'
   endif
 endif
 
@@ -457,6 +459,7 @@ neut2 = real(pnp_neut2 / pnp_over)
 
 prot2 = abs(prot2 - prot**2)
 neut2 = abs(neut2 - neut**2)
+
 
 if ( iter_print == 1 ) then
   call calculate_expectval_obo(dens_rhoRR,multipole_Q20,q20_p,q20_n,HOsp_dim)
@@ -481,6 +484,25 @@ else
   print format2, iter, gradient_norm, ener, prot, prot2, neut, neut2, pari, &
         beta, gamm
 endif
+
+!!! Test on the average number of particles. Can stop the run. 
+do i = 4, 1, -1
+  control_NZ(i+1) = control_NZ(i)
+enddo
+
+control_NZ(1) = 0
+
+if ( (abs(prot - valence_Z) > 0.5d0) .or. (abs(neut - valence_N) > 0.5d0) ) then
+  control_NZ(1) = 1
+  print*, "Warning: the numbers of particles are far from the values set in &
+         &the input parameters."
+endif
+
+if ( sum(control_NZ) >= 3 ) then
+  print*, "Critical error: the numbers of particles were wrong three times in &
+         &in the last five iterations. The code will stop."
+ stop
+endif  
 
 end subroutine print_iteration
 
