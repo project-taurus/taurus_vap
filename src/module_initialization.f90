@@ -448,7 +448,7 @@ endif
 if ( (abs(valence_Z) + abs(valence_N)) == zero ) then
   ierror = ierror + 1
   print "(a,1f10.3,a)","The number of active nucleons (valence_Z + valence_N) &
-       & = ",valence_Z+valence_N," should be strictly positive."
+        &= ",valence_Z+valence_N," should be strictly positive."
 endif 
 
 if ( proj_Mphip < 0 ) then
@@ -499,7 +499,7 @@ do i = 1, blocking_dim
   if ( blocking_id(i) < 0 ) then
     ierror = ierror + 1
     print "(a,1i5,a,1i5)","The index of the blocked quasiparticle &
-         & (blocking_id(i)) = ", blocking_id(i), " for i = ", i
+          &(blocking_id(i)) = ", blocking_id(i), " for i = ", i
   endif
 enddo
 
@@ -523,14 +523,14 @@ endif
 
 if ( seed_occeps < 0.0d0 ) then
   ierror = ierror + 1
-  print "(a,1es10.3,a)","The cutoff for the occupied single-particle states ", &
-       & "(seed_occeps) = ", seed_occeps," should be positive."
+  print "(a,1es10.3,a)","The cutoff for the occupied single-particle states &
+        &(seed_occeps) = ", seed_occeps," should be positive."
 endif 
 
 if ( (seed_allemp < 0) .or. (seed_allemp > 1) ) then
   ierror = ierror + 1
   print "(a,1i1,a)","The option for including all the empty states &
-       & (seed_allemp) = ", seed_allemp," should be 0 or 1."
+        &(seed_allemp) = ", seed_allemp," should be 0 or 1."
 endif 
 
 !!!
@@ -607,7 +607,7 @@ endif
 if ( constraint_switch(18) == 1 ) then
   ierror = ierror + 1
   print "(a)", "The constraint on <Jy> has to be switched off for now as the &
-       & wave functions are real."
+        &wave functions are real."
 endif 
 
 if ( constraint_eps <= 0.0d0 ) then
@@ -619,7 +619,7 @@ endif
 if ( isum /= 0 ) then
   ierror = ierror + 1
   print "(a,1i1,a)", "The flags to switch on/off the constraints & 
-       & (constraint_switch) should be 0 or 1."
+        &(constraint_switch) should be 0 or 1."
 endif
 !cmpi endif 
 
@@ -632,7 +632,7 @@ endif
 if ( ierror /= 0 ) then
 !cmpi   if ( paral_myrank == 0 ) then
   print "(a,1i2,a)", "The code has dectected ",ierror," problem(s) with the &
-       & input parameters and will stop. Please check the manual."
+        &input parameters and will stop. Please check the manual."
 !cmpi   endif 
   stop 
 endif
@@ -768,7 +768,7 @@ end select
 
 if ( ierror /= 0 ) then
   print "(a,1i1,a)", "The code has dectected ",ierror," problem(s) with the &
-       & hamiltonian files and will stop. Please check the files."
+        &hamiltonian files and will stop. Please check the files."
   stop 
 endif
 

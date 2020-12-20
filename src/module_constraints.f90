@@ -199,7 +199,7 @@ integer, parameter :: iter_constr=100
 integer :: i, j, k, iter, m, ia, idig, info
 integer(i64), parameter :: d1=1
 integer(i64) :: ndim2, indi, indj, indk
-real(r64) :: expvalp, expvaln, diff_prot, diff_neut
+real(r64) :: expvalp, expvaln
 real(r64), dimension(constraint_dim) :: B, expecval, ipiv, work
 real(r64), dimension(constraint_dim,constraint_dim) :: A
 real(r64), dimension(((constraint_dim)*(constraint_dim+1)/2)*d1*ndim**2) :: A1
