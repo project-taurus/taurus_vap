@@ -4,7 +4,7 @@
 [![License: GPL v3](https://img.shields.io/github/license/project-taurus/taurus_vap)](https://www.gnu.org/licenses/gpl-3.0)
 
 ## Presentation
-We present the numerical code TAURUS_vap that solves the variation after particle-number projection (VAPNP) equations for symmetry-unrestricted real Bogoliubov quasi-particle states in a
+We present the numerical code TAURUS_vap that solves the variation after particle-number projection (VAPNP) equations for real general Bogoliubov quasi-particle states represented in a
 Spherical Harmonic Oscillator (SHO) basis. The model space considered is invariant under spatial and isospin rotations but no specific SHO basis is assumed such that the code can carry out
 either valence-space or no-core calculations (depending on the hamiltonian file used as input). 
 The variational procedure can be performed under several constraints on the expectation value of a variety of operators such as the multipole deformation, the pairing field or the components of the angular momentum.

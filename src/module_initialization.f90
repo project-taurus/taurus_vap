@@ -52,12 +52,13 @@ subroutine print_version
 print '("  _________________________________________________________ ",/, &
       & " |                                                         |",/, &
       & " |  (______)  TAURUS_vap                Benjamin Bally     |",/, &
-      & " |  <(0  0)>  2020.12.21                Tomás R. Rodríguez |",/, &
+      & " |  <(0  0)>  2021.01.05                Tomás R. Rodríguez |",/, &
       & " |    (°°)                              Adrián Sánchez-F.  |",/, &
       & " |                                                         |",/, &
       & " | This code performs the particle-number variation after  |",/, &
-      & " | projection of arbitrary Bogoliubov quasiparticle states |",/, &
-      & " | in a spherical harmonic oscillator basis.               |",/, &
+      & " | projection of real general Bogoliubov quasi-particle    |",/, &
+      & " | states represented in a spherical harmonic oscillator   |",/, &
+      & " | basis.                                                  |",/, &
       & " |                                                         |",/, &
       & " | Licence: GNU General Public License version 3 or later  |",/, &
       & " | DOI: https://doi.org/10.5281/zenodo.4130680             |",/, &

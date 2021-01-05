@@ -1,8 +1,9 @@
 !==============================================================================!
 ! PROGRAM TAURUS_vap                                                           !
 !                                                                              !
-! This program performs the variation after particle-number projection of      !
-! general quasiparticle states in a harmonic ocillator model space.            !
+! This program performs the variation after particle-number projection of real !
+! general quasi-particle states represented in a spherical harmonic ocillator  !
+! basis.                                                                       !
 !                                                                              !
 ! Licence: GNU General Public License version 3 or later                       !
 ! DOI: 10.5281/zenodo.4130680                                                  !
