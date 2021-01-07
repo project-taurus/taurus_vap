@@ -470,7 +470,7 @@ if ( iter_print == 1 ) then
   beta = sqrt( q20_a**2 + 2.0d0*(q22_a**2) ) * coeff_betalm(2)
   gamm = atan( sqrt(2.d0) * abs(q22_a) / abs(q20_a) )
 
-  if (  q20_a == 0.d0 ) gamm = 0.d0
+  if (  abs(q20_a) <= epsilon(0.d0) ) gamm = 0.d0
   if ( (q20_a >  0.d0) .and. (q22_a <  0.d0) )  gamm = 2.d0*pi - gamm
   if ( (q20_a <  0.d0) .and. (q22_a >= 0.d0) )  gamm = pi - gamm
   if ( (q20_a <  0.d0) .and. (q22_a <  0.d0) )  gamm = pi + gamm

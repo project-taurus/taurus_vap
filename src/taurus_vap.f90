@@ -115,7 +115,7 @@ do iter = 1, iter_max
   !!! Writes the intermediate wave function if needed
   if ( iter == iter_max ) then
     print '(/,"Maximum number of iterations reached")' 
-  elseif ( (iter_write /= 0) .and. (mod(iter,iter_write) == 0) ) then
+  elseif ( (iter_write /= 0) .and. (mod(iter,max(1,iter_write)) == 0) ) then
     call write_wavefunction(1)
   endif
   !cmpi endif

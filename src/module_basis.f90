@@ -114,7 +114,7 @@ endif
 
 !!! Computes oscillator parameters
 if ( (htype == 1) .or. (htype == 2) ) then
-  if ( HO_hw == zero ) then
+  if ( HO_hw <= epsilon(zero) ) then
     HO_hw = 45.0d0 * nucleus_A**(-1.0d0/3.0d0) &
             - 25.0d0 * nucleus_A**(-2.0d0/3.0d0)
   endif

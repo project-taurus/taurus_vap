@@ -678,7 +678,7 @@ logical :: is_binary
 
 !!! Determines a random integer to label the state
 call random_number(xrand)                                                
-bogo_label = int(xrand*(10.0d0**12),i64)
+bogo_label = 1 + int(xrand*(1.0d12),i64)
 
 !!! Opens the file depending if intermediate or final writing and if binary
 !!! or text writing
@@ -776,7 +776,7 @@ real(r64), dimension(:,:), allocatable :: B1, vs
 logical, dimension(:), allocatable :: bwork
 
 !!! Cutoff for occupied single-particle states
-if ( seed_occeps == zero ) then
+if ( seed_occeps <= epsilon(zero) ) then
   eps = 1.0d-8
 else
   eps = seed_occeps
