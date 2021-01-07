@@ -446,7 +446,7 @@ if ( valence_N < 0 ) then
          valence_N," should be positive."
 endif 
 
-if ( (abs(valence_Z) + abs(valence_N)) <= epsilon(zero) ) then
+if ( (abs(valence_Z) + abs(valence_N)) <= epsilon0 ) then
   ierror = ierror + 1
   print "(a,1f10.3,a)","The number of active nucleons (valence_Z + valence_N) &
         &= ",valence_Z+valence_N," should be strictly positive."
@@ -466,7 +466,7 @@ endif
 
 integerness = valence_Z - int(valence_Z)  
 if ( ((proj_Mphip > 1) .or. (seed_type > 6)) .and. & 
-     (abs(integerness) > 0.0d0) ) then
+     (abs(integerness) > epsilon0) ) then
   ierror = ierror + 1
   print "(a,1f10.3,a)","The number of active protons (valence_Z) = ", & 
          valence_Z," is not an integer (needed for PNR or Slater)."
@@ -474,7 +474,7 @@ endif
 
 integerness = valence_N - int(valence_N)  
 if ( ((proj_Mphip > 1) .or. (seed_type > 6)) .and. &
-     (abs(integerness) > 0.0d0) ) then
+     (abs(integerness) > epsilon0) ) then
   ierror = ierror + 1
   print "(a,1f10.3,a)","The number of active neutrons (valence_N) = ", & 
          valence_N," is not an integer (needed for PNR or Slater)."

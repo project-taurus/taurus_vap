@@ -1194,7 +1194,7 @@ write(uto,format6) 'Q44', q4p(4), q4n(4), q4a(4), beta4a(4)
 beta = sqrt( q2a(0)**2 + 2.0d0*(q2a(2)**2) ) * coeff_betalm(2)
 gamm = atan( sqrt(2.0d0) * abs(q2a(2)) / abs(q2a(0)) )
 
-if ( abs(q2a(0)) <= epsilon(0.d0) ) gamm = 0.d0
+if ( abs(q2a(0)) <= epsilon0 ) gamm = 0.d0
 if ( (q2a(0) >  0.d0) .and. (q2a(2) <  0.d0) )  gamm = 2.d0*pi - gamm
 if ( (q2a(0) <  0.d0) .and. (q2a(2) >= 0.d0) )  gamm = pi - gamm
 if ( (q2a(0) <  0.d0) .and. (q2a(2) <  0.d0) )  gamm = pi + gamm

@@ -33,7 +33,8 @@ integer, parameter :: i8  = int8,   & ! integer  8 bits
 
 !!! Definition of simple names for numerical values
 real(r64), parameter :: one  = 1.0d0, &
-                        zero = 0.0d0
+                        zero = 0.0d0, &
+                        epsilon0 = 1.0d-16
 complex(r64), parameter :: zone  = (1.0d0,0.0d0), &
                            zzero = (0.0d0,0.0d0), &
                            zimag = (0.0d0,1.0d0)
