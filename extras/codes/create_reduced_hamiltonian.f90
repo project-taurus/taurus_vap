@@ -222,13 +222,13 @@ do a = 1, HOsp_dim
     lc = HOsp_l(c)
     mc = HOsp_2mj(c)
     tc = HOsp_2mt(c)
-    do d = c, HOsp_dim
+    do d = c+1, HOsp_dim
       ld = HOsp_l(d)
       md = HOsp_2mj(d)
       td = HOsp_2mt(d)
       bmax = HOsp_dim
       if ( c == a ) bmax = d
-      do b = a, bmax
+      do b = a+1, bmax
         lb = HOsp_l(b)
         mb = HOsp_2mj(b)
         tb = HOsp_2mt(b)

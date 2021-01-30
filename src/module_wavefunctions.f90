@@ -776,7 +776,7 @@ real(r64), dimension(:,:), allocatable :: B1, vs
 logical, dimension(:), allocatable :: bwork
 
 !!! Cutoff for occupied single-particle states
-if ( seed_occeps <= epsilon0 ) then
+if ( seed_occeps < tiny(zero) ) then
   eps = 1.0d-8
 else
   eps = seed_occeps
