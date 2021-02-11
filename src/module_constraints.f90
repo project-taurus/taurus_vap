@@ -425,8 +425,8 @@ do i = 1, constraint_dim
 enddo
 
 if ( info /= 0 ) then
-  print*, 'Warning: impossible to obtain the new lagrange multipliers. Using &
-         & the one of the previous iteration instead.' 
+  print '("Warning: impossible to obtain the new lagrange multipliers. Using &
+         &the one of the previous iteration instead.")' 
   do i = 1, constraint_dim
     lagrange_lambda1(i) = lagrange_lambda0(i)
   enddo
