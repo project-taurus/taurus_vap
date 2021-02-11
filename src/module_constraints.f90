@@ -424,6 +424,9 @@ do i = 1, constraint_dim
   lagrange_lambda1(i) = B(i)
 enddo
 
+!!! BB: to avoid the singular system when constraining things that are exactly
+!!! zero, I guess it should be necessary to remove the constraint for the     
+!!! current iteration when it is too small.
 if ( info /= 0 ) then
   print '("Warning: impossible to obtain the new lagrange multipliers. Using &
          &the one of the previous iteration instead.")' 

@@ -14,7 +14,7 @@ No. of gauge angles neutrons  1
 
 Wave Function   
 -------------
-Type of seed wave function    2 
+Type of seed wave function    0 
 Number of QP to block         0
 No symmetry simplifications   0
 Seed random number generation 0  
@@ -24,7 +24,7 @@ Include all empty sp states   0
 
 Iterative Procedure
 -------------------
-Maximum no. of iterations     10 
+Maximum no. of iterations     300
 Step intermediate wf writing  0
 More intermediate printing    0
 Type of gradient              1
@@ -38,20 +38,20 @@ Force constraint N/Z          1
 Constraint beta_lm            1
 Pair coupling scheme          1
 Tolerance for constraints     1.000E-06
-Constraint multipole Q10      1   0.000   0.000
-Constraint multipole Q11      0   0.000   0.000
-Constraint multipole Q20      0   0.100   0.200
-Constraint multipole Q21      0   0.000   0.000
-Constraint multipole Q22      0   0.100   0.300
-Constraint multipole Q30      0   0.000   0.000
-Constraint multipole Q31      0   0.000   0.000
-Constraint multipole Q32      0   0.000   0.000
-Constraint multipole Q33      0   0.000   0.000
-Constraint multipole Q40      0   0.000   0.000
-Constraint multipole Q41      0   0.000   0.000
-Constraint multipole Q42      0   0.000   0.000
-Constraint multipole Q43      0   0.000   0.000
-Constraint multipole Q44      0   0.000   0.000
+Constraint multipole Q10      0   0.000
+Constraint multipole Q11      0   0.000
+Constraint multipole Q20      0   0.000
+Constraint multipole Q21      2   0.000   0.000
+Constraint multipole Q22      0   0.000
+Constraint multipole Q30      0   0.000
+Constraint multipole Q31      0   0.000
+Constraint multipole Q32      0   0.000
+Constraint multipole Q33      0   0.000
+Constraint multipole Q40      0   0.000
+Constraint multipole Q41      0   0.000
+Constraint multipole Q42      0   0.000
+Constraint multipole Q43      0   0.000
+Constraint multipole Q44      0   0.000
 Constraint ang. mom. Jx       0   0.000
 Constraint ang. mom. Jy       0   0.000
 Constraint ang. mom. Jz       0   0.000
