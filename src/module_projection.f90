@@ -1090,7 +1090,7 @@ write(uto,format4)  'Full H   ', (ener_1b_p + ener_2bPH_pp + ener_2bPP_pp), &
 !!! Multipole deformation
 !!!
 print '(/,"MULTIPOLE DEFORMATIONS",/,22("="),//, &
-       &"Q_lm",5x,"Protons",4x,"Neutrons",5x,"Nucleons",/,41("-"))'
+       &"Q_lm",5x,"Protons",4x,"Neutrons",4x,"Nucleons",/,40("-"))'
 
 Qlm = real( pnp_Qlm / pnp_over )
 
@@ -1110,7 +1110,7 @@ do i = 1, 4
   enddo
 enddo
 
-print '(/,"Beta_lm",5x,"Protons",4x,"Neutrons",5x,"Nucleons",/,44("-"))'
+print '(/,"Beta_lm",5x,"Protons",4x,"Neutrons",4x,"Nucleons",/,43("-"))'
 do i = 1, 4
   write(i_ch,'(1i1)') i
   do j = 0, i
@@ -1130,9 +1130,9 @@ where ( (Qlm(:,0,2) < 0.d0) .and. (Qlm(:,2,2) >= 0.d0) ) gammT = pi - gammT
 where ( (Qlm(:,0,2) < 0.d0) .and. (Qlm(:,2,2) <  0.d0) ) gammT = pi + gammT
 gammT = gammT * 180.0/pi
 
-print '(/,"Triaxial",4x,"Protons",4x,"Neutrons",5x,"Nucleons",/,44("-"))'
-write(uto,format7) 'Beta  ', betaT(1), betaT(2), betaT(3)
-write(uto,format7) 'Gamma ', gammT(1), gammT(2), gammT(3)
+print '(/,"Triaxial",4x,"Protons",4x,"Neutrons",4x,"Nucleons",/,43("-"))'
+write(uto,format7) 'Beta   ', betaT(1), betaT(2), betaT(3)
+write(uto,format7) 'Gamma  ', gammT(1), gammT(2), gammT(3)
 
 !!!
 !!! Radius RMS
