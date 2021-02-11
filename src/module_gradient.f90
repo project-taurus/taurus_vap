@@ -494,13 +494,13 @@ control_NZ(1) = 0
 
 if ( (abs(prot - valence_Z) > 0.5d0) .or. (abs(neut - valence_N) > 0.5d0) ) then
   control_NZ(1) = 1
-  print*, "Warning: the numbers of particles are far from the values set in &
-         &the input parameters."
+  print '("Warning: the numbers of particles are far from the values set in &
+         &the input parameters.")'
 endif
 
 if ( sum(control_NZ) >= 3 ) then
-  print*, "Critical error: the numbers of particles were wrong three times in &
-         &in the last five iterations. The code will stop."
+  print '("Critical error: the numbers of particles were wrong three times in &
+         &in the last five iterations. The code will stop.")'
  stop
 endif  
 

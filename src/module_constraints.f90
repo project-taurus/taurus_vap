@@ -625,7 +625,8 @@ do j = 1, ndim
   lj = HOsp_l(j)
   do i = 1, ndim
     li = HOsp_l(i)
-    if ( (-1)**li /= (-1)**lj ) sum_p = sum_p + abs(dens_kappaRR(i,j))
+    if ( (-1)**li /= (-1)**lj ) sum_p = sum_p + abs(dens_rhoRR(i,j)) & 
+                                              + abs(dens_kappaRR(i,j))
   enddo
 enddo
 
