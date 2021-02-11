@@ -26,7 +26,8 @@ use WaveFunctions, only: seed_type, blocking_dim, blocking_id, seed_text, &
 use Pairs, only: pairs_scheme
 use Projection, only: proj_Mphip, proj_Mphin
 use Constraints, only: constraint_eps, constraint_max, constraint_dim, &
-                      constraint_read, constraint_switch, opt_betalm, enforce_NZ
+                       constraint_read, constraint_switch, opt_betalm, & 
+                       constraint_types, enforce_NZ
 use Gradient, only: gradient_type, gradient_eta, gradient_mu, gradient_eps
 
 implicit none
@@ -92,7 +93,7 @@ character(len=*), parameter :: format1 = "(1a)", &
                                format4 = "(1a30, 1i5)", &
                                format5 = "(1a30, 1f7.2)", &
                                format6 = "(1a30, 1es10.3)", &
-                               format7 = "(1a30, 1i1,1x,1f8.3)"
+                               format7 = "(1a30, 1i1,1x,1f7.3,1x,1f7.3)"
 
 !!! Reads the input parameters
 !cmpi if ( paral_myrank == 0 ) then        
@@ -140,9 +141,9 @@ read(uti,format3) input_names(37), enforce_NZ
 read(uti,format3) input_names(38), opt_betalm
 read(uti,format3) input_names(39), pairs_scheme  
 read(uti,format6) input_names(40), constraint_eps
-do i = 3, constraint_max
-  j = 41 + i - 3
-  read(uti,format7) input_names(j), constraint_switch(i), constraint_read(i)
+do i = 3, constraint_types  
+  read(uti,format7) input_names(38+i), constraint_switch(i), &
+                    constraint_read(i,1), constraint_read(i,2)
 enddo
 !cmpi endif
 
@@ -153,12 +154,13 @@ enddo
 !!! Counts the number of constraints. By default, switches on the constraint for
 !!! the particle numbers. The constraint on delta is treated separately.
 constraint_switch(1) = 1
-constraint_read(1) = valence_Z
+constraint_read(1,1) = valence_Z
 constraint_switch(2) = 1
-constraint_read(2) = valence_N
+constraint_read(2,1) = valence_N
 
 constraint_dim = sum(constraint_switch) - constraint_switch(26)
-where (constraint_switch == 0) constraint_read = 0.d0
+where (constraint_switch == 0) constraint_read(:,1) = 0.d0
+where (constraint_switch <= 1) constraint_read(:,2) = 0.d0
 
 !!! Assigns the value 1 to the number of gauge angles if 0 is read
 if ( proj_Mphip > -1 ) proj_Mphip = max(1,proj_Mphip)
@@ -210,14 +212,14 @@ character(5) :: blocking_dim_ch, iter_max_ch, iter_write_ch, proj_Mphip_ch, &
 character(10) :: gradient_eta_ch, gradient_mu_ch, gradient_eps_ch, &
                  constraint_eps_ch, valence_N_ch, valence_Z_ch, &
                  seed_occeps_ch
-character(8) :: constraint_read_ch(constraint_max)
+character(7) :: constraint_read_ch(constraint_types,2)
 character(5), dimension(:), allocatable :: blocking_id_ch
 character(len=*), parameter :: format1 = "(1a)", &
                                format2 = "(1a30, 1a)", &
                                format3 = "(1a30, 1i1)", &
                                format4 = "(1a30, 1a5)", &
                                format5 = "(1a30, 1a10)", &
-                               format6 = "(1a30, 1i1,1x,1a8)"
+                               format6 = "(1a30, 1i1,1x,1a7,1x,1a7)"
 
 allocate(blocking_id_ch(blocking_dim))
 
@@ -263,9 +265,11 @@ gradient_eps_ch = adjustl(gradient_eps_ch)
 write(constraint_eps_ch,'(1es10.3)') constraint_eps
 constraint_eps_ch = adjustl(constraint_eps_ch)
 
-do i = 3, constraint_max
-  write(constraint_read_ch(i),'(1f8.3)') constraint_read(i)
-  constraint_read_ch(i) = adjustl(constraint_read_ch(i))
+do i = 3, constraint_types
+  write(constraint_read_ch(i,1),'(1f7.3)') constraint_read(i,1)
+  write(constraint_read_ch(i,2),'(1f7.3)') constraint_read(i,2)
+  constraint_read_ch(i,1) = adjustr(constraint_read_ch(i,1))
+  constraint_read_ch(i,2) = adjustr(constraint_read_ch(i,2))
 enddo
 
 
@@ -314,9 +318,14 @@ write(uto,format3) input_names(37), enforce_NZ
 write(uto,format3) input_names(38), opt_betalm
 write(uto,format3) input_names(39), pairs_scheme  
 write(uto,format5) input_names(40), constraint_eps_ch
-do i = 3, constraint_max
-  write(uto,format6) input_names(41-3+i), constraint_switch(i), &
-                                          constraint_read_ch(i)
+do i = 3, constraint_types
+  if ( constraint_switch(i) < 2 ) then 
+    write(uto,format6) input_names(38+i), constraint_switch(i), &
+                       constraint_read_ch(i,1)
+  else
+    write(uto,format6) input_names(38+i), constraint_switch(i), &
+                       constraint_read_ch(i,1), constraint_read_ch(i,2)
+  endif
 enddo
 print*,' '
 
@@ -393,7 +402,7 @@ subroutine check_input(iter_max,iter_write,iter_print)
 
 integer, intent(in) :: iter_max, iter_write, iter_print
 integer :: i, isum, ierror
-integer, dimension(constraint_max) :: switch_check=0
+integer, dimension(constraint_types) :: switch_check=0
 real(r64) :: integerness
 !cmpi integer :: ierr=0
 
@@ -584,7 +593,12 @@ endif
 !!! Constraints
 !!!
 
-where ((constraint_switch /= 0) .and. (constraint_switch /= 1)) switch_check = 1
+where ((constraint_switch < 0) .and. (constraint_switch > 2)) switch_check = 1
+
+do i = 17, constraint_types
+ if ( constraint_switch(i) > 1 ) switch_check(i) = 1
+enddo
+
 isum = sum(switch_check)
 
 if ( (enforce_NZ < 0) .or. (enforce_NZ > 1) ) then
@@ -620,7 +634,7 @@ endif
 if ( isum /= 0 ) then
   ierror = ierror + 1
   print "(a,1i1,a)", "The flags to switch on/off the constraints & 
-        &(constraint_switch) should be 0 or 1."
+        &(constraint_switch) should be 0, 1 or 2 (only multipoles)."
 endif
 !cmpi endif 
 

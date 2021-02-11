@@ -46,16 +46,9 @@ complex(r64) :: rot_over,  & ! overlap
                 rot_neut,  & ! neutron number
                 rot_prot2, & ! proton variance
                 rot_neut2, & ! neutron variance
-                rot_amj(3),   & ! angular momentum J_i (1=x, 2=y, 3=z)
-                rot_amj2(3),  & ! angular momentum J_i^2 (1=x, 2=y, 3=z) 
-                rot_q1p(0:1), & ! multipole Q1m (protons) 
-                rot_q1n(0:1), & !     "     Q1m (neutrons)
-                rot_q2p(0:2), & !     "     Q2m (protons) 
-                rot_q2n(0:2), & !     "     Q2m (neutrons)
-                rot_q3p(0:3), & !     "     Q3m (protons) 
-                rot_q3n(0:3), & !     "     Q3m (neutrons)
-                rot_q4p(0:4), & !     "     Q4m (protons) 
-                rot_q4n(0:4)    !     "     Q4m (neutrons)
+                rot_amj(3),  & ! angular momentum J_i (1=x, 2=y, 3=z)
+                rot_amj2(3), & ! angular momentum J_i^2 (1=x, 2=y, 3=z) 
+                rot_Qlm(3,0:4,4) ! multipole Qlm (1=p,2=n,3=a), m, l
 complex(r64), dimension(12) :: rot_ecomp ! "components" of the rotated energy    
 complex(r64), dimension(:,:), allocatable :: rot_occnum, & ! occupation numbers
                                              rot_H20, & ! Quantities for the
@@ -71,16 +64,9 @@ complex(r64) :: pnp_over,  & ! overlap
                 pnp_neut,  & ! neutron number
                 pnp_prot2, & ! proton variance
                 pnp_neut2, & ! neutron variance
-                pnp_amj(3),   & ! angular momentum J_i (1=x, 2=y, 3=z)
-                pnp_amj2(3),  & ! angular momentum J_i^2 (1=x, 2=y, 3=z) 
-                pnp_q1p(0:1), & ! multipole Q1m (protons) 
-                pnp_q1n(0:1), & !     "     Q1m (neutrons)
-                pnp_q2p(0:2), & !     "     Q2m (protons) 
-                pnp_q2n(0:2), & !     "     Q2m (neutrons)
-                pnp_q3p(0:3), & !     "     Q3m (protons) 
-                pnp_q3n(0:3), & !     "     Q3m (neutrons)
-                pnp_q4p(0:4), & !     "     Q4m (protons) 
-                pnp_q4n(0:4)    !     "     Q4m (neutrons)
+                pnp_amj(3),  & ! angular momentum J_i (1=x, 2=y, 3=z)
+                pnp_amj2(3), & ! angular momentum J_i^2 (1=x, 2=y, 3=z) 
+                pnp_Qlm(3,0:4,4) ! multipole Qlm (1=p,2=n,3=a), m, l
 complex(r64), dimension(12) :: pnp_ecomp ! "components" of the projected energy  
 complex(r64), dimension(:,:), allocatable :: pnp_occnum, & ! occupation numbers
                                              pnp_H20, & ! Quantities for the
@@ -219,7 +205,8 @@ real(r64) :: phip, phin, ovac0
 real(r64), dimension(:), allocatable :: voveru0
 complex(r64) :: weip, wein, amjx_p, amjx_n, amjy_p, amjy_n, amjz_p, amjz_n
 complex(r64), dimension(ndim,ndim) :: bogo_zU0bar, bogo_zV0bar, & 
-                                      bogo_zU0tilde, bogo_zV0tilde, ROTG 
+                                      bogo_zU0tilde, bogo_zV0tilde, ROTG
+complex(r64), dimension(ndim**2) :: Qlm
 
 !!! Initialization: sets most gauge-dependent quantity to zero
 call reset_pnp(iopt)
@@ -336,41 +323,25 @@ do nangle = nangle_min, nangle_max
                                        zone*angumome_Jz,zone*angumome_Jz2, &
                                        rot_amj2(3),ndim)
     
-    !!! Q1m
-    call calculate_expectval_obo_cplx(dens_rhoLR,zone*multipole_Q10, &
-                                      rot_q1p(0),rot_q1n(0),ndim)
-    call calculate_expectval_obo_cplx(dens_rhoLR,zone*multipole_Q11, &
-                                      rot_q1p(1),rot_q1n(1),ndim)
+    !!! Multipole Qlm
+    do i = 1, 4
+      do j = 0, i
     
-    !!! Q2m
-    call calculate_expectval_obo_cplx(dens_rhoLR,zone*multipole_Q20, &
-                                      rot_q2p(0),rot_q2n(0),ndim)
-    call calculate_expectval_obo_cplx(dens_rhoLR,zone*multipole_Q21, &
-                                      rot_q2p(1),rot_q2n(1),ndim)
-    call calculate_expectval_obo_cplx(dens_rhoLR,zone*multipole_Q22, &
-                                      rot_q2p(2),rot_q2n(2),ndim)
-  
-    !!! Q3m
-    call calculate_expectval_obo_cplx(dens_rhoLR,zone*multipole_Q30, &
-                                      rot_q3p(0),rot_q3n(0),ndim)
-    call calculate_expectval_obo_cplx(dens_rhoLR,zone*multipole_Q31, &
-                                      rot_q3p(1),rot_q3n(1),ndim)
-    call calculate_expectval_obo_cplx(dens_rhoLR,zone*multipole_Q32, &
-                                      rot_q3p(2),rot_q3n(2),ndim)
-    call calculate_expectval_obo_cplx(dens_rhoLR,zone*multipole_Q33, &
-                                      rot_q3p(3),rot_q3n(3),ndim)
-  
-    !!! Q4m
-    call calculate_expectval_obo_cplx(dens_rhoLR,zone*multipole_Q40, &
-                                      rot_q4p(0),rot_q4n(0),ndim)
-    call calculate_expectval_obo_cplx(dens_rhoLR,zone*multipole_Q41, &
-                                      rot_q4p(1),rot_q4n(1),ndim)
-    call calculate_expectval_obo_cplx(dens_rhoLR,zone*multipole_Q42, &
-                                      rot_q4p(2),rot_q4n(2),ndim)
-    call calculate_expectval_obo_cplx(dens_rhoLR,zone*multipole_Q43, &
-                                      rot_q4p(3),rot_q4n(3),ndim)
-    call calculate_expectval_obo_cplx(dens_rhoLR,zone*multipole_Q44, &
-                                      rot_q4p(4),rot_q4n(4),ndim)
+        if ( i == 1 ) then 
+          Qlm(:) = zone * (multipole_Q1m(:,1,j) + multipole_Q1m(:,2,j))
+        elseif ( i == 2 ) then 
+          Qlm(:) = zone * (multipole_Q2m(:,1,j) + multipole_Q2m(:,2,j))
+        elseif ( i == 3 ) then 
+          Qlm(:) = zone * (multipole_Q3m(:,1,j) + multipole_Q3m(:,2,j))
+        else
+          Qlm(:) = zone * (multipole_Q4m(:,1,j) + multipole_Q4m(:,2,j))
+        endif 
+    
+        call calculate_expectval_obo_cplx(dens_rhoLR,Qlm,rot_Qlm(1,j,i), &
+                                          rot_Qlm(2,j,i),ndim)
+        rot_Qlm(3,j,i) = rot_Qlm(1,j,i) + rot_Qlm(2,j,i)
+      enddo
+    enddo
   
     !!! radius square      
     call calculate_expectval_obo_cplx(dens_rhoLR,zone*radius_r2,rot_ra2p, &
@@ -426,14 +397,7 @@ else
   pnp_ra2n = zzero  
   pnp_amj = zzero
   pnp_amj2 = zzero
-  pnp_q1p = zzero
-  pnp_q1n = zzero
-  pnp_q2p = zzero
-  pnp_q2n = zzero
-  pnp_q3p = zzero
-  pnp_q3n = zzero
-  pnp_q4p = zzero
-  pnp_q4n = zzero
+  pnp_Qlm = zzero
   pnp_occnum = zzero
   pnp_ecomp = zzero
 endif
@@ -479,14 +443,7 @@ else
   pnp_ra2n = pnp_ra2n + rot_ra2n * factor1
   pnp_amj = pnp_amj + rot_amj * factor1
   pnp_amj2 = pnp_amj2 + rot_amj2 * factor1
-  pnp_q1p = pnp_q1p + rot_q1p * factor1
-  pnp_q1n = pnp_q1n + rot_q1n * factor1
-  pnp_q2p = pnp_q2p + rot_q2p * factor1
-  pnp_q2n = pnp_q2n + rot_q2n * factor1
-  pnp_q3p = pnp_q3p + rot_q3p * factor1
-  pnp_q3n = pnp_q3n + rot_q3n * factor1
-  pnp_q4p = pnp_q4p + rot_q4p * factor1
-  pnp_q4n = pnp_q4n + rot_q4n * factor1
+  pnp_Qlm = pnp_Qlm + rot_Qlm * factor1
   pnp_occnum = pnp_occnum + rot_occnum * factor1
   pnp_ecomp = pnp_ecomp + rot_ecomp * factor1
 endif
@@ -509,9 +466,7 @@ end subroutine sum_gauge
 !cmpi complex(r64) :: pnp_over_red, pnp_ener_red, pnp_pari_red, pnp_ra2p_red, &
 !cmpi                 pnp_ra2n_red, pnp_prot_red, pnp_neut_red, pnp_prot2_red, &
 !cmpi                 pnp_neut2_red, pnp_amj_red(3), pnp_amj2_red(3),  &
-!cmpi                 pnp_q1p_red(0:1), pnp_q1n_red(0:1), pnp_q2p_red(0:2), &
-!cmpi                 pnp_q2n_red(0:2), pnp_q3p_red(0:3), pnp_q3n_red(0:3), &
-!cmpi                 pnp_q4p_red(0:4), pnp_q4n_red(0:4)   
+!cmpi                 pnp_Qlm_red(3,0:4,4) 
 !cmpi complex(r64), dimension(12) :: pnp_ecomp_red
 !cmpi complex(r64), dimension(:,:), allocatable :: pnp_occnum_red, pnp_H20_red, &
 !cmpi                                              pnp_A_red, pnp_AH20_red
@@ -563,21 +518,7 @@ end subroutine sum_gauge
 !cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
 !cmpi    call mpi_reduce(pnp_amj2,pnp_amj2_red,3,mpi_double_complex, &
 !cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
-!cmpi    call mpi_reduce(pnp_q1p,pnp_q1p_red,2,mpi_double_complex, &
-!cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
-!cmpi    call mpi_reduce(pnp_q1n,pnp_q1n_red,2,mpi_double_complex, &
-!cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
-!cmpi    call mpi_reduce(pnp_q2p,pnp_q2p_red,3,mpi_double_complex, &
-!cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
-!cmpi    call mpi_reduce(pnp_q2n,pnp_q2n_red,3,mpi_double_complex, &
-!cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
-!cmpi    call mpi_reduce(pnp_q3p,pnp_q3p_red,4,mpi_double_complex, &
-!cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
-!cmpi    call mpi_reduce(pnp_q3n,pnp_q3n_red,4,mpi_double_complex, &
-!cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
-!cmpi    call mpi_reduce(pnp_q4p,pnp_q4p_red,5,mpi_double_complex, &
-!cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
-!cmpi    call mpi_reduce(pnp_q4n,pnp_q4n_red,5,mpi_double_complex, &
+!cmpi    call mpi_reduce(pnp_Qlm,pnp_Qlm_red,60,mpi_double_complex, &
 !cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
 !cmpi    call mpi_reduce(pnp_occnum,pnp_occnum_red,ndim2,mpi_double_complex, & 
 !cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
@@ -587,14 +528,7 @@ end subroutine sum_gauge
 !cmpi    pnp_ra2n = pnp_ra2n_red
 !cmpi    pnp_amj = pnp_amj_red
 !cmpi    pnp_amj2 = pnp_amj2_red
-!cmpi    pnp_q1p = pnp_q1p_red
-!cmpi    pnp_q1n = pnp_q1n_red
-!cmpi    pnp_q2p = pnp_q2p_red
-!cmpi    pnp_q2n = pnp_q2n_red
-!cmpi    pnp_q3p = pnp_q3p_red
-!cmpi    pnp_q3n = pnp_q3n_red
-!cmpi    pnp_q4p = pnp_q4p_red
-!cmpi    pnp_q4n = pnp_q4n_red
+!cmpi    pnp_Qlm = pnp_Qlm_red
 !cmpi    pnp_occnum = pnp_occnum_red
 !cmpi    pnp_ecomp = pnp_ecomp_red
 !cmpi  endif
@@ -1044,17 +978,17 @@ subroutine print_results(Mphip,Mphin)
 integer, intent(in) :: Mphip, Mphin
 integer :: i, j, ialloc=0
 real(r64) :: over, pari, ra2p, ra2n, ra2a, ra2ch, prot, neut, prot2, neut2, & 
-             amj(3), amj2(3), q1p(0:1), q1n(0:1), q1a(0:1), q2p(0:2), q2n(0:2),&
-             q2a(0:2), q3p(0:3), q3n(0:3), q3a(0:3), q4p(0:4), q4n(0:4), & 
-             q4a(0:4), beta1a(0:1), beta2a(0:2), beta3a(0:3), beta4a(0:4), &
-             beta, gamm, & 
-             P_T00_J1m1, P_T00_J10, P_T00_J1p1, &
+             amj(3), amj2(3), Qlm(3,0:4,4), betalm(3,0:4,4), betaT(3), &
+             gammT(3), P_T00_J1m1, P_T00_J10, P_T00_J1p1, &
              P_T1m1_J00, P_T10_J00, P_T1p1_J00, ener_0b, ener_1b_p, ener_1b_n, & 
              ener_2bPH_pp, ener_2bPH_pn, ener_2bPH_np, ener_2bPH_nn,&
              ener_2bPP_pp, ener_2bPP_pn, ener_2bPP_np, ener_2bPP_nn, &
              energy_p, energy_n
 real(r64), dimension(:,:), allocatable, save :: occnum_pnp
 real(r64), dimension(:,:), allocatable :: occnum
+character(1) :: i_ch, j_ch
+character(4) :: Qlm_ch
+character(7) :: betalm_ch
 character(12) :: label_ch  
 character(19) :: filename  
 character(len=*), parameter :: format1 = "(1a20,2f12.7)", &                              
@@ -1062,8 +996,8 @@ character(len=*), parameter :: format1 = "(1a20,2f12.7)", &
                                format3 = "(1a9,2f13.6,13x,1f13.6)", &
                                format4 = "(1a9,4f13.6)", &
                                format5 = "(1a20,1a12,/)", &                              
-                               format6 = "(1a3,4f12.6)", &
-                               format7 = "(1a7,1f12.6)", &
+                               format6 = "(1a4,3f12.6)", &
+                               format7 = "(1a7,3f12.6)", &
                                format8 = "(1a5,3f12.6)", &
                                format9 = "(1a5,12x,1f12.6)", &
                                format10 = "(1a13,3f12.6)", &
@@ -1156,52 +1090,49 @@ write(uto,format4)  'Full H   ', (ener_1b_p + ener_2bPH_pp + ener_2bPP_pp), &
 !!! Multipole deformation
 !!!
 print '(/,"MULTIPOLE DEFORMATIONS",/,22("="),//, &
-       &"Qlm",5x,"Protons",4x,"Neutrons",5x,"Total",7x,"Beta_lm"/,51("-"))'
+       &"Q_lm",5x,"Protons",4x,"Neutrons",5x,"Nucleons",/,41("-"))'
 
-q1p = real( pnp_q1p / pnp_over )
-q1n = real( pnp_q1n / pnp_over )
-q2p = real( pnp_q2p / pnp_over )
-q2n = real( pnp_q2n / pnp_over )
-q3p = real( pnp_q3p / pnp_over )
-q3n = real( pnp_q3n / pnp_over )
-q4p = real( pnp_q4p / pnp_over )
-q4n = real( pnp_q4n / pnp_over )
-q1a = q1p + q1n
-q2a = q2p + q2n
-q3a = q3p + q3n
-q4a = q4p + q4n
+Qlm = real( pnp_Qlm / pnp_over )
 
-beta1a = q1a * coeff_betalm(1)
-beta2a = q2a * coeff_betalm(2)
-beta3a = q3a * coeff_betalm(3)
-beta4a = q4a * coeff_betalm(4)
+do i = 1, 4
+  write(i_ch,'(1i1)') i
+  do j = 0, i
+    write(j_ch,'(1i1)') j
+    Qlm_ch = "Q_" // i_ch // j_ch
+    write(uto,format6) Qlm_ch, Qlm(1,j,i), Qlm(2,j,i), Qlm(3,j,i)
+  enddo
+enddo
 
-write(uto,format6) 'Q10', q1p(0), q1n(0), q1a(0), beta1a(0)
-write(uto,format6) 'Q11', q1p(1), q1n(1), q1a(1), beta1a(1)
-write(uto,format6) 'Q20', q2p(0), q2n(0), q2a(0), beta2a(0)
-write(uto,format6) 'Q21', q2p(1), q2n(1), q2a(1), beta2a(1)
-write(uto,format6) 'Q22', q2p(2), q2n(2), q2a(2), beta2a(2)
-write(uto,format6) 'Q30', q3p(0), q3n(0), q3a(0), beta3a(0)
-write(uto,format6) 'Q31', q3p(1), q3n(1), q3a(1), beta3a(1)
-write(uto,format6) 'Q32', q3p(2), q3n(2), q3a(2), beta3a(2)
-write(uto,format6) 'Q33', q3p(3), q3n(3), q3a(3), beta3a(3)
-write(uto,format6) 'Q40', q4p(0), q4n(0), q4a(0), beta4a(0)
-write(uto,format6) 'Q41', q4p(1), q4n(1), q4a(1), beta4a(1)
-write(uto,format6) 'Q42', q4p(2), q4n(2), q4a(2), beta4a(2)
-write(uto,format6) 'Q43', q4p(3), q4n(3), q4a(3), beta4a(3)
-write(uto,format6) 'Q44', q4p(4), q4n(4), q4a(4), beta4a(4)
+!!! Beta parameters
+do i = 1, 4
+  do j = 0, i
+    betalm(:,j,i) = Qlm(:,j,i) * coeff_betalm(:,i)
+  enddo
+enddo
 
-beta = sqrt( q2a(0)**2 + 2.0d0*(q2a(2)**2) ) * coeff_betalm(2)
-gamm = atan( sqrt(2.0d0) * abs(q2a(2)) / abs(q2a(0)) )
+print '(/,"Beta_lm",5x,"Protons",4x,"Neutrons",5x,"Nucleons",/,44("-"))'
+do i = 1, 4
+  write(i_ch,'(1i1)') i
+  do j = 0, i
+    write(j_ch,'(1i1)') j
+    betalm_ch = "Beta_" // i_ch // j_ch 
+    write(uto,format7) betalm_ch, betalm(1,j,i), betalm(2,j,i), betalm(3,j,i)
+  enddo
+enddo
 
-if ( abs(q2a(0)) <= epsilon0 ) gamm = 0.d0
-if ( (q2a(0) >  0.d0) .and. (q2a(2) <  0.d0) )  gamm = 2.d0*pi - gamm
-if ( (q2a(0) <  0.d0) .and. (q2a(2) >= 0.d0) )  gamm = pi - gamm
-if ( (q2a(0) <  0.d0) .and. (q2a(2) <  0.d0) )  gamm = pi + gamm
+!!! Triaxial parameters
+betaT(:) = sqrt( Qlm(:,0,2)**2 + 2.0d0*(Qlm(:,2,2)**2) ) * coeff_betalm(:,2)
+gammT(:) = atan( sqrt(2.0d0) * abs( Qlm(:,2,2) / Qlm(:,0,2) ) )
 
-print '(/,"Triaxial parameters",/,19("-"))'
-write(uto,format7) 'Beta   ', beta
-write(uto,format7) 'Gamma  ', gamm * 180.0/pi
+where ( Qlm(:,0,2) <= epsilon0 ) gammT = 0.d0
+where ( (Qlm(:,0,2) > 0.d0) .and. (Qlm(:,2,2) <  0.d0) ) gammT = 2.d0*pi - gammT
+where ( (Qlm(:,0,2) < 0.d0) .and. (Qlm(:,2,2) >= 0.d0) ) gammT = pi - gammT
+where ( (Qlm(:,0,2) < 0.d0) .and. (Qlm(:,2,2) <  0.d0) ) gammT = pi + gammT
+gammT = gammT * 180.0/pi
+
+print '(/,"Triaxial",4x,"Protons",4x,"Neutrons",5x,"Nucleons",/,44("-"))'
+write(uto,format7) 'Beta  ', betaT(1), betaT(2), betaT(3)
+write(uto,format7) 'Gamma ', gammT(1), gammT(2), gammT(3)
 
 !!!
 !!! Radius RMS

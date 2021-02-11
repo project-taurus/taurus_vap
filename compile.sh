@@ -44,8 +44,9 @@ if [ $FC = "ifort" ] || [ $FC = "mpiifort" ]; then
   OPT="-O3 -mkl" 
 elif [ $FC = "gfortran" ] || [ $FC = "mpif90" ]; then
   LIB="-L/usr/lib -llapack -lblas"
-  #OPT="-O3 -Wall -Wcompare-reals -Wno-maybe-uninitialized"  # To check the warnings
   OPT="-O3" 
+  #OPT="-O3 -Wall -Wcompare-reals -Wno-maybe-uninitialized"  # To check the warnings
+  OPT="-O3 -Wall -Wno-maybe-uninitialized"  # To check the warnings
 else
   echo "Wrong compiler ('gfortran', 'ifort', 'mpif90' or 'mpiifort'). Exiting."
   exit

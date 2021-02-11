@@ -1,14 +1,14 @@
 Interaction
 -----------
-Master name hamil. files      usdb
+Master name hamil. files      no_chi2bM3A_srg0800_eMax06_e3Max14_hwHO020
 Center-of-mass correction     0
-Read reduced hamiltonian      0
+Read reduced hamiltonian      1
 No. of MPI proc per H team    0
 
 Particle Number
 ---------------
-Number of active protons      4.00
-Number of active neutrons     4.00  
+Number of active protons      8.00
+Number of active neutrons     8.00  
 No. of gauge angles protons   1
 No. of gauge angles neutrons  1
 
@@ -24,7 +24,7 @@ Include all empty sp states   0
 
 Iterative Procedure
 -------------------
-Maximum no. of iterations     300
+Maximum no. of iterations     10 
 Step intermediate wf writing  0
 More intermediate printing    0
 Type of gradient              1
@@ -35,30 +35,30 @@ Tolerance for gradient        1.00E-04
 Constraints             
 -----------
 Force constraint N/Z          1
-Constraint beta_lm            2
+Constraint beta_lm            0
 Pair coupling scheme          1
 Tolerance for constraints     1.000E-06
-Constraint multipole Q10      0 0.000
-Constraint multipole Q11      0 0.000
-Constraint multipole Q20      0 0.000
-Constraint multipole Q21      1 0.000
-Constraint multipole Q22      0 00.00
-Constraint multipole Q30      0 0.000
-Constraint multipole Q31      0 0.000
-Constraint multipole Q32      0 0.000
-Constraint multipole Q33      0 0.000
-Constraint multipole Q40      0 0.000
-Constraint multipole Q41      0 0.000
-Constraint multipole Q42      0 0.000
-Constraint multipole Q43      0 0.000
-Constraint multipole Q44      0 0.000
-Constraint ang. mom. Jx       0 0.000
-Constraint ang. mom. Jy       0 0.000
-Constraint ang. mom. Jz       0 0.000
-Constraint pair P_T00_J10     0 0.000
-Constraint pair P_T00_J1m1    0 0.000
-Constraint pair P_T00_J1p1    0 0.000
-Constraint pair P_T10_J00     0 0.000
-Constraint pair P_T1m1_J00    0 0.000
-Constraint pair P_T1p1_J00    0 0.000
-Constraint field Delta        0 0.000
+Constraint multipole Q10      2   0.000   0.000
+Constraint multipole Q11      0   0.000   0.000
+Constraint multipole Q20      0   0.000   0.000
+Constraint multipole Q21      1   0.000   0.000
+Constraint multipole Q22      0   0.000   0.000
+Constraint multipole Q30      0   0.000   0.000
+Constraint multipole Q31      0   0.000   0.000
+Constraint multipole Q32      0   0.000   0.000
+Constraint multipole Q33      0   0.000   0.000
+Constraint multipole Q40      0   0.000   0.000
+Constraint multipole Q41      0   0.000   0.000
+Constraint multipole Q42      0   0.000   0.000
+Constraint multipole Q43      0   0.000   0.000
+Constraint multipole Q44      0   0.000   0.000
+Constraint ang. mom. Jx       0   0.000
+Constraint ang. mom. Jy       0   0.000
+Constraint ang. mom. Jz       0   0.000
+Constraint pair P_T00_J10     0   0.000
+Constraint pair P_T00_J1m1    0   0.000
+Constraint pair P_T00_J1p1    0   0.000
+Constraint pair P_T10_J00     0   0.000
+Constraint pair P_T1m1_J00    0   0.000
+Constraint pair P_T1p1_J00    0   0.000
+Constraint field Delta        0   0.000

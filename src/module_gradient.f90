@@ -462,18 +462,20 @@ neut2 = abs(neut2 - neut**2)
 
 
 if ( iter_print == 1 ) then
-  call calculate_expectval_obo(dens_rhoRR,multipole_Q20,q20_p,q20_n,HOsp_dim)
-  call calculate_expectval_obo(dens_rhoRR,multipole_Q22,q22_p,q22_n,HOsp_dim)
+  call calculate_expectval_obo(dens_rhoRR,multipole_Q2m(1:HOsp_dim**2,1,0) + &
+                          multipole_Q2m(1:HOsp_dim**2,2,0),q20_p,q20_n,HOsp_dim)
+  call calculate_expectval_obo(dens_rhoRR,multipole_Q2m(1:HOsp_dim**2,1,2) + &
+                          multipole_Q2m(1:HOsp_dim**2,2,2),q22_p,q22_n,HOsp_dim)
   q20_a = q20_p + q20_n
   q22_a = q22_p + q22_n
 
-  beta = sqrt( q20_a**2 + 2.0d0*(q22_a**2) ) * coeff_betalm(2)
+  beta = sqrt( q20_a**2 + 2.0d0*(q22_a**2) ) * coeff_betalm(2,3)
   gamm = atan( sqrt(2.d0) * abs(q22_a) / abs(q20_a) )
 
   if (  abs(q20_a) <= epsilon0 ) gamm = 0.d0
-  if ( (q20_a >  0.d0) .and. (q22_a <  0.d0) )  gamm = 2.d0*pi - gamm
-  if ( (q20_a <  0.d0) .and. (q22_a >= 0.d0) )  gamm = pi - gamm
-  if ( (q20_a <  0.d0) .and. (q22_a <  0.d0) )  gamm = pi + gamm
+  if ( (q20_a > 0.d0) .and. (q22_a <  0.d0) )  gamm = 2.d0*pi - gamm
+  if ( (q20_a < 0.d0) .and. (q22_a >= 0.d0) )  gamm = pi - gamm
+  if ( (q20_a < 0.d0) .and. (q22_a <  0.d0) )  gamm = pi + gamm
   gamm = gamm * 180.0/pi
 endif 
 
