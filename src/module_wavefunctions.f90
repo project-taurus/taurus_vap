@@ -671,7 +671,7 @@ end subroutine read_wavefunction
 subroutine write_wavefunction(iopt,ener)           
 
 integer, intent(in) :: iopt
-real(r64), intent(in), optional :: ener 
+real(r64), intent(in) :: ener 
 integer :: i, j
 integer(i64) :: iener, irand
 real(r64) :: absener, xrand 
@@ -681,7 +681,7 @@ character(19) :: filename
 logical :: is_binary
 
 !!! Determines the label of the state based on a random number and the 
-!!! particle-number projected energy. 
+!!! particle-number projected energy.
 absener = abs(ener)
 
 do while (absener >= one) 

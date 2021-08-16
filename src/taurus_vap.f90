@@ -116,7 +116,7 @@ do iter = 1, iter_max
   if ( iter == iter_max ) then
     print '(/,"Maximum number of iterations reached")' 
   elseif ( (iter_write /= 0) .and. (mod(iter,max(1,iter_write)) == 0) ) then
-    call write_wavefunction(1)
+    call write_wavefunction(1,real(pnp_ener/pnp_over))
   endif
   !cmpi endif
 
