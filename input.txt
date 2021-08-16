@@ -40,9 +40,9 @@ Pair coupling scheme          1
 Tolerance for constraints     1.000E-06
 Constraint multipole Q10      0 0.000
 Constraint multipole Q11      0 0.000
-Constraint multipole Q20      0 0.000
+Constraint multipole Q20      0 0.200
 Constraint multipole Q21      1 0.000
-Constraint multipole Q22      0 00.00
+Constraint multipole Q22      0 20.00
 Constraint multipole Q30      0 0.000
 Constraint multipole Q31      0 0.000
 Constraint multipole Q32      0 0.000

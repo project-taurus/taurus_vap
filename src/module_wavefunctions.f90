@@ -657,28 +657,43 @@ end subroutine read_wavefunction
 ! - "final_wf.bin/txt"        after  the iterative procedure                   !
 ! - "intermediate_wf.bin/txt" during  "      "        "                        !
 ! The wave function is either written in a binary (.bin) or text (.txt) file.  !
-! Before being written, the wavefunctions is being assigned a random integer   !
-! label between 0 and 10^12 to identify uniquely the state (used in the GCM).  !
+! Before being written, the wavefunctions is being assigned a label, which is  !
+! an integer between 0 and 10^15 to identify uniquely the state (used in       !
+! the GCM).                                                                    !
 !                                                                              !
 ! seed_text = 0 or 3 writes a binary file                                      !
 !           = 1 or 2   "    " text    "                                        !
 !                                                                              !
 ! Input: iopt = 0 writes "final_wf.bin/txt"                                    !
 !             = 1   "    "intermediate_wf.bin/txt"                             !
+!        ener = particle-number projected energy (optional)                    !
 !------------------------------------------------------------------------------!
-subroutine write_wavefunction(iopt)           
+subroutine write_wavefunction(iopt,ener)           
 
 integer, intent(in) :: iopt
+real(r64), intent(in), optional :: ener 
 integer :: i, j
-real(r64) :: xrand 
+integer(i64) :: iener, irand
+real(r64) :: absener, xrand 
 character(4) :: filetype  
 character(11) :: fileform  
 character(19) :: filename  
 logical :: is_binary
 
-!!! Determines a random integer to label the state
+!!! Determines the label of the state based on a random number and the 
+!!! particle-number projected energy. 
+absener = abs(ener)
+
+do while (absener >= one) 
+  absener = absener / 10.d0
+enddo
+
 call random_number(xrand)                                                
-bogo_label = 1 + int(xrand*(1.0d12),i64)
+
+iener = int(absener*(1.0d9),i64)
+irand = int(xrand*(1.0d6),i64)
+
+bogo_label = (10**6) * iener + irand
 
 !!! Opens the file depending if intermediate or final writing and if binary
 !!! or text writing

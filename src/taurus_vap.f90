@@ -135,7 +135,7 @@ call diagonalize_hsp_and_H11(1,HOsp_dim)
 
 !!! Final writing and printing (projected and unprojected)
 !cmpi if ( paral_myrank == 0 ) then        
-call write_wavefunction(0)
+call write_wavefunction(0,real(pnp_ener/pnp_over))
 !cmpi endif
 if ( max(proj_Mphip,proj_Mphin) > 1 ) then
   call print_results(proj_Mphip,proj_Mphin)
