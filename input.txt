@@ -17,7 +17,7 @@ Wave Function
 Type of seed wave function    0 
 Number of QP to block         0
 No symmetry simplifications   0
-Seed random number generation 0  
+Seed random number generation 5
 Read/write wf file as text    0
 Cutoff occupied s.-p. states  0.00E-00
 Include all empty sp states   0

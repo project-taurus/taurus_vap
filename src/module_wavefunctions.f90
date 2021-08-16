@@ -658,7 +658,7 @@ end subroutine read_wavefunction
 ! - "intermediate_wf.bin/txt" during  "      "        "                        !
 ! The wave function is either written in a binary (.bin) or text (.txt) file.  !
 ! Before being written, the wavefunctions is being assigned a label, which is  !
-! an integer between 0 and 10^15 to identify uniquely the state (used in       !
+! an integer between 0 and 10^18 to identify uniquely the state (used in       !
 ! the GCM).                                                                    !
 !                                                                              !
 ! seed_text = 0 or 3 writes a binary file                                      !
@@ -673,8 +673,7 @@ subroutine write_wavefunction(iopt,ener)
 integer, intent(in) :: iopt
 real(r64), intent(in) :: ener 
 integer :: i, j
-integer(i64) :: iener, irand
-real(r64) :: absener, xrand 
+real(r64) :: absener
 character(4) :: filetype  
 character(11) :: fileform  
 character(19) :: filename  
@@ -688,12 +687,7 @@ do while (absener >= one)
   absener = absener / 10.d0
 enddo
 
-call random_number(xrand)                                                
-
-iener = int(absener*(1.0d9),i64)
-irand = int(xrand*(1.0d6),i64)
-
-bogo_label = (10**6) * iener + irand
+bogo_label = int(absener*(1.0d18),i64)
 
 !!! Opens the file depending if intermediate or final writing and if binary
 !!! or text writing

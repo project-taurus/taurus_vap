@@ -989,13 +989,13 @@ real(r64), dimension(:,:), allocatable :: occnum
 character(1) :: i_ch, j_ch
 character(4) :: Qlm_ch
 character(7) :: betalm_ch
-character(15) :: label_ch  
+character(18) :: label_ch  
 character(19) :: filename  
 character(len=*), parameter :: format1 = "(1a20,2f12.7)", &                              
                                format2 = "(1a9,39x,1f13.6)", &
                                format3 = "(1a9,2f13.6,13x,1f13.6)", &
                                format4 = "(1a9,4f13.6)", &
-                               format5 = "(1a20,1a15,/)", &                              
+                               format5 = "(1a20,1a18,/)", &                              
                                format6 = "(1a4,3f12.6)", &
                                format7 = "(1a7,3f12.6)", &
                                format8 = "(1a5,3f12.6)", &
@@ -1032,7 +1032,7 @@ prot2 = real( pnp_prot2 / pnp_over - (pnp_prot / pnp_over)**2 )
 neut2 = real( pnp_neut2 / pnp_over - (pnp_neut / pnp_over)**2 )
 
 if ( max(Mphip, Mphin) == 1 ) then
-  write(label_ch,'(1i15)') bogo_label                                              
+  write(label_ch,'(1i18)') bogo_label                                              
   label_ch = adjustl(label_ch)                                  
   write(uto,format5) 'Label of the state: ',label_ch                        
 endif
