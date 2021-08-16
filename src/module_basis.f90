@@ -16,7 +16,7 @@ MODULE Basis
 !cmpi use Parallelization
 use Constants
 use MathMethods
-use Nucleus, only: valence_Z, valence_N, nucleus_A
+use Nucleus, only: valence_Z, valence_N, nucleus_Z, nucleus_N, nucleus_A
 
 implicit none
 public

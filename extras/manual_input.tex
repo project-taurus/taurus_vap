@@ -31,7 +31,7 @@
 % 
 \begin{center}
  {\LARGE \textbf{\TAURUSvap: Manual for the input file}} \\
- {\large 05/01/2021}
+ {\large 11/02/2021}
 \end{center}
 
 %
@@ -345,6 +345,7 @@ Tolerance for gradient        &1.000E-04 \\
 
 \subsubsection*{Description}
 \begin{center}
+\small
 \begin{tabular}{|c|l|l|}
 \hline
 Line & Format & Data \\
@@ -355,8 +356,9 @@ Line & Format & Data \\
  \textbf{38}   & 1a30, 1i1     & \tt input\_names(38), opt\_betalm     \\
  \textbf{39}   & 1a30, 1i1     & \tt input\_names(39), pairs\_scheme   \\
  \textbf{40}   & 1a30, 1es10.3 & \tt input\_names(40), constraint\_eps \\
- \textbf{41}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(41), constraint\_switch( 3), 1x, constraint\_read( 3) \\
- \textbf{42}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(42), constraint\_switch( 4), 1x, constraint\_read( 4) \\
+ \textbf{41}   & 1a30, 1i1, 1x, 1f8.3, & \tt input\_names(41), constraint\_switch( 3), 1x, constraint\_read( 3,1), \\
+               &            1x, 1f8.3 & \tt                                           1x, constraint\_read( 3,2)  \\
+ %\textbf{42}   & 1a30, 1i1, 1x, 1f8.3, 1x, 1f8.3 & \tt input\_names(42), constraint\_switch( 4), 1x, constraint\_read( 4) \\
 % \textbf{42}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(42), constraint\_switch( 5), 1x, constraint\_read( 5) \\
 % \textbf{43}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(43), constraint\_switch( 6), 1x, constraint\_read( 6) \\
 % \textbf{44}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(44), constraint\_switch( 7), 1x, constraint\_read( 7) \\
@@ -369,7 +371,10 @@ Line & Format & Data \\
 % \textbf{51}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(51), constraint\_switch(14), 1x, constraint\_read(14) \\
 % \textbf{52}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(52), constraint\_switch(15), 1x, constraint\_read(15) \\
 % \textbf{53}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(53), constraint\_switch(16), 1x, constraint\_read(16) \\
-% \textbf{54}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(54), constraint\_switch(17), 1x, constraint\_read(17) \\
+ $\vdots$      & $\hfill \vdots \hfill$ & $\hfill \vdots \hfill$       \\
+ \textbf{53}   & 1a30, 1i1, 1x, 1f8.3, & \tt input\_names(53), constraint\_switch(53), 1x, constraint\_read(16,1), \\
+               &            1x, 1f8.3 & \tt                                           1x, constraint\_read(16,2) \\
+ \textbf{54}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(54), constraint\_switch(17), 1x, constraint\_read(17) \\
 % \textbf{55}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(55), constraint\_switch(18), 1x, constraint\_read(19) \\
 % \textbf{56}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(56), constraint\_switch(19), 1x, constraint\_read(19) \\
 % \textbf{57}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(57), constraint\_switch(20), 1x, constraint\_read(20) \\
@@ -403,8 +408,10 @@ where
   The adjustment will stop after 100 iterations even if the criterion is not met.
 \item \ttt{constraint\_switch(j)}: option to switch on/off the constraint \ttt{j}. \\[0.05cm]
   \ttt{= 0\:} the constraint \ttt{j} is switched off. \\[0.05cm]
-  \ttt{= 1\:} the constraint \ttt{j} is switched on. 
-\item \ttt{constraint\_read(j)}: the expectation value targeted for the constraint \ttt{j}. 
+  \ttt{= 1\:} the constraint \ttt{j} is switched on (global constraint for the nucleons).
+  \ttt{= 2\:} the constraints \ttt{j} are switched on (separate constraints for protons and neutrons). This option is only valid 
+  for the constraints on the multipole moments.
+\item \ttt{constraint\_read(j)}: the expectation value targeted for the constraint \ttt{j}. \\
       Note that if \ttt{constraint\_switch(j) = 0}, this value is not used in the code.
 \end{itemize}
 
@@ -444,6 +451,17 @@ The physical correspondance for the indices \ttt{j} is the following:
 \end{tabular}
 \end{center}
 
+\subsubsection*{Remarks}
+
+\begin{itemize}
+  \item To minimize the contamination coming from motion of the center of mass, the average values of $\tilde{Q}_{10}$ and $\tilde{Q}_{11}$
+  should be constrained to zero, both for protons and neutrons (i.e.\ using \ttt{constraint\_switch(j) = 2}).
+  \item To fix the orientation of the nucleus in the basis, the average value of $\tilde{Q}_{21}$ should be constrained to zero, both for protons and neutrons 
+  (i.e.\ using \ttt{constraint\_switch(j) = 2}).
+  \item When imposing a constraint on states that are exact eigenstates for a related operator, the code may not be able to 
+  solve the system of linear equations to obtain the Lagrange parameters (the system is exactly singular). This is a known problem of the current algorithm.
+  Example: using the constraint $\langle \tilde{Q}_{10} \rangle = 0$ in the model space made of the $sd$-shell (which is parity conserving).
+\end{itemize}
 
 \subsubsection*{Example}
 \begin{center}

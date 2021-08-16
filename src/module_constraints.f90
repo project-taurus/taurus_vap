@@ -24,10 +24,11 @@ use Projection, only: proj_Mphip, proj_Mphin
 implicit none
 
 !!! Number of constraints and options for specific cases
-integer, parameter :: constraint_max=26 ! Maximum number of constraints
+integer, parameter :: constraint_types=26, & ! Number of constraint types     
+                      constraint_max=40      ! Maximum number of constraints
 integer :: constraint_dim=0,  & ! Number of constraints to be applied
            constraint_pair=0, & ! Number of pairing constraints
-           constraint_switch(constraint_max), & ! Activate constraints
+           constraint_switch(constraint_types), & ! Activate constraints
            enforce_NZ, & ! Apply constraint on N and Z even if PNVAP
            opt_betalm    ! Constraint on (beta,gamma) instead of (Q20,Q22)
 
@@ -37,7 +38,7 @@ real(r64), dimension(:), allocatable :: constraint_HO,  & ! Mat. elem. (HO)
                                         constraint_20,  & ! Mat. elem. 20 (QP) 
                                         constraint_11     ! Mat. elem. 11 (QP) 
 real(r64) :: constraint_eps, & ! Tolerance for constraints convergence 
-             constraint_read(constraint_max) ! Values read as inputs
+             constraint_read(constraint_types,2) ! Values read as inputs
 
 !!! Lagrange multipliers                        
 real(r64), dimension(:), allocatable :: lagrange_lambda0, & ! Lag. mult. before
@@ -64,16 +65,16 @@ CONTAINS
 !------------------------------------------------------------------------------!
 subroutine set_constraints
 
-integer :: i, j, ialloc=0
+integer :: i, j, m, n, p, ialloc=0
 integer(i64) :: k
-real(r64) :: constraint_beta, constraint_gamma
+real(r64) :: constraint_beta(2), constraint_gamma(2)
 real(r64), dimension(:), allocatable :: Q
 
 !!! Lifts the constraint on the number of protons if PNVAP and no forcing, or
 !!! if the seed wave function is a Slater determinant without pairing constr.
 if ( ((proj_Mphip > 1) .and. (enforce_NZ == 0)) .or. is_good_Z ) then
   constraint_switch(1) = 0
-  constraint_read(1) = 0.0d0
+  constraint_read(1,1) = 0.0d0
 endif
 
 if ( constraint_switch(1) == 0 ) constraint_dim = constraint_dim - 1
@@ -82,7 +83,7 @@ if ( constraint_switch(1) == 0 ) constraint_dim = constraint_dim - 1
 !!! if the seed wave function is a Slater determinant without pairing constr.
 if ( ((proj_Mphin > 1) .and. (enforce_NZ == 0)) .or. is_good_N ) then
   constraint_switch(2) = 0
-  constraint_read(2) = 0.0d0
+  constraint_read(2,1) = 0.0d0
 endif
 
 if ( constraint_switch(2) == 0 ) constraint_dim = constraint_dim - 1
@@ -108,73 +109,107 @@ lagrange_lambda1 = zero
 Lchol = zero
 
 !!! If opt_betalm > 0, calculates the coresponding value of Qlm
-constraint_beta  = constraint_read(5)
-constraint_gamma = constraint_read(7) * pi / 180.d0
+constraint_beta(:)  = constraint_read(5,:)
+constraint_gamma(:) = constraint_read(7,:) * pi / 180.d0
                              
 if ( opt_betalm > 0 ) then                             
-  constraint_read(3) = constraint_read(3) / coeff_betalm(1) 
-  constraint_read(4) = constraint_read(4) / coeff_betalm(1) 
-  constraint_read(5) = constraint_read(5) / coeff_betalm(2) 
-  constraint_read(6) = constraint_read(6) / coeff_betalm(2) 
-  constraint_read(7) = constraint_read(7) / coeff_betalm(2) 
-  constraint_read(8) = constraint_read(8) / coeff_betalm(3) 
-  constraint_read(9) = constraint_read(9) / coeff_betalm(3) 
-  constraint_read(10) = constraint_read(10) / coeff_betalm(3) 
-  constraint_read(11) = constraint_read(11) / coeff_betalm(3) 
-  constraint_read(12) = constraint_read(12) / coeff_betalm(4) 
-  constraint_read(13) = constraint_read(13) / coeff_betalm(4) 
-  constraint_read(14) = constraint_read(14) / coeff_betalm(4) 
-  constraint_read(15) = constraint_read(15) / coeff_betalm(4) 
-  constraint_read(16) = constraint_read(16) / coeff_betalm(4) 
+  m = 2
+  do i = 1, 4
+    do j = 0, i 
+      m = m + 1      
+      p = 2 * kdelta(constraint_switch(m),1)
+      do n = 1, constraint_switch(m)
+        constraint_read(m,n) = constraint_read(m,n) / coeff_betalm(n+p,i)
+      enddo
+    enddo           
+  enddo           
 endif           
                              
 if ( opt_betalm > 1 ) then                             
-  constraint_read(5) = constraint_beta * cos(constraint_gamma) / coeff_betalm(2)
-  constraint_read(7) = constraint_beta * sin(constraint_gamma) / (sqrt(2.d0) &
-                       * coeff_betalm(2))
+  !!! beta triaxial          
+  p = 2 * kdelta(constraint_switch(5),1)
+  do n = 1, constraint_switch(5)
+    constraint_read(5,n) = constraint_beta(n) * cos(constraint_gamma(n)) &
+                           / coeff_betalm(n+p,2)
+  enddo
+                             
+  !!! gamma triaxial         
+  p = 2 * kdelta(constraint_switch(7),1)
+  do n = 1, constraint_switch(7)
+    constraint_read(7,n) = constraint_beta(n) * sin(constraint_gamma(n)) & 
+                           / (sqrt(2.d0) * coeff_betalm(n+p,2))
+  enddo
 endif
 
 !!! Collects all single-particle matrix elements from the different constraints
 j = 0
 
-do i = 1, constraint_max
-  if ( constraint_switch(i) == 1 ) then
+do i = 1, constraint_types
+  do m = 1, constraint_switch(i)
     j = j + 1
     k = (j - 1) * HOsp_dim2 
     if ( (i >= 20) .and. (i < 26) ) constraint_pair = constraint_pair + 1
-   
-    if ( i ==  1 ) Q = partnumb_Z
-    if ( i ==  2 ) Q = partnumb_N
-    if ( i ==  3 ) Q = multipole_Q10
-    if ( i ==  4 ) Q = multipole_Q11
-    if ( i ==  5 ) Q = multipole_Q20
-    if ( i ==  6 ) Q = multipole_Q21
-    if ( i ==  7 ) Q = multipole_Q22
-    if ( i ==  8 ) Q = multipole_Q30
-    if ( i ==  9 ) Q = multipole_Q31
-    if ( i == 10 ) Q = multipole_Q32
-    if ( i == 11 ) Q = multipole_Q33
-    if ( i == 12 ) Q = multipole_Q40
-    if ( i == 13 ) Q = multipole_Q41
-    if ( i == 14 ) Q = multipole_Q42
-    if ( i == 15 ) Q = multipole_Q43
-    if ( i == 16 ) Q = multipole_Q44
-    if ( i == 17 ) Q = angumome_Jx
-    if ( i == 18 ) Q = angumome_Jy
-    if ( i == 19 ) Q = angumome_Jz
-    if ( i == 20 ) Q = pairs_T00_J10
-    if ( i == 21 ) Q = pairs_T00_J1m1
-    if ( i == 22 ) Q = pairs_T00_J1p1
-    if ( i == 23 ) Q = pairs_T10_J00
-    if ( i == 24 ) Q = pairs_T1m1_J00
-    if ( i == 25 ) Q = pairs_T1p1_J00
-    if ( i == 26 ) factor_delta = constraint_read(i)
+  
+    select case (i)
+      case (1)
+        Q = partnumb_Z
+      case (2)
+        Q = partnumb_N
+      case (3,4)
+        n = i - 3
+        if ( constraint_switch(i) == 1 ) then
+          Q(:) = multipole_Q1m(:,1,n) + multipole_Q1m(:,2,n)
+        else
+          Q(:) = multipole_Q1m(:,m,n)
+        endif
+      case (5,6,7)
+        n = i - 5
+        if ( constraint_switch(i) == 1 ) then
+          Q(:) = multipole_Q2m(:,1,n) + multipole_Q2m(:,2,n)
+        else
+          Q(:) = multipole_Q2m(:,m,n)
+        endif
+      case (8,9,10,11)
+        n = i - 8
+        if ( constraint_switch(i) == 1 ) then
+          Q(:) = multipole_Q3m(:,1,n) + multipole_Q3m(:,2,n)
+        else
+          Q(:) = multipole_Q3m(:,m,n)
+        endif
+      case (12,13,14,15,16)
+        n = i - 12
+        if ( constraint_switch(i) == 1 ) then
+          Q(:) = multipole_Q4m(:,1,n) + multipole_Q4m(:,2,n)
+        else
+          Q(:) = multipole_Q4m(:,m,n)
+        endif
+      case (17)
+        Q = angumome_Jx
+      case (18)
+        Q = angumome_Jy
+      case (19)
+        Q = angumome_Jz
+      case (20)
+        Q = pairs_T00_J10
+      case (21)
+        Q = pairs_T00_J1m1
+      case (22)
+        Q = pairs_T00_J1p1
+      case (23)
+        Q = pairs_T10_J00
+      case (24)
+        Q = pairs_T1m1_J00
+      case (25)
+        Q = pairs_T1p1_J00
+      case (26)
+        factor_delta = constraint_read(i,1)
+    end select
    
     if ( i < 26 ) then
       constraint_HO(k+1:k+HOsp_dim2) = Q(1:HOsp_dim2)
-      constraint_val(j) = constraint_read(i)
+      constraint_val(j) = constraint_read(i,m)
     endif
-  endif
+  enddo
 enddo
 
 deallocate(Q)
@@ -389,9 +424,12 @@ do i = 1, constraint_dim
   lagrange_lambda1(i) = B(i)
 enddo
 
+!!! BB: to avoid the singular system when constraining things that are exactly
+!!! zero, I guess it should be necessary to remove the constraint for the     
+!!! current iteration when it is too small.
 if ( info /= 0 ) then
-  print*, 'Warning: impossible to obtain the new lagrange multipliers. Using &
-         & the one of the previous iteration instead.' 
+  print '("Warning: impossible to obtain the new lagrange multipliers. Using &
+         &the one of the previous iteration instead.")' 
   do i = 1, constraint_dim
     lagrange_lambda1(i) = lagrange_lambda0(i)
   enddo
@@ -625,7 +663,8 @@ do j = 1, ndim
   lj = HOsp_l(j)
   do i = 1, ndim
     li = HOsp_l(i)
-    if ( (-1)**li /= (-1)**lj ) sum_p = sum_p + abs(dens_kappaRR(i,j))
+    if ( (-1)**li /= (-1)**lj ) sum_p = sum_p + abs(dens_rhoRR(i,j)) & 
+                                              + abs(dens_kappaRR(i,j))
   enddo
 enddo
 
@@ -649,20 +688,20 @@ endif
 !!! Takes into account the constraints that could break the symmetries
 sum_pair = 0.0d0
 do i = 13, 16
-  sum_pair = sum_pair + abs(constraint_read(i))
+  sum_pair = sum_pair + abs(constraint_read(i,1))
 enddo
 if ( sum_pair > eps ) is_separate_NZ = .false.
 
 sum_pair = 0.0d0
 do i = 13, 17
-  sum_pair = sum_pair + abs(constraint_read(i))
+  sum_pair = sum_pair + abs(constraint_read(i,1))
 enddo
 if ( sum_pair > eps ) is_good_Z = .false.
 
 sum_pair = 0.0d0
 do i = 13, 18
   if ( i == 17 ) cycle
-  sum_pair = sum_pair + abs(constraint_read(i))
+  sum_pair = sum_pair + abs(constraint_read(i,1))
 enddo
 if ( sum_pair > eps ) is_good_N = .false.
 
