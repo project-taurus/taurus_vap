@@ -52,4 +52,3 @@ fi
 
 # Some cleaning
 rm $code $inter $input
-

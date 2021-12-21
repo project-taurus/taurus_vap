@@ -57,8 +57,8 @@ if ( (ityp == 1) .or. (ityp == 2) ) then
   enddo
   read(uth,*) itmp1, core_Z, core_N
 else 
-  core_Z = zero
-  core_N = zero
+  read(uth,*) 
+  read(uth,*) core_Z, core_N
 endif
 
 !!! Computes all the remaining number of particles 

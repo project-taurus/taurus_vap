@@ -69,8 +69,9 @@ CONTAINS
 !------------------------------------------------------------------------------!
 subroutine set_basis    
 
-integer, parameter :: max_columns=50, max_length=1000
-integer :: i, j, k, htype, facn, shinc, mjinc, jmax, ialloc=0
+integer, parameter :: max_columns=100, max_length=5000
+integer :: i, j, k, htype, opt_hw=0, facn, shinc, mjinc, jmax, ialloc=0, itmp
+real(r64) :: xtmp
 real(r64), dimension(1:max_columns) :: columns
 character(len=max_length) :: line
 
@@ -93,34 +94,63 @@ if ( ialloc /= 0 ) stop 'Error during allocation of shells'
 backspace uth
 
 if ( (htype == 1) .or. (htype == 2) ) then
+  read(uth,*) itmp, HOsh_dim, (HOsh_na(i),i=1,HOsh_dim)
+
   !!! Small algorithm that counts the number of columns to see if there is
   !!! an optional value of HO_hw in ANTOINE files (not native)
+  do i = 1, htype
+    read(uth,*) 
+  enddo
+
   read(uth,'(a)') line
   do i = 1, max_columns
     read(line,*,iostat=j) columns(1:i)
     if ( j == -1 ) exit
   enddo
   backspace uth
-
-  if ( i-1 == HOsh_dim+2 ) then
-    read(uth,*) htype, HOsh_dim, (HOsh_na(i),i=1,HOsh_dim)
-    HO_hw = zero
+ 
+  if ( i-1 == 4 ) then
+    read(uth,*)
+    opt_hw = 0  
   else
-    read(uth,*) htype, HOsh_dim, (HOsh_na(i),i=1,HOsh_dim), HO_hw
+    read(uth,*) itmp, itmp, itmp, xtmp, opt_hw, HO_hw
   endif 
 else
   read(uth,*) HOsh_dim, (HOsh_na(i),i=1,HOsh_dim)
+  read(uth,*) 
+  read(uth,*) opt_hw, HO_hw
 endif
 
 !!! Computes oscillator parameters
-if ( (htype == 1) .or. (htype == 2) ) then
-  if ( HO_hw <= epsilon0 ) then
+select case (opt_hw)
+  !!! Formula from Blomqvist et al., NPA 106, 545 (1968). 
+  !!! See also formula (3.45) in the book by J. Suhonen
+  case (0)
     HO_hw = 45.0d0 * nucleus_A**(-1.0d0/3.0d0) &
             - 25.0d0 * nucleus_A**(-2.0d0/3.0d0)
-  endif
-else
-  read(uth,*) HO_hw                      
+  
+  !!! Formula from Bohr and Mottelson. 
+  !!! See also (3.44) in the book by J. Suhonen
+  case (1)
+    HO_hw = 41.0d0 * nucleus_A**(-1.0d0/3.0d0) 
+
+  !!! Takes the value read in the .sho file
+  case (2) 
+    continue
+
+  !!! Default case: stops the code
+  case default
+    print*, "The option for the oscillator frequency, opt_hw =", opt_hw, &
+            " should be equal to 0, 1 or 2."
+    stop
+end select
+ 
+if ( HO_hw < epsilon0 ) then
+  print "(a,1es12.5,a)", "The oscillator frequency (HO_hw) = ",HO_hw, &
+        " should positive."
+  stop
 endif
+ 
 HO_b = hbarc / sqrt(mass_ma * HO_hw)
 
 !!! Determines the quantum numbers of the shells

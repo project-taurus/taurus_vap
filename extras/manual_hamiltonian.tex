@@ -31,7 +31,7 @@
 % 
 \begin{center}
  {\LARGE \textbf{\TAURUSvap: Manual for the Hamiltonian files}} \\
- {\large 09/10/2020}
+ {\large 22/12/2021}
 \end{center}
 
 %
@@ -92,9 +92,10 @@ The only differences are:
   \item The name of the interaction can accept up to 100 characters.
   \item The code does not handle different valence spaces for protons and neutrons (we need a space invariant under
   isospin rotation in order to be able to perform a subsequent isospin projection).
-  \item It is possible to include a value for the oscillator frequency $\hbar \omega$ after the list of shells included in the model space (same line).
-  For example, for the $sd$-shell: \tt{1 3 205  1001  203  12.50}. If the frequency is missing, the code will set its values ussing the
-  formula: $\hbar \omega = 45 A^{-1/3} - 25 A^{-2/3}$ MeV.\footnote{See equation (3.45) of the book \textit{From Nucleons to Nucleus} by J. Suhonen.}
+  \item It is possible to select the oscillator frequency $\hbar \omega$ by adding two parameters at the end of the line
+  specifying the number of particles in the core. 
+  For example, for the $sd$-shell: \tt{1 8 8 0.300 opt\_hw HO\_hw}. See next section for more details on these two parameters. 
+  In case they are not specified, \tt{opt\_hw = 0} is assumed.
 \end{itemize}
 To learn more about this format, go visit the ``Manual'' section of their
 \href{http://www.iphc.cnrs.fr/nutheo/code\_antoine/menu.html}{website}. 
@@ -116,7 +117,8 @@ Line & \ Type \hfill & Data \\
  \textbf{1}   & character  & \tt{hamil\_name} \\
  \textbf{2}   & integer    & \tt{hamil\_type} \\
  \textbf{3}   & integers   & \tt{HOsh\_dim}  \: \tt{(HOsh\_na(i), i=1, HOsh\_dim)} \\
- \textbf{4}   & real       & \tt{HO\_hw} \\
+ \textbf{4}   & integers   & \tt{core\_Z} \: \tt{core\_N} \\
+ \textbf{5}   & integer \: real  & \tt{opt\_hw} \: \tt{HO\_hw} \\
 \hline
 \end{tabular}
 \end{center}
@@ -129,7 +131,15 @@ where in each line we have:
                   \tt{(HOsh\_na(i), i=1, HOsh\_dim)}: loop to read the name of the shells. For a shell with quantum numbers $n,l,j$, the
                   name is $\tt{HOsh\_na} = 10000n + 100l + 2j$. Note that $n$ begins at 0. This is similar to the ANTOINE format except
                    that the first factor is 10000 (because $l$ can be larger than 10 in no-core calculations).
-\item[\textbf{4}] \tt{HO\_hw}: the frequency of the Harmonic Oscillator.
+\item[\textbf{4}] \tt{core\_Z}: number of protons in the core. \\         
+                  \tt{core\_N}: number of neutrons in the core.              
+\item[\textbf{5}] \tt{opt\_hw}: option to control the value of the frequency for the Harmonic Oscillator. \\
+                  \tt{= 0} the frequency is set using the formula $\hbar \omega = 45A^{-1/3} - 25A^{-2/3}$.\footnote{See equation (3.45) of the 
+                  book \textit{From Nucleons to Nucleus} by J. Suhonen.} \\ 
+                  \tt{= 1} the frequency is set using the formula $\hbar \omega = 41A^{-1/3}$.\footnote{See equation (3.44) of the 
+                  book \textit{From Nucleons to Nucleus} by J. Suhonen.} \\ 
+                  \tt{= 2} the frequency is set to the value \tt{HO\_hw}. \\
+                  \tt{HO\_hw}: value of the frequency for the Harmonic Oscillator.
 \end{itemize}
 
 \subsubsection*{Example}
@@ -139,6 +149,7 @@ where in each line we have:
   \tt{My Chiral EFT Hamiltionian for emax=4 and hw=20} \\
   \tt{3} \\
   \tt{15      1    103    101  10001    205    203  10103  10101    307    305  20001  10205  10203    409    407} \\
+  \tt{0  0} \\
   \tt{20.0} \\
 \hline
 \end{tabular}

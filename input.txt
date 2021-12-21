@@ -1,6 +1,6 @@
 Interaction
 -----------
-Master name hamil. files      usdb
+Master name hamil. files      delta100    
 Center-of-mass correction     0
 Read reduced hamiltonian      0
 No. of MPI proc per H team    0
@@ -17,7 +17,7 @@ Wave Function
 Type of seed wave function    0 
 Number of QP to block         0
 No symmetry simplifications   0
-Seed random number generation 5
+Seed random number generation 0
 Read/write wf file as text    0
 Cutoff occupied s.-p. states  0.00E-00
 Include all empty sp states   0
@@ -30,12 +30,12 @@ More intermediate printing    0
 Type of gradient              1
 Parameter eta for gradient    0.100E-00
 Parameter mu  for gradient    0.300E-00
-Tolerance for gradient        1.00E-04
+Tolerance for gradient        1.00E-02
 
 Constraints             
 -----------
 Force constraint N/Z          1
-Constraint beta_lm            1
+Constraint beta_lm            2
 Pair coupling scheme          1
 Tolerance for constraints     1.000E-06
 Constraint multipole Q10      0   0.000
