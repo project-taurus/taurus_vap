@@ -367,7 +367,7 @@ do a = 1, HOsp_dim
           bred = int(b,i16)
           cred = int(c,i16)
           dred = int(d,i16)
-          Vred = real(Vdec,r32)
+          Vred = real(Vdec,rH2)
           write(uth6) ared, bred, cred, dred      
           write(uth7) Vred      
         endif  

@@ -307,7 +307,7 @@ write(uto,format1) input_names(26)
 write(uto,format4) input_names(27), iter_max_ch
 write(uto,format4) input_names(28), iter_write_ch
 write(uto,format3) input_names(29), iter_print
-write(uto,format3) input_names(20), gradient_type
+write(uto,format3) input_names(30), gradient_type
 write(uto,format5) input_names(31), gradient_eta_ch
 write(uto,format5) input_names(32), gradient_mu_ch
 write(uto,format5) input_names(33), gradient_eps_ch
