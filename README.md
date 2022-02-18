@@ -134,7 +134,8 @@ If you use this code in your research work and publications, please cite us:
 > B. Bally, Adrían Sánchez-Fernández and Tomás R. Rodríguez  
 > Symmetry-projected variational calculations with the numerical suite TAURUS  
 > I. Variation after particle-number projection  
-> submitted to EPJA (2020)
+> Eur. Phys. J. A 57, 69 (2021)   
+> https://doi.org/10.1140/epja/s10050-021-00369-z
 
 ## Additional informations
 
@@ -142,16 +143,13 @@ If you use this code in your research work and publications, please cite us:
 TAURUS_vap is licensed under GNU General Public License version 3 (see LICENSE.txt).
 
 ### Funding
-The project TAURUS is supported by the the European Union’s Horizon 2020 research and innovation programme under the Marie Skłodowska-Curie grant agreement No. 839847.  
+The project TAURUS was initially supported by the the European Union’s Horizon 2020 research and innovation programme under the Marie Skłodowska-Curie grant agreement No. 839847.  
 https://cordis.europa.eu/project/id/839847
 
 ### Contributors 
 For the time being, the people that contributed to the code are:
-* Benjamin Bally (Universidad Autónoma de Madrid)
+* Benjamin Bally (CEA Paris-Saclay)
 * Tomás R. Rodríguez Frutos (Universidad Autónoma de Madrid)
-* Adrían Sánchez-Fernández (Universidad Autónoma de Madrid)
+* Adrián Sánchez-Fernández (Universidad Autónoma de Madrid)
 
 We also thank the people that helped us benchmark and test the code in its early versions.
-
-
-

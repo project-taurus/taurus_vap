@@ -18,6 +18,7 @@
 ! - subroutine write_wavefunction                                              !
 ! - subroutine calculate_densities                                             !
 ! - subroutine calculate_densities_real                                        !
+! - subroutine calculate_spatial_density                                       !
 !==============================================================================!
 MODULE Wavefunctions 
 
@@ -57,6 +58,9 @@ real(r64), dimension(:,:), allocatable :: dens_rhoRR, &      ! <R|a+a|R> (real)
 complex(r64), dimension(:,:), allocatable :: dens_rhoLR,   & ! <L|a+a|R> 
                                              dens_kappaLR, & ! <L|aa|R>
                                              dens_kappaRL    ! <L|a+a+|R>^*
+integer :: dens_spatial, & ! option to compute the spatial one-body density
+           dens_nr(3)   ! number of points in the discretization
+real(r64) :: dens_dr(3) ! spacing between the points 
 
 !!! Information on the good quantum number of the wave function
 logical :: is_good_Z=.false.,      & ! Slater determinant for protons
@@ -579,11 +583,11 @@ select case (seed_text)
 end select
 
 if ( is_binary ) then
-  fileform='unformatted'
-  filetype='.bin'
+  fileform = 'unformatted'
+  filetype = '.bin'
 else
-  fileform='formatted'
-  filetype='.txt'
+  fileform = 'formatted'
+  filetype = '.txt'
 endif
 
 filename = 'initial_wf' // filetype
@@ -699,17 +703,17 @@ select case (seed_text)
 end select
 
 if ( is_binary ) then
-  fileform='unformatted'
-  filetype='.bin'
+  fileform = 'unformatted'
+  filetype = '.bin'
 else
-  fileform='formatted'
-  filetype='.txt'
+  fileform = 'formatted'
+  filetype = '.txt'
 endif
 
 if ( iopt == 0 ) then
-  filename='final_wf' // filetype
+  filename = 'final_wf' // filetype
 else
-  filename='intermediate_wf' // filetype
+  filename = 'intermediate_wf' // filetype
 endif
 
 open(utw, file=filename, status='replace', action='write',form=fileform)
@@ -1082,7 +1086,7 @@ end subroutine calculate_densities
 !------------------------------------------------------------------------------!
 ! subroutine calculate_densities_real                                          !
 !                                                                              !
-! Calculate the real diagonal densities according to                           !
+! Calculates the real diagonal densities according to                          !
 !     rhoRR = V_R V_R^T                                                        !
 !   kappaRR = V_R U_R^T                                                        !
 ! Here all quantities are real so no need of complex conjugate.                !
@@ -1102,6 +1106,197 @@ call dgemm('n','t',ndim,ndim,ndim,one,VR,ndim,VR,ndim,zero,rhoRR,ndim)
 call dgemm('n','t',ndim,ndim,ndim,one,VR,ndim,UR,ndim,zero,kappaRR,ndim)
 
 end subroutine calculate_densities_real
+
+!------------------------------------------------------------------------------!
+! subroutine calculate_spatial_density                                         !
+!                                                                              !
+! Calculates the spatial one-body densities for proton and neutrons separately !
+! and writes it in a file.                                                     !
+! The spatial density reads                                                    !
+!                                                                              !
+! The spatial density integrated over the angles reads                         !
+!                                                                              !
+! Input: ndim = dimension of the sp basis                                      !
+!        rhoRR = one-body density                                              !
+!        rhoNZ = one-body density projected on NZ                              !
+!------------------------------------------------------------------------------!
+subroutine calculate_spatial_density(rhoRR,rhoNZ,ndim)
+
+integer, intent(in) ::  ndim
+complex(r64), dimension(ndim,ndim), intent(in) :: rhoRR, rhoNZ
+integer :: a, b, na, nb, la, lb, mla, mlb, ja, jb, mja, mjb, ms, hdim, &
+           r1, r2, r3, r1min, r1max, r2min, r2max, r3min, r3max
+real(r64) :: x, y, z, r, theta, phi, dr1, dr2, dr3, Rnla, Rnlb, cga, cgb, &   
+             fac, rho_p, rho_n, rhoNZ_p, rhoNZ_n
+complex(r64) :: Ylma, Ylmb, angular
+character(50) :: filename1, filename2, filename3
+character(len=*), parameter :: format1 = "(1f7.3,4f10.5)", &
+                               format2 = "(3f8.4,4f10.5)"
+
+hdim = HOsp_dim/2
+
+!!! Name for the file where the densities are written
+filename1 = adjustl('spatial_density_R.dat')
+filename2 = adjustl('spatial_density_RThetaPhi.dat')
+filename3 = adjustl('spatial_density_XYZ.dat')
+
+!!! If dens_spatial = 1: r1 = r, r2 = theta, r3 = phi
+!!! If dens_spatial = 2: r1 = x, r2 = y    , r3 = z  
+if ( dens_spatial <= 2 ) then
+  r1min = 0 
+  r1max = dens_nr(1) - 1
+  r2min = 0 
+  r2max = dens_nr(2) - 1
+  r3min = 0 
+  r3max = dens_nr(3) - 1
+  dr1 = dens_dr(1)
+  dr2 =   pi / (r2max+1)
+  dr3 = 2*pi / (r3max+1)
+else 
+  r1min = -dens_nr(1) + 1
+  r1max =  dens_nr(1)
+  r2min = -dens_nr(2) + 1
+  r2max =  dens_nr(2)
+  r3min = -dens_nr(3) + 1
+  r3max =  dens_nr(3)
+  dr1 = dens_dr(1)
+  dr2 = dens_dr(2)
+  dr3 = dens_dr(3)
+endif
+
+!!! Computes the spatial one-body density integrated over the angular part
+if ( dens_spatial <= 2 ) then  
+  open(utd, file=filename1, status='replace', action='write', form='formatted')        
+  write(utd,*) "            unprojected          projected   "
+  write(utd,*) "   r      rho_p     rho_n     rho_p     rho_n"
+
+  do r1 = r1min, r1max
+    r = r1 * dr1 
+
+    rho_p = zero
+    rho_n = zero
+    rhoNZ_p = zero
+    rhoNZ_n = zero
+
+    do a = 1, hdim
+      na = HOsp_n(a)
+      la = HOsp_l(a)
+      ja = HOsp_2j(a)
+      mja= HOsp_2mj(a)
+      Rnla = radial_function(na,la,r)
+
+      do b = a, hdim
+        nb = HOsp_n(b)
+        lb = HOsp_l(b)
+        jb = HOsp_2j(b)
+        mjb= HOsp_2mj(b)
+        Rnlb = radial_function(nb,lb,r)
+     
+        if ( la /= lb ) cycle   
+        if ( ja /= jb ) cycle   
+        if ( mja /= mjb ) cycle   
+ 
+        fac = (2.0d0 - kdelta(a,b)) * Rnla * Rnlb
+ 
+        rho_p = rho_p + fac * real(rhoRR(b,a))
+        rho_n = rho_n + fac * real(rhoRR(b+hdim,a+hdim))
+        rhoNZ_p = rhoNZ_p + fac * real(rhoNZ(b,a))
+        rhoNZ_n = rhoNZ_n + fac * real(rhoNZ(b+hdim,a+hdim))
+ 
+      enddo
+    enddo
+
+    write(utd,format1) r, rho_p/(4*pi), rho_n/(4*pi), rhoNZ_p/(4*pi), & 
+                          rhoNZ_n/(4*pi) 
+  enddo
+
+  close(utd)
+endif
+
+if ( dens_spatial == 1 ) return
+
+!!! Computes the spatial one-body density 
+if ( dens_spatial == 2 ) then
+  open(utd, file=filename2, status='replace', action='write', form='formatted')        
+  write(utd,*) "                             unprojected          projected   "
+  write(utd,*) "   r      theta   phi      rho_p     rho_n     rho_p     rho_n"
+else
+  open(utd, file=filename3, status='replace', action='write', form='formatted')        
+  write(utd,*) "                             unprojected          projected   "
+  write(utd,*) "   r       y       z       rho_p     rho_n     rho_p     rho_n"
+endif
+
+do r1 = r1min, r1max
+  do r2 = r2min, r2max
+    do r3 = r3min, r3max
+
+      if ( dens_spatial == 2 ) then
+        r = r1 * dr1 
+        theta = r2 * dr2 + dr2/2
+        phi = r3 * dr3 + dr3/2
+      else
+        x = r1 * dr1 + dr1/2
+        y = r2 * dr2 + dr2/2
+        z = r3 * dr3 + dr3/2
+
+        r = sqrt( x**2 + y**2 + z**2 )
+        theta = acos( z / r )
+        phi = acos( x / sqrt(x**2 + y**2) )
+      endif
+
+      rho_p = zero
+      rho_n = zero
+      rhoNZ_p = zero
+      rhoNZ_n = zero
+
+      do a = 1, hdim
+        na = HOsp_n(a)
+        la = HOsp_l(a)
+        ja = HOsp_2j(a)
+        mja= HOsp_2mj(a)
+        Rnla = radial_function(na,la,r)
+
+        do b = a, hdim
+          nb = HOsp_n(b)
+          lb = HOsp_l(b)
+          jb = HOsp_2j(b)
+          mjb= HOsp_2mj(b)
+          Rnlb = radial_function(nb,lb,r)
+     
+          fac = (2.0d0 - kdelta(a,b)) * Rnla * Rnlb
+     
+          angular = zzero
+          do mla = -la, la
+            ms = mja - 2*mla
+            mlb = (mjb - mja + 2*mla)/2
+            if ( abs(mlb) > lb ) cycle
+
+            Ylma = conjg(spherharmonic(la,mla,theta,phi))
+            Ylmb = spherharmonic(lb,mlb,theta,phi)
+            call ClebschGordan(1,2*la,ja,ms,2*mla,mja,cga)
+            call ClebschGordan(1,2*lb,jb,ms,2*mlb,mjb,cgb)
+            angular = angular + Ylma * Ylmb * cga * cgb 
+          enddo
+         
+          rho_p = rho_p + fac * real(rhoRR(b,a) * angular)
+          rho_n = rho_n + fac * real(rhoRR(b+hdim,a+hdim) * angular)
+          rhoNZ_p = rhoNZ_p + fac * real(rhoNZ(b,a) * angular)
+          rhoNZ_n = rhoNZ_n + fac * real(rhoNZ(b+hdim,a+hdim) * angular)
+        enddo
+      enddo
+
+      if ( dens_spatial == 2 ) then 
+        write(utd,format2) r, theta, phi, rho_p, rho_n, rhoNZ_p, rhoNZ_n
+      else 
+        write(utd,format2) x, y, z, rho_p, rho_n, rhoNZ_p, rhoNZ_n
+      endif
+    enddo
+  enddo
+enddo
+
+close(utd)
+
+end subroutine calculate_spatial_density
 
 END MODULE Wavefunctions 
 !==============================================================================!

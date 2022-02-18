@@ -31,7 +31,7 @@
 % 
 \begin{center}
  {\LARGE \textbf{\TAURUSvap: Manual for the input file}} \\
- {\large 11/02/2021}
+ {\large 18/02/2022}
 \end{center}
 
 %
@@ -199,7 +199,11 @@ Line & Format & Data \\
  \textbf{21}   & 1a30, 1i1 & \tt input\_names(21), seed\_text        \\
  \textbf{22}   & 1a30, 1es10.3 & \tt input\_names(22), seed\_occeps  \\
  \textbf{23}   & 1a30, 1i1 & \tt input\_names(23), seed\_allemp      \\
- \textbf{24}   & 1a    & \tt input\_names(24)                        \\
+ \textbf{24}   & 1a30, 1i1 & \tt input\_names(24), dens\_spatial     \\
+ \textbf{25}   & 1a30, 1i3, 1x, 1f5.2 & \tt input\_names(25), dens\_nr(1), dens\_dr(1) \\
+ \textbf{26}   & 1a30, 1i3, 1x, 1f5.2 & \tt input\_names(26), dens\_nr(2), dens\_dr(2) \\
+ \textbf{27}   & 1a30, 1i3, 1x, 1f5.2 & \tt input\_names(27), dens\_nr(3), dens\_dr(3) \\
+ \textbf{28}   & 1a    & \tt input\_names(28)                        \\
 \hline
 \end{tabular}
 \end{center}
@@ -244,6 +248,14 @@ where
  option only if you encounter numerical problems or if the code crashes with an error messsage linked to the evaluation of the overlap. \\[0.05cm]
  \ttt{= 0\:} eliminates the maximum number of empty states possible. \\[0.05cm]
  \ttt{= 1\:} takes into account all the empty states.
+\item \ttt{dens\_spatial}: option to compute the spatial one-body density and write it into a file at the end of the iterations. \\[0.05cm]
+ \ttt{= 0\:} nothing is computed. \\[0.05cm]
+ \ttt{= 1\:} computes the spatial density integrated over all angles, $\rho(r)$, and writes it into the file \ttt{spatial\_density\_R.dat} \\[0.05cm]
+ \ttt{= 2\:} computes the spatial density in spherical coordinates, $\rho(r,\theta,\phi)$, and writes it into the file \ttt{spatial\_density\_RThetaPhi.dat}. Computes $\rho(r)$ as well. \\[0.05cm]
+ \ttt{= 3\:} computes the spatial density in cartesian coordinates,  $\rho(x,y,z)$, and writes it into the file \ttt{spatial\_density\_XYZ.dat}. 
+\item \ttt{dens\_nr(i)}: number of mesh points along the direction $i$. ($1=r$ or $x$, $2=\theta$ or $y$, $3=\phi$ or $z$).
+\item \ttt{dens\_dr(i)}: step size along the direction $i$. ($1=r$ or $x$, $2=\theta$ or $y$, $3=\phi$ or $z$). In case \ttt{dens\_spatial = 2}, the step size along direction $\theta$ is equal 
+ to $\frac{\pi}{\ttt{dens\_nr(2)}}$ and the step size along the direction $\phi$ is equal to $\frac{2\pi}{\ttt{dens\_nr(3)}}$ and the input values are not used.
 \end{itemize}
 
 \subsubsection*{Example}
@@ -260,6 +272,10 @@ No symmetry simplifications   &0         \\
 Read/write wf file as text    &0         \\
 Cutoff occupied s.-p.\ states &0.000E+00 \\
 Include all empty sp states   &0         \\
+Spatial one-body density      &0         \\
+Discretization for x/r        &0\phantom{000}0.00 \\
+Discretization for y/theta    &0\phantom{000}0.00 \\
+Discretization for z/phi      &0\phantom{000}0.00 \\
                               &          \\
 \hline
 \end{tabular}
@@ -276,16 +292,16 @@ Include all empty sp states   &0         \\
 \hline
 Line & Format & Data \\
 \hline
- \textbf{25}   & 1a            & \tt input\_names(25)                 \\
- \textbf{26}   & 1a            & \tt input\_names(26)                 \\
- \textbf{27}   & 1a30, 1i5     & \tt input\_names(27), iter\_max      \\
- \textbf{28}   & 1a30, 1i5     & \tt input\_names(28), iter\_write    \\
- \textbf{29}   & 1a30, 1i1     & \tt input\_names(29), iter\_print    \\
- \textbf{30}   & 1a30, 1i1     & \tt input\_names(30), gradient\_type \\
- \textbf{31}   & 1a30, 1es10.3 & \tt input\_names(31), gradient\_eta  \\
- \textbf{32}   & 1a30, 1es10.3 & \tt input\_names(32), gradient\_mu   \\
- \textbf{33}   & 1a30, 1es10.3 & \tt input\_names(33), gradient\_eps  \\
- \textbf{34}   & 1a            & \tt input\_names(34)                 \\
+ \textbf{29}   & 1a            & \tt input\_names(29)                 \\
+ \textbf{30}   & 1a            & \tt input\_names(30)                 \\
+ \textbf{31}   & 1a30, 1i5     & \tt input\_names(31), iter\_max      \\
+ \textbf{32}   & 1a30, 1i5     & \tt input\_names(32), iter\_write    \\
+ \textbf{33}   & 1a30, 1i1     & \tt input\_names(33), iter\_print    \\
+ \textbf{34}   & 1a30, 1i1     & \tt input\_names(34), gradient\_type \\
+ \textbf{35}   & 1a30, 1es10.3 & \tt input\_names(35), gradient\_eta  \\
+ \textbf{36}   & 1a30, 1es10.3 & \tt input\_names(36), gradient\_mu   \\
+ \textbf{37}   & 1a30, 1es10.3 & \tt input\_names(37), gradient\_eps  \\
+ \textbf{38}   & 1a            & \tt input\_names(38)                 \\
 \hline
 \end{tabular}
 \end{center}
@@ -350,13 +366,13 @@ Tolerance for gradient        &1.000E-04 \\
 \hline
 Line & Format & Data \\
 \hline
- \textbf{35}   & 1a            & \tt input\_names(35)                  \\
- \textbf{36}   & 1a            & \tt input\_names(36)                  \\
- \textbf{37}   & 1a30, 1i1     & \tt input\_names(37), enforce\_NZ     \\
- \textbf{38}   & 1a30, 1i1     & \tt input\_names(38), opt\_betalm     \\
- \textbf{39}   & 1a30, 1i1     & \tt input\_names(39), pairs\_scheme   \\
- \textbf{40}   & 1a30, 1es10.3 & \tt input\_names(40), constraint\_eps \\
- \textbf{41}   & 1a30, 1i1, 1x, 1f8.3, & \tt input\_names(41), constraint\_switch( 3), 1x, constraint\_read( 3,1), \\
+ \textbf{39}   & 1a            & \tt input\_names(39)                  \\
+ \textbf{40}   & 1a            & \tt input\_names(40)                  \\
+ \textbf{41}   & 1a30, 1i1     & \tt input\_names(41), enforce\_NZ     \\
+ \textbf{42}   & 1a30, 1i1     & \tt input\_names(42), opt\_betalm     \\
+ \textbf{43}   & 1a30, 1i1     & \tt input\_names(43), pairs\_scheme   \\
+ \textbf{44}   & 1a30, 1es10.3 & \tt input\_names(44), constraint\_eps \\
+ \textbf{45}   & 1a30, 1i1, 1x, 1f8.3, & \tt input\_names(45), constraint\_switch( 3), 1x, constraint\_read( 3,1), \\
                &            1x, 1f8.3 & \tt                                           1x, constraint\_read( 3,2)  \\
  %\textbf{42}   & 1a30, 1i1, 1x, 1f8.3, 1x, 1f8.3 & \tt input\_names(42), constraint\_switch( 4), 1x, constraint\_read( 4) \\
 % \textbf{42}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(42), constraint\_switch( 5), 1x, constraint\_read( 5) \\
@@ -372,9 +388,9 @@ Line & Format & Data \\
 % \textbf{52}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(52), constraint\_switch(15), 1x, constraint\_read(15) \\
 % \textbf{53}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(53), constraint\_switch(16), 1x, constraint\_read(16) \\
  $\vdots$      & $\hfill \vdots \hfill$ & $\hfill \vdots \hfill$       \\
- \textbf{53}   & 1a30, 1i1, 1x, 1f8.3, & \tt input\_names(53), constraint\_switch(53), 1x, constraint\_read(16,1), \\
-               &            1x, 1f8.3 & \tt                                           1x, constraint\_read(16,2) \\
- \textbf{54}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(54), constraint\_switch(17), 1x, constraint\_read(17) \\
+ \textbf{58}   & 1a30, 1i1, 1x, 1f8.3, & \tt input\_names(58), constraint\_switch(53), 1x, constraint\_read(17,1), \\
+               &            1x, 1f8.3 & \tt                                           1x, constraint\_read(17,2) \\
+ \textbf{59}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(59), constraint\_switch(17), 1x, constraint\_read(18) \\
 % \textbf{55}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(55), constraint\_switch(18), 1x, constraint\_read(19) \\
 % \textbf{56}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(56), constraint\_switch(19), 1x, constraint\_read(19) \\
 % \textbf{57}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(57), constraint\_switch(20), 1x, constraint\_read(20) \\
@@ -383,8 +399,8 @@ Line & Format & Data \\
 % \textbf{60}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(60), constraint\_switch(23), 1x, constraint\_read(23) \\
 % \textbf{61}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(61), constraint\_switch(24), 1x, constraint\_read(24) \\
  $\vdots$      & $\hfill \vdots \hfill$ & $\hfill \vdots \hfill$       \\
- \textbf{63}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(63), constraint\_switch(25), 1x, constraint\_read(25) \\
- \textbf{64}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(64), constraint\_switch(26), 1x, constraint\_read(26) \\
+ \textbf{68}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(68), constraint\_switch(25), 1x, constraint\_read(26) \\
+ \textbf{69}   & 1a30, 1i1, 1x, 1f8.3 & \tt input\_names(69), constraint\_switch(26), 1x, constraint\_read(27) \\
 \hline
 \end{tabular}
 \end{center}
@@ -408,11 +424,13 @@ where
   The adjustment will stop after 100 iterations even if the criterion is not met.
 \item \ttt{constraint\_switch(j)}: option to switch on/off the constraint \ttt{j}. \\[0.05cm]
   \ttt{= 0\:} the constraint \ttt{j} is switched off. \\[0.05cm]
-  \ttt{= 1\:} the constraint \ttt{j} is switched on (global constraint for the nucleons).
-  \ttt{= 2\:} the constraints \ttt{j} are switched on (separate constraints for protons and neutrons). This option is only valid 
-  for the constraints on the multipole moments.
-\item \ttt{constraint\_read(j)}: the expectation value targeted for the constraint \ttt{j}. \\
-      Note that if \ttt{constraint\_switch(j) = 0}, this value is not used in the code.
+  \ttt{= 1\:} the constraint \ttt{j} is switched on (global constraint for the nucleons). \\[0.05cm]
+  \ttt{= 2\:} the constraints \ttt{j} are switched on (separate constraints for proton and neutron parts). This option is only valid 
+  for the constraints on the multipole moments and the radii. \\[0.05cm]
+  \ttt{= 3\:} the constraints \ttt{j} are switched on (separate constraints for isoscalar and isovector parts). This option is only valid 
+  for the constraints on the multipole moments and the radii. \\[0.05cm]
+\item \ttt{constraint\_read(j)}: the expectation value(s) targeted for the constraint \ttt{j}. \\
+      Note that if \ttt{constraint\_switch(j) = 0}, the value(s) is not used in the code.
 \end{itemize}
 
 The physical correspondance for the indices \ttt{j} is the following:
@@ -437,16 +455,17 @@ The physical correspondance for the indices \ttt{j} is the following:
  \ttt{14} & $\tilde{Q}_{42}$ or $\tilde{\beta}_{42}$ &\\
  \ttt{15} & $\tilde{Q}_{43}$ or $\tilde{\beta}_{43}$ &\\
  \ttt{16} & $\tilde{Q}_{44}$ or $\tilde{\beta}_{44}$ &\\
- \ttt{17} & $J_x$ & \\
- \ttt{18} & $J_y$ & (not active) \\
- \ttt{19} & $J_z$ & \\
- \ttt{20} & $\vphantom{\Bigg(} \left[ \tilde{P}^\dagger_{\text{x}} \right]^{J=1,\, T=0}_{M_J =0,\,  M_T =0}$ &with x = agn or sen \\
- \ttt{21} & $\vphantom{\Bigg(} \left[ \tilde{P}^\dagger_{\text{x}} \right]^{J=1,\, T=0}_{M_J =-1,\, M_T =0}$ &with x = agn or sen \\
- \ttt{22} & $\vphantom{\Bigg(} \left[ \tilde{P}^\dagger_{\text{x}} \right]^{J=1,\, T=0}_{M_J =+1,\, M_T =0}$ &with x = agn or sen \\
- \ttt{23} & $\vphantom{\Bigg(} \left[ \tilde{P}^\dagger_{\text{x}} \right]^{J=0,\, T=1}_{M_J =0,\, M_T =0}$  &with x = agn or sen \\
- \ttt{24} & $\vphantom{\Bigg(} \left[ \tilde{P}^\dagger_{\text{x}} \right]^{J=0,\, T=1}_{M_J =0,\, M_T =-1}$ &with x = agn or sen \\
- \ttt{25} & $\vphantom{\Bigg(} \left[ \tilde{P}^\dagger_{\text{x}} \right]^{J=0,\, T=1}_{M_J =0,\, M_T =+1}$ &with x = agn or sen \\
- \ttt{26} & $\Delta$ (HFB field) & \\
+ \ttt{17} & $\sqrt{\langle r^2 \rangle}$ \\
+ \ttt{18} & $J_x$ & \\
+ \ttt{19} & $J_y$ & (not active) \\
+ \ttt{20} & $J_z$ & \\
+ \ttt{21} & $\vphantom{\Bigg(} \left[ \tilde{P}^\dagger_{\text{x}} \right]^{J=1,\, T=0}_{M_J =0,\,  M_T =0}$ &with x = agn or sen \\
+ \ttt{22} & $\vphantom{\Bigg(} \left[ \tilde{P}^\dagger_{\text{x}} \right]^{J=1,\, T=0}_{M_J =-1,\, M_T =0}$ &with x = agn or sen \\
+ \ttt{23} & $\vphantom{\Bigg(} \left[ \tilde{P}^\dagger_{\text{x}} \right]^{J=1,\, T=0}_{M_J =+1,\, M_T =0}$ &with x = agn or sen \\
+ \ttt{24} & $\vphantom{\Bigg(} \left[ \tilde{P}^\dagger_{\text{x}} \right]^{J=0,\, T=1}_{M_J =0,\, M_T =0}$  &with x = agn or sen \\
+ \ttt{25} & $\vphantom{\Bigg(} \left[ \tilde{P}^\dagger_{\text{x}} \right]^{J=0,\, T=1}_{M_J =0,\, M_T =-1}$ &with x = agn or sen \\
+ \ttt{26} & $\vphantom{\Bigg(} \left[ \tilde{P}^\dagger_{\text{x}} \right]^{J=0,\, T=1}_{M_J =0,\, M_T =+1}$ &with x = agn or sen \\
+ \ttt{27} & $\Delta$ (HFB field) & \\
 \hline
 \end{tabular}
 \end{center}
@@ -474,30 +493,31 @@ Force constraint N/Z            &1         \\
 Constraint beta\_lm             &2         \\
 Pair coupling scheme            &1         \\
 Tolerence for constraints       &1.000E-06 \\
-Constraint multipole Q10        &0 0.000   \\
-Constraint multipole Q11        &0 0.000   \\
-Constraint multipole Q20        &1 0.100   \\
-Constraint multipole Q21        &1 0.000   \\
-Constraint multipole Q22        &1 10.00   \\
-Constraint multipole Q30        &0 0.400   \\
-Constraint multipole Q31        &0 0.100   \\
-Constraint multipole Q32        &0 0.100   \\
-Constraint multipole Q33        &0 0.100   \\
-Constraint multipole Q40        &0 0.000   \\
-Constraint multipole Q41        &0 0.000   \\
-Constraint multipole Q42        &0 0.000   \\
-Constraint multipole Q43        &0 0.000   \\
-Constraint multipole Q44        &0 0.000   \\
-Constraint ang.\ mom.\ Jx       &0 1.000   \\
-Constraint ang.\ mom.\ Jy       &0 1.000   \\
-Constraint ang.\ mom.\ Jz       &0 1.000   \\
-Constraint pair P\_T00\_J10     &0 1.000   \\
-Constraint pair P\_T00\_J1m1    &0 2.000   \\
-Constraint pair P\_T00\_J1p1    &0 2.000   \\
-Constraint pair P\_T10\_J00     &0 1.000   \\
-Constraint pair P\_T1m1\_J00    &0 1.000   \\
-Constraint pair P\_T1p1\_J00    &0 1.000   \\
-Constraint field Delta          &0 0.050   \\
+Constraint multipole Q10        &0 \phantom{0}0.000   \\
+Constraint multipole Q11        &0 \phantom{0}0.000   \\
+Constraint multipole Q20        &1 \phantom{0}0.100   \\
+Constraint multipole Q21        &1 \phantom{0}0.000   \\
+Constraint multipole Q22        &1 \phantom{0}10.00   \\
+Constraint multipole Q30        &0 \phantom{0}0.400   \\
+Constraint multipole Q31        &0 \phantom{0}0.100   \\
+Constraint multipole Q32        &0 \phantom{0}0.100   \\
+Constraint multipole Q33        &0 \phantom{0}0.100   \\
+Constraint multipole Q40        &0 \phantom{0}0.000   \\
+Constraint multipole Q41        &0 \phantom{0}0.000   \\
+Constraint multipole Q42        &0 \phantom{0}0.000   \\
+Constraint multipole Q43        &0 \phantom{0}0.000   \\
+Constraint multipole Q44        &0 \phantom{0}0.000   \\
+Constraint radius sqrt(r\^{}2)  &0 \phantom{0}0.000   \\
+Constraint ang.\ mom.\ Jx       &0 \phantom{0}1.000   \\
+Constraint ang.\ mom.\ Jy       &0 \phantom{0}1.000   \\
+Constraint ang.\ mom.\ Jz       &0 \phantom{0}1.000   \\
+Constraint pair P\_T00\_J10     &0 \phantom{0}1.000   \\
+Constraint pair P\_T00\_J1m1    &0 \phantom{0}2.000   \\
+Constraint pair P\_T00\_J1p1    &0 \phantom{0}2.000   \\
+Constraint pair P\_T10\_J00     &0 \phantom{0}1.000   \\
+Constraint pair P\_T1m1\_J00    &0 \phantom{0}1.000   \\
+Constraint pair P\_T1p1\_J00    &0 \phantom{0}1.000   \\
+Constraint field Delta          &0 \phantom{0}0.050   \\
 \hline
 \end{tabular}
 \end{center}

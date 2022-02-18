@@ -22,7 +22,8 @@ use Hamiltonian, only: hamil_file, hamil_fsho, hamil_f01b, hamil_f2b, &
                        hamil_fred, hamil_fcom, hamil_com, hamil_type, &
                        hamil_read 
 use WaveFunctions, only: seed_type, blocking_dim, blocking_id, seed_text, &
-                         seed_rand, seed_symm, seed_occeps, seed_allemp
+                         seed_rand, seed_symm, seed_occeps, seed_allemp, &
+                         dens_spatial, dens_nr, dens_dr
 use Pairs, only: pairs_scheme
 use Projection, only: proj_Mphip, proj_Mphin
 use Constraints, only: constraint_eps, constraint_max, constraint_dim, &
@@ -33,7 +34,7 @@ use Gradient, only: gradient_type, gradient_eta, gradient_mu, gradient_eps
 implicit none
 private 
 
-character(30), dimension(64) :: input_names ! Name of inputs
+character(30), dimension(69) :: input_names ! Name of inputs
 character(30), dimension(:), allocatable :: input_block ! Name for blocking
 
 !!! Public routines
@@ -53,7 +54,7 @@ subroutine print_version
 print '("  _________________________________________________________ ",/, &
       & " |                                                         |",/, &
       & " |  (______)  TAURUS_vap                Benjamin Bally     |",/, &
-      & " |  <(0  0)>  2021.12.22                Tomás R. Rodríguez |",/, &
+      & " |  <(0  0)>  2022.02.18                Tomás R. Rodríguez |",/, &
       & " |    (°°)                              Adrián Sánchez-F.  |",/, &
       & " |                                                         |",/, &
       & " | This code performs the particle-number variation after  |",/, &
@@ -88,12 +89,13 @@ character(3) :: app2b='.2b'
 character(4) :: appsho='.sho', app01b='.01b', appred='.red', appcom='.com'
 character(100) :: hamil_dummy
 character(len=*), parameter :: format1 = "(1a)", &
-                               format2 = "(1a30, 1a100)", &
-                               format3 = "(1a30, 1i1)", &
-                               format4 = "(1a30, 1i5)", &
-                               format5 = "(1a30, 1f7.2)", &
-                               format6 = "(1a30, 1es10.3)", &
-                               format7 = "(1a30, 1i1,1x,1f7.3,1x,1f7.3)"
+                               format2 = "(1a30,1a100)", &
+                               format3 = "(1a30,1i1)", &
+                               format4 = "(1a30,1i5)", &
+                               format5 = "(1a30,1f7.2)", &
+                               format6 = "(1a30,1es10.3)", &
+                               format7 = "(1a30,1i1,1x,1f7.3,1x,1f7.3)", &
+                               format8 = "(1a30,1i3,1x,1f5.2)"
 
 !!! Reads the input parameters
 !cmpi if ( paral_myrank == 0 ) then        
@@ -124,25 +126,29 @@ read(uti,format4) input_names(20), seed_rand
 read(uti,format3) input_names(21), seed_text    
 read(uti,format6) input_names(22), seed_occeps   
 read(uti,format3) input_names(23), seed_allemp   
-read(uti,format1) input_names(24)
-read(uti,format1) input_names(25)
-read(uti,format1) input_names(26)
-read(uti,format4) input_names(27), iter_max
-read(uti,format4) input_names(28), iter_write
-read(uti,format3) input_names(29), iter_print
-read(uti,format3) input_names(30), gradient_type
-read(uti,format6) input_names(31), gradient_eta
-read(uti,format6) input_names(32), gradient_mu
-read(uti,format6) input_names(33), gradient_eps
-read(uti,format1) input_names(34)
-read(uti,format1) input_names(35)
-read(uti,format1) input_names(36)
-read(uti,format3) input_names(37), enforce_NZ
-read(uti,format3) input_names(38), opt_betalm
-read(uti,format3) input_names(39), pairs_scheme  
-read(uti,format6) input_names(40), constraint_eps
+read(uti,format3) input_names(24), dens_spatial  
+read(uti,format8) input_names(25), dens_nr(1), dens_dr(1) 
+read(uti,format8) input_names(26), dens_nr(2), dens_dr(2) 
+read(uti,format8) input_names(27), dens_nr(3), dens_dr(3) 
+read(uti,format1) input_names(28)
+read(uti,format1) input_names(29)
+read(uti,format1) input_names(30)
+read(uti,format4) input_names(31), iter_max
+read(uti,format4) input_names(32), iter_write
+read(uti,format3) input_names(33), iter_print
+read(uti,format3) input_names(34), gradient_type
+read(uti,format6) input_names(35), gradient_eta
+read(uti,format6) input_names(36), gradient_mu
+read(uti,format6) input_names(37), gradient_eps
+read(uti,format1) input_names(38)
+read(uti,format1) input_names(39)
+read(uti,format1) input_names(40)
+read(uti,format3) input_names(41), enforce_NZ
+read(uti,format3) input_names(42), opt_betalm
+read(uti,format3) input_names(43), pairs_scheme  
+read(uti,format6) input_names(44), constraint_eps
 do i = 3, constraint_types  
-  read(uti,format7) input_names(38+i), constraint_switch(i), &
+  read(uti,format7) input_names(42+i), constraint_switch(i), &
                     constraint_read(i,1), constraint_read(i,2)
 enddo
 !cmpi endif
@@ -158,13 +164,27 @@ constraint_read(1,1) = valence_Z
 constraint_switch(2) = 1
 constraint_read(2,1) = valence_N
 
-constraint_dim = sum(constraint_switch) - constraint_switch(26)
+constraint_dim = 0
+
+do i = 1, constraint_types-1
+  constraint_dim = constraint_dim + min(constraint_switch(i),2)
+enddo
+
 where (constraint_switch == 0) constraint_read(:,1) = 0.d0
 where (constraint_switch <= 1) constraint_read(:,2) = 0.d0
 
 !!! Assigns the value 1 to the number of gauge angles if 0 is read
 if ( proj_Mphip > -1 ) proj_Mphip = max(1,proj_Mphip)
 if ( proj_Mphin > -1 ) proj_Mphin = max(1,proj_Mphin)
+
+!!! Determines the spacing for the spatial density in spherical coordinates
+if ( dens_spatial == 0 ) then
+  dens_nr = 0   
+  dens_dr = zero
+elseif ( dens_spatial == 1 ) then
+  dens_nr(2:3) = 0   
+  dens_dr(2:3) = zero
+endif
 
 !!! Assigns the names for the hamiltonian files and opens them
 j = len_trim(adjustl(hamil_dummy))
@@ -207,6 +227,8 @@ subroutine print_input(iter_max,iter_write,iter_print)
 
 integer, intent(in) :: iter_max, iter_write, iter_print
 integer :: i, dummy_teamssize=0
+character(3) :: dens_nr_ch(3)
+character(5) :: dens_dr_ch(3)
 character(5) :: blocking_dim_ch, iter_max_ch, iter_write_ch, proj_Mphip_ch, &
                 proj_Mphin_ch, paral_teamssize_ch, seed_rand_ch
 character(10) :: gradient_eta_ch, gradient_mu_ch, gradient_eps_ch, &
@@ -215,11 +237,12 @@ character(10) :: gradient_eta_ch, gradient_mu_ch, gradient_eps_ch, &
 character(7) :: constraint_read_ch(constraint_types,2)
 character(5), dimension(:), allocatable :: blocking_id_ch
 character(len=*), parameter :: format1 = "(1a)", &
-                               format2 = "(1a30, 1a)", &
-                               format3 = "(1a30, 1i1)", &
-                               format4 = "(1a30, 1a5)", &
-                               format5 = "(1a30, 1a10)", &
-                               format6 = "(1a30, 1i1,1x,1a7,1x,1a7)"
+                               format2 = "(1a30,1a)", &
+                               format3 = "(1a30,1i1)", &
+                               format4 = "(1a30,1a5)", &
+                               format5 = "(1a30,1a10)", &
+                               format6 = "(1a30,1i1,1x,1a7,1x,1a7)", &
+                               format7 = "(1a30,1a3,1x,1a5)"
 
 allocate(blocking_id_ch(blocking_dim))
 
@@ -249,6 +272,20 @@ write(seed_rand_ch,'(1i5)') seed_rand
 write(seed_occeps_ch,'(1es10.3)') seed_occeps
 seed_rand_ch = adjustl(seed_rand_ch)
 seed_occeps_ch = adjustl(seed_occeps_ch)
+
+write(dens_nr_ch(1),'(1i3)') dens_nr(1)
+write(dens_nr_ch(2),'(1i3)') dens_nr(2)
+write(dens_nr_ch(3),'(1i3)') dens_nr(3)
+dens_nr_ch(1) = adjustl(dens_nr_ch(1))
+dens_nr_ch(2) = adjustl(dens_nr_ch(2))
+dens_nr_ch(3) = adjustl(dens_nr_ch(3))
+
+write(dens_dr_ch(1),'(1f5.2)') dens_dr(1)
+write(dens_dr_ch(2),'(1f5.2)') dens_dr(2)
+write(dens_dr_ch(3),'(1f5.2)') dens_dr(3)
+dens_dr_ch(1) = adjustl(dens_dr_ch(1))
+dens_dr_ch(2) = adjustl(dens_dr_ch(2))
+dens_dr_ch(3) = adjustl(dens_dr_ch(3))
 
 write(iter_max_ch,'(1i5)') iter_max
 write(iter_write_ch,'(1i5)') iter_write
@@ -301,26 +338,30 @@ write(uto,format4) input_names(20), seed_rand_ch
 write(uto,format3) input_names(21), seed_text    
 write(uto,format5) input_names(22), seed_occeps_ch
 write(uto,format3) input_names(23), seed_allemp  
-write(uto,format1) input_names(24)
-write(uto,format1) input_names(25)
-write(uto,format1) input_names(26)
-write(uto,format4) input_names(27), iter_max_ch
-write(uto,format4) input_names(28), iter_write_ch
-write(uto,format3) input_names(29), iter_print
-write(uto,format3) input_names(30), gradient_type
-write(uto,format5) input_names(31), gradient_eta_ch
-write(uto,format5) input_names(32), gradient_mu_ch
-write(uto,format5) input_names(33), gradient_eps_ch
-write(uto,format1) input_names(34)
-write(uto,format1) input_names(35)
-write(uto,format1) input_names(36)
-write(uto,format3) input_names(37), enforce_NZ
-write(uto,format3) input_names(38), opt_betalm
-write(uto,format3) input_names(39), pairs_scheme  
-write(uto,format5) input_names(40), constraint_eps_ch
+write(uto,format3) input_names(24), dens_spatial 
+write(uto,format7) input_names(25), dens_nr_ch(1), dens_dr_ch(1)
+write(uto,format7) input_names(26), dens_nr_ch(2), dens_dr_ch(2)
+write(uto,format7) input_names(27), dens_nr_ch(3), dens_dr_ch(3)
+write(uto,format1) input_names(28)
+write(uto,format1) input_names(29)
+write(uto,format1) input_names(30)
+write(uto,format4) input_names(31), iter_max_ch
+write(uto,format4) input_names(32), iter_write_ch
+write(uto,format3) input_names(33), iter_print
+write(uto,format3) input_names(34), gradient_type
+write(uto,format5) input_names(35), gradient_eta_ch
+write(uto,format5) input_names(36), gradient_mu_ch
+write(uto,format5) input_names(37), gradient_eps_ch
+write(uto,format1) input_names(38)
+write(uto,format1) input_names(39)
+write(uto,format1) input_names(40)
+write(uto,format3) input_names(41), enforce_NZ
+write(uto,format3) input_names(42), opt_betalm
+write(uto,format3) input_names(43), pairs_scheme  
+write(uto,format5) input_names(44), constraint_eps_ch
 do i = 3, constraint_types
   if ( constraint_switch(i) < 2 ) then 
-    write(uto,format6) input_names(38+i), constraint_switch(i), &
+    write(uto,format6) input_names(42+i), constraint_switch(i), &
                        constraint_read_ch(i,1)
   else
     write(uto,format6) input_names(38+i), constraint_switch(i), &
@@ -365,6 +406,9 @@ end subroutine print_input
 !cmpi call mpi_bcast(seed_symm,1,mpi_integer,0,mpi_comm_world,ierr)
 !cmpi call mpi_bcast(seed_occeps,1,mpi_double_precision,0,mpi_comm_world,ierr)
 !cmpi call mpi_bcast(seed_allemp,1,mpi_integer,0,mpi_comm_world,ierr)
+!cmpi call mpi_bcast(dens_spatial,1,mpi_integer,0,mpi_comm_world,ierr)
+!cmpi call mpi_bcast(dens_nr,3,mpi_integer,0,mpi_comm_world,ierr)
+!cmpi call mpi_bcast(dens_dr,3,mpi_double_precision,0,mpi_comm_world,ierr)
 
 !!! Iterative procedure
 !cmpi call mpi_bcast(iter_max,1,mpi_integer,0,mpi_comm_world,ierr)
@@ -543,6 +587,20 @@ if ( (seed_allemp < 0) .or. (seed_allemp > 1) ) then
         &(seed_allemp) = ", seed_allemp," should be 0 or 1."
 endif 
 
+if ( (dens_spatial < 0) .or. (dens_spatial > 3) ) then
+  ierror = ierror + 1
+  print "(a,1i1,a)","The option for including all the empty states &
+        &(seed_allemp) = ", seed_allemp," should be 0 or 1."
+endif 
+
+do i = 1, 3
+  if ( (dens_nr(i) < 0.d0) .or. (dens_dr(i) < 0.d0) ) then
+    ierror = ierror + 1
+    print "(a,1i1,a)","The values for the discretization of the spatial &
+          &one-body density should be positive."
+  endif
+enddo
+
 !!!
 !!! Iterations
 !!!
@@ -593,9 +651,9 @@ endif
 !!! Constraints
 !!!
 
-where ((constraint_switch < 0) .and. (constraint_switch > 2)) switch_check = 1
+where ((constraint_switch < 0) .and. (constraint_switch > 3)) switch_check = 1
 
-do i = 17, constraint_types
+do i = 18, constraint_types
  if ( constraint_switch(i) > 1 ) switch_check(i) = 1
 enddo
 
@@ -613,13 +671,29 @@ if ( (opt_betalm < 0) .or. (opt_betalm > 2) ) then
          opt_betalm," should be between 0 and 2."
 endif 
 
+if ( (opt_betalm == 2) .and. ((constraint_read(5,1) < 0.0d0) .or. &
+     (constraint_read(5,2) < 0.0d0)) ) then
+  ierror = ierror + 1
+  print "(a,2es11.3,a)","The values of beta (constraint_read(5,1:2)) = ", & 
+         constraint_read(5,1),constraint_read(5,2)," should be positive."
+endif 
+
+if ( (constraint_switch(17) == 3) .and. (constraint_read(17,1) - &
+     constraint_read(17,2) < 0.0d0) ) then
+  ierror = ierror + 1
+  print "(a,1es10.3,a,1es10.3,a)","The value of the isoscalar radius &
+        &constraint (constraint_read(17,1))",constraint_read(17,1)," should &
+        &be larger than the value of the isovector radius constraint &
+        &(constraint_read(17,2))",constraint_read(17,2)
+endif
+
 if ( (pairs_scheme < 0) .or. (pairs_scheme > 1) ) then
   ierror = ierror + 1
   print "(a,1i1,a)","The scheme for the coupling of pairs (pairs_scheme) = ", & 
          pairs_scheme," should be 0 or 1."
 endif 
 
-if ( constraint_switch(18) == 1 ) then
+if ( constraint_switch(19) == 1 ) then
   ierror = ierror + 1
   print "(a)", "The constraint on <Jy> has to be switched off for now as the &
         &wave functions are real."
@@ -634,7 +708,8 @@ endif
 if ( isum /= 0 ) then
   ierror = ierror + 1
   print "(a,1i1,a)", "The flags to switch on/off the constraints & 
-        &(constraint_switch) should be 0, 1 or 2 (only multipoles)."
+        &(constraint_switch) accept the values: 0, 1 (all), 2, 3 (radius and &
+        &multipoles)."
 endif
 !cmpi endif 
 

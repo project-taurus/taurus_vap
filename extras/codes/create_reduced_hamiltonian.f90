@@ -90,8 +90,8 @@ character(3) ::  app2b='.2b'
 integer(i8) :: trperm
 integer(i16) :: ared, bred, cred, dred
 integer :: ht, i, j, t, fac_ht, ialloc=0, &
-           a, ja, ma, la, ta, b, jb, mb, lb, tb, bmax, tmax, &
-           c, jc, mc, lc, tc, d, jd, md, ld, td, &
+           a, ja, ma, la, ta, b, jb, mb, lb, tb, tmax, &
+           c, jc, mc, lc, tc, d, jd, md, ld, td, dmax, &
            uth6, uth7, uth8
 real(r64) :: Vtmp, Vcut, Vdec
 real(rH2) :: Vred
@@ -161,7 +161,7 @@ if ( myrank == 0 ) then
 endif 
 
 !------------------------------------------------------------------------------!
-! Reads/uncouples/writes the two-body parts                                    !
+! Reads the two-body parts                                                     !
 !------------------------------------------------------------------------------!
     
 allocate( shells_idx(HOsh_dim,HOsh_dim,HOsh_dim,HOsh_dim), stat=ialloc ) 
@@ -218,25 +218,25 @@ do a = 1, HOsp_dim
   la = HOsp_l(a)
   ma = HOsp_2mj(a)
   ta = HOsp_2mt(a)
-  do c = a, HOsp_dim
-    lc = HOsp_l(c)
-    mc = HOsp_2mj(c)
-    tc = HOsp_2mt(c)
-    do d = c+1, HOsp_dim
-      ld = HOsp_l(d)
-      md = HOsp_2mj(d)
-      td = HOsp_2mt(d)
-      bmax = HOsp_dim
-      if ( c == a ) bmax = d
-      do b = a+1, bmax
-        lb = HOsp_l(b)
-        mb = HOsp_2mj(b)
-        tb = HOsp_2mt(b)
+  do b = a+1, HOsp_dim
+    lb = HOsp_l(b)
+    mb = HOsp_2mj(b)
+    tb = HOsp_2mt(b)
+    if ( ma + mb < 0 ) cycle
+    do c = a, HOsp_dim
+      lc = HOsp_l(c)
+      mc = HOsp_2mj(c)
+      tc = HOsp_2mt(c)
+      dmax = HOsp_dim
+      if ( c == a ) dmax = b
+      do d = c+1, dmax
+        ld = HOsp_l(d)
+        md = HOsp_2mj(d)
+        td = HOsp_2mt(d)
 
         if ( (-1)**(la+lb) /= (-1)**(lc+ld) ) cycle
         if ( ta + tb /= tc + td ) cycle
         if ( ma + mb /= mc + md ) cycle
-        if ( ma + mb < 0 ) cycle
  
         call uncouple_J(a,b,c,d,Vdec) 
     
@@ -271,7 +271,8 @@ close(uth8, status='keep')
 !cmpi hamil_H2dim = hamil_H2red
 
 if ( myrank == 0 ) then
-! print*, hamil_H2dim
+  write(uto,*) "Name of the Hamiltonian: ", hamil_file    
+  write(uto,*) "Number of uncoupled matrix elements:", hamil_H2dim   
   write(uthr) hamil_H2dim   
 endif
 

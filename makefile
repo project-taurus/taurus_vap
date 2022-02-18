@@ -36,10 +36,10 @@ ifeq ($(FC),$(filter $(FC), gfortran mpif90))
    OPT=-O3 -J$(MODDIR) -fopenmp
  endif
 else ifeq ($(FC),$(filter $(FC), ifort mpiifort))
- OPT=-O3 -module $(MODDIR) -mkl -lmkl_sequential
+ OPT=-O3 -module $(MODDIR) -qmkl -lmkl_sequential
  LIB=
  ifeq ($(TH),omp)
-   OPT=-O3 -module $(MODDIR) -mkl -qopenmp -lmkl_intel_thread
+   OPT=-O3 -module $(MODDIR) -qmkl -qopenmp -lmkl_intel_thread
  endif
 endif
 

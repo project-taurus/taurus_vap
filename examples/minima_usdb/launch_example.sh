@@ -80,13 +80,13 @@ do
       line0=$(grep -m 1 -n "Full H   " output.$zzz.$nnn.$ggg.$i.txt)
       line0=$(echo $line0 | sed "s/:.*//" )
       let line1=$line0-2
-      let line2=$line0+24
-      let line3=$line0+25
+      let line2=$line0+43
+      let line3=$line0+44
 
       enertmp=$(awk 'NR=='$line0'{print $6}' output.$zzz.$nnn.$ggg.$i.txt)
       epaitmp=$(awk 'NR=='$line1'{print $6}' output.$zzz.$nnn.$ggg.$i.txt)
-      betatmp=$(awk 'NR=='$line2'{print $2}' output.$zzz.$nnn.$ggg.$i.txt)
-      gammtmp=$(awk 'NR=='$line3'{print $2}' output.$zzz.$nnn.$ggg.$i.txt)
+      betatmp=$(awk 'NR=='$line2'{print $4}' output.$zzz.$nnn.$ggg.$i.txt)
+      gammtmp=$(awk 'NR=='$line3'{print $4}' output.$zzz.$nnn.$ggg.$i.txt)
 
       # Store if it is the minimum
       if (( $(echo "$enertmp < $enermin" | bc -l) )); then

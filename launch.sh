@@ -40,7 +40,7 @@ cp $heredir/$input .
 if [ $omp = "yes" ] && [ $nthreads -ne 0 ]; then
   export OMP_NUM_THREADS=$nthreads
   # only for large model spaces
-  #export OMP_STACKSIZE=100M
+  export OMP_STACKSIZE=100M
 fi
 
 # Runs the code (MPI or not)

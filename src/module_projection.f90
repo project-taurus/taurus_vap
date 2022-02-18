@@ -37,41 +37,40 @@ complex(r64), dimension(:), allocatable :: proj_weip, & ! proton    "   weights
 real(r64) :: proj_facpi=2*pi ! factor for integral reduction      
 
 !!! Rotated quantities
-complex(r64) :: rot_over,  & ! overlap
-                rot_ener,  & ! energy
-                rot_pari,  & ! parity
-                rot_ra2p,  & ! radius^2 protons
-                rot_ra2n,  & ! radius^2 neutrons
-                rot_prot,  & ! proton number 
-                rot_neut,  & ! neutron number
-                rot_prot2, & ! proton variance
-                rot_neut2, & ! neutron variance
+complex(r64) :: rot_over,    & ! overlap
+                rot_ener,    & ! energy
+                rot_pari,    & ! parity
+                rot_rad2(2), & ! radius^2 (1=p,2=n)
+                rot_prot,    & ! proton number 
+                rot_neut,    & ! neutron number
+                rot_prot2,   & ! proton variance
+                rot_neut2,   & ! neutron variance
                 rot_amj(3),  & ! angular momentum J_i (1=x, 2=y, 3=z)
                 rot_amj2(3), & ! angular momentum J_i^2 (1=x, 2=y, 3=z) 
-                rot_Qlm(3,0:4,4) ! multipole Qlm (1=p,2=n,3=a), m, l
+                rot_Qlm(2,0:4,4) ! multipole Qlm (1=p,2=n), m, l
 complex(r64), dimension(12) :: rot_ecomp ! "components" of the rotated energy    
 complex(r64), dimension(:,:), allocatable :: rot_occnum, & ! occupation numbers
                                              rot_H20, & ! Quantities for the
                                              rot_A,   & ! projected gradient
                                              ROT ! Rotation matrix
 !!! Projected quantities 
-complex(r64) :: pnp_over,  & ! overlap
-                pnp_ener,  & ! energy
-                pnp_pari,  & ! parity
-                pnp_ra2p,  & ! radius^2 protons
-                pnp_ra2n,  & ! radius^2 neutrons
-                pnp_prot,  & ! proton number 
-                pnp_neut,  & ! neutron number
-                pnp_prot2, & ! proton variance
-                pnp_neut2, & ! neutron variance
+complex(r64) :: pnp_over,    & ! overlap
+                pnp_ener,    & ! energy
+                pnp_pari,    & ! parity
+                pnp_rad2(2), & ! radius^2 (1=p,2=n) 
+                pnp_prot,    & ! proton number 
+                pnp_neut,    & ! neutron number
+                pnp_prot2,   & ! proton variance
+                pnp_neut2,   & ! neutron variance
                 pnp_amj(3),  & ! angular momentum J_i (1=x, 2=y, 3=z)
                 pnp_amj2(3), & ! angular momentum J_i^2 (1=x, 2=y, 3=z) 
-                pnp_Qlm(3,0:4,4) ! multipole Qlm (1=p,2=n,3=a), m, l
+                pnp_Qlm(2,0:4,4) ! multipole Qlm (1=p,2=n), m, l
 complex(r64), dimension(12) :: pnp_ecomp ! "components" of the projected energy  
 complex(r64), dimension(:,:), allocatable :: pnp_occnum, & ! occupation numbers
-                                             pnp_H20, & ! Quantities for the
-                                             pnp_A,   & ! projected gradient
-                                             pnp_AH20
+                                             pnp_H20,  & ! quantities for the
+                                             pnp_A,    & ! projected gradient
+                                             pnp_AH20, &
+                                             pnp_rho     ! projected density
 
 CONTAINS 
 
@@ -88,7 +87,7 @@ allocate( rot_occnum(HOsh_dim,2), pnp_occnum(HOsh_dim,2), &
           rot_H20(HOsp_dim,HOsp_dim), pnp_H20(HOsp_dim,HOsp_dim), & 
           rot_A(HOsp_dim,HOsp_dim), pnp_A(HOsp_dim,HOsp_dim), & 
           pnp_AH20(HOsp_dim,HOsp_dim), ROT(HOsp_dim,HOsp_dim), &
-          stat=ialloc )
+          pnp_rho(HOsp_dim,HOsp_dim), stat=ialloc )
 if ( ialloc /= 0 ) stop 'Error during allocation of arrays for the projection'
 
 ROT = zzero
@@ -206,7 +205,7 @@ real(r64), dimension(:), allocatable :: voveru0
 complex(r64) :: weip, wein, amjx_p, amjx_n, amjy_p, amjy_n, amjz_p, amjz_n
 complex(r64), dimension(ndim,ndim) :: bogo_zU0bar, bogo_zV0bar, & 
                                       bogo_zU0tilde, bogo_zV0tilde, ROTG
-complex(r64), dimension(ndim**2) :: Qlm
+complex(r64), dimension(ndim**2) :: Qlm, rad2
 
 !!! Initialization: sets most gauge-dependent quantity to zero
 call reset_pnp(iopt)
@@ -339,13 +338,13 @@ do nangle = nangle_min, nangle_max
     
         call calculate_expectval_obo_cplx(dens_rhoLR,Qlm,rot_Qlm(1,j,i), &
                                           rot_Qlm(2,j,i),ndim)
-        rot_Qlm(3,j,i) = rot_Qlm(1,j,i) + rot_Qlm(2,j,i)
       enddo
     enddo
   
     !!! radius square      
-    call calculate_expectval_obo_cplx(dens_rhoLR,zone*radius_r2,rot_ra2p, &
-                                      rot_ra2n,ndim)
+    rad2(:) = zone * (radius_r2(:,1) + radius_r2(:,2))
+    call calculate_expectval_obo_cplx(dens_rhoLR,rad2,rot_rad2(1),rot_rad2(2), &
+                                      ndim)
   endif
   
   !!! Sums this gauge angle constribution to the integral
@@ -393,13 +392,13 @@ if ( iopt == 0 ) then
   pnp_H20 = zzero
   pnp_AH20 = zzero
 else
-  pnp_ra2p = zzero  
-  pnp_ra2n = zzero  
+  pnp_rad2 = zzero  
   pnp_amj = zzero
   pnp_amj2 = zzero
   pnp_Qlm = zzero
   pnp_occnum = zzero
   pnp_ecomp = zzero
+  pnp_rho = zzero
 endif
 
 end subroutine reset_pnp  
@@ -439,13 +438,13 @@ if ( iopt == 0 ) then
   pnp_H20 = pnp_H20 + rot_H20 * factor1
   pnp_AH20 = pnp_AH20 + rot_A * factor2
 else
-  pnp_ra2p = pnp_ra2p + rot_ra2p * factor1
-  pnp_ra2n = pnp_ra2n + rot_ra2n * factor1
+  pnp_rad2 = pnp_rad2 + rot_rad2 * factor1
   pnp_amj = pnp_amj + rot_amj * factor1
   pnp_amj2 = pnp_amj2 + rot_amj2 * factor1
   pnp_Qlm = pnp_Qlm + rot_Qlm * factor1
   pnp_occnum = pnp_occnum + rot_occnum * factor1
   pnp_ecomp = pnp_ecomp + rot_ecomp * factor1
+  pnp_rho = pnp_rho + dens_rhoLR * factor1
 endif
 
 end subroutine sum_gauge                  
@@ -462,15 +461,17 @@ end subroutine sum_gauge
 !cmpi subroutine reduce_projected_quantities(iopt)
 
 !cmpi integer, intent(in) :: iopt
-!cmpi integer :: ndim2, ierr=0
-!cmpi complex(r64) :: pnp_over_red, pnp_ener_red, pnp_pari_red, pnp_ra2p_red, &
-!cmpi                 pnp_ra2n_red, pnp_prot_red, pnp_neut_red, pnp_prot2_red, &
-!cmpi                 pnp_neut2_red, pnp_amj_red(3), pnp_amj2_red(3),  &
-!cmpi                 pnp_Qlm_red(3,0:4,4) 
+!cmpi integer :: ndim2, ndim3, ierr=0
+!cmpi complex(r64) :: pnp_over_red, pnp_ener_red, pnp_pari_red, & 
+!cmpi                 pnp_rad2_red(2), pnp_prot_red, pnp_neut_red, &
+!cmpi                 pnp_prot2_red, pnp_neut2_red, &
+!cmpi                 pnp_amj_red(3), pnp_amj2_red(3),  &
+!cmpi                 pnp_Qlm_red(2,0:4,4) 
 !cmpi complex(r64), dimension(12) :: pnp_ecomp_red
 !cmpi complex(r64), dimension(:,:), allocatable :: pnp_occnum_red, pnp_H20_red, &
-!cmpi                                              pnp_A_red, pnp_AH20_red
-
+!cmpi                                              pnp_A_red, pnp_AH20_red, &
+!cmpi                                              pnp_rho_red
+!cmpi
 !cmpi  call mpi_reduce(pnp_over,pnp_over_red,1,mpi_double_complex, &
 !cmpi                  mpi_sum,0,mpi_comm_peers,ierr)
 !cmpi  call mpi_reduce(pnp_ener,pnp_ener_red,1,mpi_double_complex, &
@@ -509,27 +510,29 @@ end subroutine sum_gauge
 !cmpi    pnp_AH20 = pnp_AH20_red
 !cmpi  else
 !cmpi    ndim2 = 2 * HOsh_dim
+!cmpi    ndim3 = HOsh_dim**2
 !cmpi    pnp_occnum_red = zzero * pnp_occnum
-!cmpi    call mpi_reduce(pnp_ra2p,pnp_ra2p_red,1,mpi_double_complex, &
-!cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
-!cmpi    call mpi_reduce(pnp_ra2n,pnp_ra2n_red,1,mpi_double_complex, &
+!cmpi    pnp_rho_red = zzero * pnp_rho   
+!cmpi    call mpi_reduce(pnp_rad2,pnp_rad2_red,2,mpi_double_complex, &
 !cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
 !cmpi    call mpi_reduce(pnp_amj,pnp_amj_red,3,mpi_double_complex, &
 !cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
 !cmpi    call mpi_reduce(pnp_amj2,pnp_amj2_red,3,mpi_double_complex, &
 !cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
-!cmpi    call mpi_reduce(pnp_Qlm,pnp_Qlm_red,60,mpi_double_complex, &
+!cmpi    call mpi_reduce(pnp_Qlm,pnp_Qlm_red,40,mpi_double_complex, &
 !cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
 !cmpi    call mpi_reduce(pnp_occnum,pnp_occnum_red,ndim2,mpi_double_complex, & 
 !cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
+!cmpi    call mpi_reduce(pnp_rho,pnp_rho_red,ndim3,mpi_double_complex, & 
+!cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
 !cmpi    call mpi_reduce(pnp_ecomp,pnp_ecomp_red,12,mpi_double_complex, &
 !cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
-!cmpi    pnp_ra2p = pnp_ra2p_red
-!cmpi    pnp_ra2n = pnp_ra2n_red
+!cmpi    pnp_rad2 = pnp_rad2_red
 !cmpi    pnp_amj = pnp_amj_red
 !cmpi    pnp_amj2 = pnp_amj2_red
 !cmpi    pnp_Qlm = pnp_Qlm_red
 !cmpi    pnp_occnum = pnp_occnum_red
+!cmpi    pnp_rho = pnp_rho_red
 !cmpi    pnp_ecomp = pnp_ecomp_red
 !cmpi  endif
 
@@ -977,15 +980,17 @@ subroutine print_results(Mphip,Mphin)
 
 integer, intent(in) :: Mphip, Mphin
 integer :: i, j, ialloc=0
-real(r64) :: over, pari, ra2p, ra2n, ra2a, ra2ch, prot, neut, prot2, neut2, & 
-             amj(3), amj2(3), Qlm(3,0:4,4), betalm(3,0:4,4), betaT(3), &
-             gammT(3), P_T00_J1m1, P_T00_J10, P_T00_J1p1, &
+real(r64) :: over, pari, prot, neut, prot2, neut2,& 
+             rad2_p, rad2_n, rad2_ch, rad2_is, rad2_iv, &
+             amj(3), amj2(3), Qlm(4,0:4,4), betalm(4,0:4,4), betaT(4), &
+             gammT(4), P_T00_J1m1, P_T00_J10, P_T00_J1p1, &
              P_T1m1_J00, P_T10_J00, P_T1p1_J00, ener_0b, ener_1b_p, ener_1b_n, & 
              ener_2bPH_pp, ener_2bPH_pn, ener_2bPH_np, ener_2bPH_nn,&
              ener_2bPP_pp, ener_2bPP_pn, ener_2bPP_np, ener_2bPP_nn, &
              energy_p, energy_n
-real(r64), dimension(:,:), allocatable, save :: occnum_pnp
-real(r64), dimension(:,:), allocatable :: occnum
+complex(r64) :: fac
+real(r64), dimension(:,:), allocatable, save :: occnum_pnp, occnum
+complex(r64), dimension(:,:), allocatable, save :: rho_pnp
 character(1) :: i_ch, j_ch
 character(4) :: Qlm_ch
 character(7) :: betalm_ch
@@ -996,8 +1001,8 @@ character(len=*), parameter :: format1 = "(1a20,2f12.7)", &
                                format3 = "(1a9,2f13.6,13x,1f13.6)", &
                                format4 = "(1a9,4f13.6)", &
                                format5 = "(1a20,1a18,/)", &                              
-                               format6 = "(1a4,3f12.6)", &
-                               format7 = "(1a7,3f12.6)", &
+                               format6 = "(1a4,4f12.6)", &
+                               format7 = "(1a7,5f12.6)", &
                                format8 = "(1a5,3f12.6)", &
                                format9 = "(1a5,12x,1f12.6)", &
                                format10 = "(1a13,3f12.6)", &
@@ -1006,9 +1011,29 @@ character(len=*), parameter :: format1 = "(1a20,2f12.7)", &
                                format13 = "(1a61)", &
                                format14 = "(1a64)", &
                                format15 = "(1a3,34x,2f13.6)"
+!!!
+!!! Initialization
+!!!
+if ( allocated(rho_pnp) .eqv. .false. ) then 
+  allocate( rho_pnp(HOsp_dim,HOsp_dim), stat=ialloc )
+  if ( ialloc /= 0 ) stop 'Error during allocation of projected density'
+  rho_pnp = zzero
+endif
+
+if ( allocated(occnum_pnp) .eqv. .false. ) then 
+  allocate( occnum_pnp(HOsp_dim,HOsp_dim), stat=ialloc )
+  if ( ialloc /= 0 ) stop 'Error during allocation of occupation numbers'
+  occnum_pnp = zero
+endif
+
+if ( allocated(occnum) .eqv. .false. ) then 
+  allocate( occnum(HOsh_dim,2), stat=ialloc )
+  if ( ialloc /= 0 ) stop 'Error during allocation of occupation numbers'
+  occnum = zero
+endif
 
 !cmpi if ( paral_myrank == 0 ) then
-if ( max(Mphip, Mphin) > 1 ) then
+if ( max(Mphip,Mphin) > 1 ) then
   print '(/,60("%"),/,17x,"PROJECTED STATE PROPERTIES",17x,/,60("%"),/)'
 else
 !!!
@@ -1016,8 +1041,14 @@ else
 endif
 !cmpi endif
 
+!!!
 !!! Projects the wave function
+!!!
 call project_wavefunction(1,0,Mphip,Mphin,HOsp_dim)
+
+if ( max(Mphip,Mphin) > 1 ) then
+  rho_pnp = pnp_rho / pnp_over
+endif
 
 !cmpi if ( paral_myrank == 0 ) then
 
@@ -1089,17 +1120,21 @@ write(uto,format4)  'Full H   ', (ener_1b_p + ener_2bPH_pp + ener_2bPP_pp), &
 !!!
 !!! Multipole deformation
 !!!
-print '(/,"MULTIPOLE DEFORMATIONS",/,22("="),//, &
-       &"Q_lm",5x,"Protons",4x,"Neutrons",4x,"Nucleons",/,40("-"))'
+print '(/,"MULTIPOLE DEFORMATIONS",/,22("="),/, &
+       & 37x,"Nucleons",/, &
+       &"Q_lm",5x,"Protons",4x,"Neutrons",3x,"Isoscalar",3x,"Isovector", & 
+       & /,52("-"))'
 
-Qlm = real( pnp_Qlm / pnp_over )
+Qlm(1:2,:,:) = real( pnp_Qlm(1:2,:,:) / pnp_over )
+Qlm(3,:,:) =  Qlm(1,:,:) + Qlm(2,:,:)
+Qlm(4,:,:) = -Qlm(1,:,:) + Qlm(2,:,:)
 
 do i = 1, 4
   write(i_ch,'(1i1)') i
   do j = 0, i
     write(j_ch,'(1i1)') j
     Qlm_ch = "Q_" // i_ch // j_ch
-    write(uto,format6) Qlm_ch, Qlm(1,j,i), Qlm(2,j,i), Qlm(3,j,i)
+    write(uto,format6) Qlm_ch, Qlm(1,j,i), Qlm(2,j,i), Qlm(3,j,i), Qlm(4,j,i)
   enddo
 enddo
 
@@ -1110,13 +1145,16 @@ do i = 1, 4
   enddo
 enddo
 
-print '(/,"Beta_lm",5x,"Protons",4x,"Neutrons",4x,"Nucleons",/,43("-"))'
+print '(/,40x,"Nucleons",/, & 
+       & "Beta_lm",5x,"Protons",4x,"Neutrons",3x,"Isoscalar",3x,"Isovector", &
+       & /,55("-"))'
 do i = 1, 4
   write(i_ch,'(1i1)') i
   do j = 0, i
     write(j_ch,'(1i1)') j
     betalm_ch = "Beta_" // i_ch // j_ch 
-    write(uto,format7) betalm_ch, betalm(1,j,i), betalm(2,j,i), betalm(3,j,i)
+    write(uto,format7) betalm_ch, betalm(1,j,i), betalm(2,j,i), betalm(3,j,i), &
+                       betalm(4,j,i)
   enddo
 enddo
 
@@ -1130,28 +1168,34 @@ where ( (Qlm(:,0,2) < 0.d0) .and. (Qlm(:,2,2) >= 0.d0) ) gammT = pi - gammT
 where ( (Qlm(:,0,2) < 0.d0) .and. (Qlm(:,2,2) <  0.d0) ) gammT = pi + gammT
 gammT = gammT * 180.0/pi
 
-print '(/,"Triaxial",4x,"Protons",4x,"Neutrons",4x,"Nucleons",/,43("-"))'
-write(uto,format7) 'Beta   ', betaT(1), betaT(2), betaT(3)
-write(uto,format7) 'Gamma  ', gammT(1), gammT(2), gammT(3)
+print '(/,40x,"Nucleons",/,"Triaxial",4x,"Protons",4x,"Neutrons",3x, &
+       & "Isoscalar",3x,"Isovector",/,55("-"))'
+write(uto,format7) 'Beta   ', betaT(1), betaT(2), betaT(3), betaT(4)
+write(uto,format7) 'Gamma  ', gammT(1), gammT(2), gammT(3), gammT(4)
 
 !!!
 !!! Radius RMS
 !!!
-ra2p = real( pnp_ra2p / pnp_over )
-ra2n = real( pnp_ra2n / pnp_over )
-ra2a = real( (pnp_ra2p + pnp_ra2n) / (pnp_prot + pnp_neut) )
-ra2p = ra2p / prot
-ra2n = ra2n / neut
+rad2_p = real( pnp_rad2(1) / pnp_prot )
+rad2_n = real( pnp_rad2(2) / pnp_neut )
+
+rad2_is = real( ( pnp_rad2(1) + pnp_rad2(2)) / (pnp_prot + pnp_neut) )
+rad2_iv = real( (-pnp_rad2(1) + pnp_rad2(2)) / (pnp_prot + pnp_neut) )
 
 ! The correction is taken from Cipollone.2015.PhysRevC.92.014306
-ra2ch = ra2p + 0.88d0 - 0.11d0 * (prot / neut ) + 0.75d0 * (hbarc / mass_mp)**2
+rad2_ch = rad2_p + 0.88d0 - 0.11d0 * (prot / neut ) & 
+                 + 0.75d0 * (hbarc / mass_mp)**2
 
-print '(/,"RADIUS",/,6("="),//, &
-      & 2x,"i",3x,"<r_i^2>^1/2",/,17("-"))'
-write(uto,format12) '  p  ', sqrt(ra2p)
-write(uto,format12) '  n  ', sqrt(ra2n)
-write(uto,format12) '  a  ', sqrt(ra2a)
-write(uto,format12) ' ch  ', sqrt(ra2ch)
+print '(/,"RADIUS",/,6("="),/, &
+       & 40x,"Nucleons",/, &
+       & "Quantity",4x,"Protons",4x,"Neutrons",3x,"Isoscalar",3x,"Isovector", &
+       & 5x,"Charge"/,67("-"))'
+write(uto,format7) '  r    ', sqrt(rad2_p), sqrt(rad2_n), sqrt(rad2_is), &
+                              sign(sqrt(abs(rad2_iv)),rad2_iv), sqrt(rad2_ch)
+write(uto,format7) '  r^2  ', rad2_p, rad2_n, rad2_is, rad2_iv, rad2_ch
+
+!print '(/,"Corrections for the charge radius: &
+!      &Cipollone.2015.PhysRevC.92.014306")'
 
 !!!
 !!! Angular momentum
@@ -1189,40 +1233,42 @@ endif
 !!! Occupation numbers            
 !!!
 if ( max(Mphip,Mphin) > 1 ) then 
-  allocate( occnum_pnp (HOsh_dim,2), stat=ialloc )
-  if ( ialloc /= 0 ) stop 'Error during allocation of occupation numbers'
   occnum_pnp = real( pnp_occnum / pnp_over )
-  return
 else 
-  allocate( occnum (HOsh_dim,2), stat=ialloc )
-  if ( ialloc /= 0 ) stop 'Error during allocation of occupation numbers'
   occnum = real( pnp_occnum / pnp_over )
 endif
 
-open(ute, file='occupation_numbers.dat', status='replace', action='write', &       
-          form='formatted')                                                     
-write(ute,format13) "Occupation numbers"        
-write(ute,format14) "  #    2*mt    n     l    2*j   label   unprojected &
+if ( max(Mphip,Mphin) == 1 ) then
+  open(ute, file='occupation_numbers.dat', status='replace', action='write', &       
+            form='formatted')                                                     
+  write(ute,format13) "Occupation numbers"        
+  write(ute,format14) "  #    2*mt    n     l    2*j   label   unprojected &
                     &   projected"
 
-do i = 1, 2      
-  write(ute,'(64("-"))')
-  do j = 1, HOsh_dim
-    if ( max(proj_Mphip,proj_Mphin) > 1 ) then
+  do i = 1, 2      
+    write(ute,'(64("-"))')
+    do j = 1, HOsh_dim
       write(ute,format11) j, (-1)**i, HOsh_n(j), HOsh_l(j), HOsh_2j(j), & 
                           HOsh_na(j), occnum(j,i), occnum_pnp(j,i) 
-    else
-      write(ute,format11) j, (-1)**i, HOsh_n(j), HOsh_l(j), HOsh_2j(j), & 
-                          HOsh_na(j), occnum(j,i)
-    endif
+    enddo
+    write(ute,format15) "sum", sum(occnum(:,i)), sum(occnum_pnp(:,i))
   enddo
-    if ( max(proj_Mphip,proj_Mphin) > 1 ) then
-      write(ute,format15) "sum", sum(occnum(:,i)), sum(occnum_pnp(:,i))
-    else
-      write(ute,format15) "sum", sum(occnum(:,i))
-    endif
-enddo
-close(ute, status='keep')                                                       
+
+  close(ute, status='keep')                                                       
+endif
+
+!!!
+!!! Spatial one-body density      
+!!!
+if ( max(proj_Mphip,proj_Mphin) > 1 ) then
+  fac = zone 
+else
+  fac = zzero
+endif
+
+if ( (dens_spatial > 0) .and. (max(Mphip,Mphin) == 1) ) then
+  call calculate_spatial_density(zone*dens_rhoRR,fac*rho_pnp,HOsp_dim)
+endif
 
 !!!
 !!! Complementary informations    
@@ -1236,6 +1282,14 @@ end select
 
 print '(/,60("%"),/,20x,"COMPLEMENTARY FILES",21x,/,60("%"),/)'
 print '(5x,"Description",17x,"File",/,44("-"))'
+if ( dens_spatial == 1 ) then
+  print*,"Spatial density int: spatial_density_R.dat"
+elseif ( dens_spatial == 2 ) then
+  print*,"Spatial density int: spatial_density_R.dat"
+  print*,"Spatial density 3D : spatial_density_RThetaPhi.dat"
+elseif ( dens_spatial == 3 ) then
+  print*,"Spatial density 3D : spatial_density_XYZ.dat"
+endif
 print*,"Occupation numbers : occupation_numbers.dat"
 print*,"Canonical basis    : canonicalbasis.dat"
 print*,"Eigenbasis h       : eigenbasis_h.dat"

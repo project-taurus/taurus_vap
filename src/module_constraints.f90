@@ -24,11 +24,12 @@ use Projection, only: proj_Mphip, proj_Mphin
 implicit none
 
 !!! Number of constraints and options for specific cases
-integer, parameter :: constraint_types=26, & ! Number of constraint types     
-                      constraint_max=40      ! Maximum number of constraints
+integer, parameter :: constraint_types=27, & ! Number of constraint types     
+                      constraint_max=42      ! Maximum number of constraints
 integer :: constraint_dim=0,  & ! Number of constraints to be applied
            constraint_pair=0, & ! Number of pairing constraints
            constraint_switch(constraint_types), & ! Activate constraints
+           constraint_id(constraint_types), & ! Remember order of constraints
            enforce_NZ, & ! Apply constraint on N and Z even if PNVAP
            opt_betalm    ! Constraint on (beta,gamma) instead of (Q20,Q22)
 
@@ -62,12 +63,22 @@ CONTAINS
 !   Q22 = beta * sin(gamma) * coef * sqrt(2)                                   !
 ! where                                                                        !
 !   coef = 3/(4*pi) * r0**2 * A**(5/3)                                         !
+!                                                                              !
+! For constraint_switch = 3, the values read in input correspond to the        !
+! isoscalar/isovector constraints and are transformed into the proton/neutron  !
+! values as                                                                    !
+! Q_p = (Q_is - Q_iv) / 2                                                      !
+! Q_n = (Q_is + Q_iv) / 2                                                      !
+!                                                                              !
+! For the radius, the values read are squared as we compute <r^2> and we note  !
+! that it is also necessary to divide by the expectation values <Z>, <N> or    !
+! <A> (done when calculating the expectation values).                          !
 !------------------------------------------------------------------------------!
 subroutine set_constraints
 
 integer :: i, j, m, n, p, ialloc=0
 integer(i64) :: k
-real(r64) :: constraint_beta(2), constraint_gamma(2)
+real(r64) :: constraint_beta(2), constraint_gamma(2), value_is, value_iv, sig
 real(r64), dimension(:), allocatable :: Q
 
 !!! Lifts the constraint on the number of protons if PNVAP and no forcing, or
@@ -108,7 +119,7 @@ lagrange_lambda0 = zero
 lagrange_lambda1 = zero
 Lchol = zero
 
-!!! If opt_betalm > 0, calculates the coresponding value of Qlm
+!!! If opt_betalm > 0, calculates the corresponding value of Qlm
 constraint_beta(:)  = constraint_read(5,:)
 constraint_gamma(:) = constraint_read(7,:) * pi / 180.d0
                              
@@ -117,8 +128,8 @@ if ( opt_betalm > 0 ) then
   do i = 1, 4
     do j = 0, i 
       m = m + 1      
-      p = 2 * kdelta(constraint_switch(m),1)
-      do n = 1, constraint_switch(m)
+      p = 2 * (kdelta(constraint_switch(m),1) + kdelta(constraint_switch(m),3))
+      do n = 1, min(constraint_switch(m),2)
         constraint_read(m,n) = constraint_read(m,n) / coeff_betalm(n+p,i)
       enddo
     enddo           
@@ -127,29 +138,53 @@ endif
                              
 if ( opt_betalm > 1 ) then                             
   !!! beta triaxial          
-  p = 2 * kdelta(constraint_switch(5),1)
-  do n = 1, constraint_switch(5)
+  p = 2 * (kdelta(constraint_switch(5),1) + kdelta(constraint_switch(5),3))
+                             
+  do n = 1, min(constraint_switch(5),2)
     constraint_read(5,n) = constraint_beta(n) * cos(constraint_gamma(n)) &
                            / coeff_betalm(n+p,2)
   enddo
                              
   !!! gamma triaxial         
-  p = 2 * kdelta(constraint_switch(7),1)
-  do n = 1, constraint_switch(7)
+  p = 2 * (kdelta(constraint_switch(7),1) + kdelta(constraint_switch(7),3))
+                             
+  do n = 1, min(constraint_switch(7),2)
     constraint_read(7,n) = constraint_beta(n) * sin(constraint_gamma(n)) & 
                            / (sqrt(2.d0) * coeff_betalm(n+p,2))
   enddo
 endif
 
+!!! Calculates the square of the constraints on the radius
+p = 2 * (kdelta(constraint_switch(17),1) + kdelta(constraint_switch(17),3))
+sig = sign(one,constraint_read(17,2))
+
+constraint_read(17,1) = constraint_read(17,1)**2 / coeff_r2(1+p)
+constraint_read(17,2) =  sig * constraint_read(17,2)**2 / coeff_r2(2+p)
+                             
+!!! If constraint_switch = 3, calculates the proton/neutron constraints
+!!! conrresponding to the isoscalar/isovector constraints
+do i = 1, constraint_types
+  if ( constraint_switch(i) == 3 ) then 
+    value_is = constraint_read(i,1)
+    value_iv = constraint_read(i,2)
+
+    constraint_read(i,1) = (value_is - value_iv) / 2
+    constraint_read(i,2) = (value_is + value_iv) / 2
+  endif 
+enddo
+
 !!! Collects all single-particle matrix elements from the different constraints
 j = 0
+constraint_id = 0 
 
 do i = 1, constraint_types
-  do m = 1, constraint_switch(i)
+  do m = 1, min(constraint_switch(i),2)
     j = j + 1
     k = (j - 1) * HOsp_dim2 
     if ( (i >= 20) .and. (i < 26) ) constraint_pair = constraint_pair + 1
-  
+ 
+    constraint_id(j) = i 
+ 
     select case (i)
       case (1)
         Q = partnumb_Z
@@ -184,24 +219,30 @@ do i = 1, constraint_types
           Q(:) = multipole_Q4m(:,m,n)
         endif
       case (17)
-        Q = angumome_Jx
+        if ( constraint_switch(i) == 1 ) then
+          Q(:) = radius_r2(:,1) + radius_r2(:,2)
+        else
+          Q(:) = radius_r2(:,m)
+        endif
       case (18)
-        Q = angumome_Jy
+        Q = angumome_Jx
       case (19)
-        Q = angumome_Jz
+        Q = angumome_Jy
       case (20)
-        Q = pairs_T00_J10
+        Q = angumome_Jz
       case (21)
-        Q = pairs_T00_J1m1
+        Q = pairs_T00_J10
       case (22)
-        Q = pairs_T00_J1p1
+        Q = pairs_T00_J1m1
       case (23)
-        Q = pairs_T10_J00
+        Q = pairs_T00_J1p1
       case (24)
-        Q = pairs_T1m1_J00
+        Q = pairs_T10_J00
       case (25)
-        Q = pairs_T1p1_J00
+        Q = pairs_T1m1_J00
       case (26)
+        Q = pairs_T1p1_J00
+      case (27)
         factor_delta = constraint_read(i,1)
     end select
    

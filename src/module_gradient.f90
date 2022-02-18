@@ -317,7 +317,7 @@ if ( opt == 1 ) then
   write(ute,"(1a,1f12.6)")   "Proton  fermi energy = ",fermi_p
   write(ute,"(1a,1f12.6,/)") "Neutron fermi energy = ",fermi_n
   write(ute,format2) "   #      Z        N        n        l        p &
-                     &      jz        j         h  " 
+                     &       j       jz         h  " 
   do i = 1, ndim                                                                 
     xneut = zero                                                                 
     xprot = zero                                                                 
@@ -337,7 +337,7 @@ if ( opt == 1 ) then
     enddo                                                                        
     xj = 0.5d0 * (-1.d0 + sqrt(1+4*abs(xj2)))                                       
     xl = 0.5d0 * (-1.d0 + sqrt(1+4*abs(xl2)))                                       
-    write(ute,format1) i, xprot, xneut, xn, xl, xpar, xjz, xj, eigen_hsp(i)           
+    write(ute,format1) i, xprot, xneut, xn, xl, xpar, xj, xjz, eigen_hsp(i)           
   enddo                                                                          
   close(ute, status='keep')                                                       
 
@@ -347,7 +347,7 @@ if ( opt == 1 ) then
   write(ute,"(1a,1f12.6)")   "Proton  fermi energy = ",fermi_p
   write(ute,"(1a,1f12.6,/)") "Neutron fermi energy = ",fermi_n
   write(ute,format3) "   #      Z        N        n        l        p &
-                     &      jz        j         v2           h " 
+                     &       j       jz         v2           h " 
   do i = 1, ndim                                                                 
     xneut = zero                                                                 
     xprot = zero                                                                 
@@ -368,7 +368,7 @@ if ( opt == 1 ) then
     enddo                                                                        
     xj = 0.5d0 * (-1.d0 + sqrt(1+4*abs(xj2)))                                       
     xl = 0.5d0 * (-1.d0 + sqrt(1+4*abs(xl2)))                                       
-    write(ute,format1) i, xprot, xneut, xn, xl, xpar, xjz, xj, rhoc(k,k), & 
+    write(ute,format1) i, xprot, xneut, xn, xl, xpar, xj, xjz, rhoc(k,k), & 
                        hspc(k,k)
   enddo                                                                          
   close(ute, status='keep')                                                       
@@ -382,7 +382,7 @@ if ( opt == 1 ) then
   open(ute, file='eigenbasis_H11.dat', status='replace', action='write', &       
            form='formatted')                                                     
   write(ute,format2) "   #      Z        N        n        l        p & 
-                     &      jz        j         H11"                                              
+                     &       j       jz         H11"                                              
   do i = 1, ndim                                                                 
     xneut = zero                                                                 
     xprot = zero                                                                 
@@ -402,7 +402,7 @@ if ( opt == 1 ) then
     enddo                                                                        
     xj = 0.5d0 * (-1.d0 + sqrt(1+4*abs(xj2)))                                       
     xl = 0.5d0 * (-1.d0 + sqrt(1+4*abs(xl2)))                                       
-    write(ute,format1) i, xprot, xneut, xn, xl, xpar, xjz, xj, eigen_H11(i)           
+    write(ute,format1) i, xprot, xneut, xn, xl, xpar, xj, xjz, eigen_H11(i)           
   enddo                                                                          
   close(ute, status='keep')                                                       
 endif                      

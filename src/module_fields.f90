@@ -103,10 +103,9 @@ integer, intent(in) :: ndim
 complex(r64), dimension(ndim,ndim), intent(in) :: rhoLR, kappaLR, kappaRL
 complex(r64), dimension(ndim,ndim), intent(out) :: gammaLR, hspLR, deltaLR, & 
                                                    deltaRL
-integer :: i, j, ia, ib, ic, id, it
-integer :: perm
+integer :: i, j, ia, ib, ic, id, it, perm
 integer(i64) :: kk
-real(r64) :: h2b
+real(r64) :: h2b, f2b
 !cmpi integer :: ierr=0
 !cmpi complex(r64), dimension(ndim,ndim) :: gammaLR_red, deltaLR_red, & 
 !cmpi                                       deltaRL_red
@@ -116,7 +115,7 @@ deltaLR = zzero
 deltaRL = zzero
 
 !$OMP PARALLEL DO FIRSTPRIVATE(rhoLR,kappaLR,kappaRL) &
-!$OMP             PRIVATE(ia,ib,ic,id,h2b,perm,it) &
+!$OMP             PRIVATE(ia,ib,ic,id,h2b,f2b,perm,it) &
 !$OMP             REDUCTION(+:gammaLR,deltaLR,deltaRL)
 do kk = 1, hamil_H2dim  
   ia = hamil_abcd(1+4*(kk-1))
@@ -134,38 +133,26 @@ do kk = 1, hamil_H2dim
       h2b = sign(one,perm*one) * h2b
     endif
 
+    !!! Faster than using if ((a /= c).or.(b /= d))
+    f2b = h2b * (1 - kdelta(ia,ic) * kdelta(ib,id))
+
     !!! Calculation of Gamma
     gammaLR(ia,ic) = gammaLR(ia,ic) + h2b * rhoLR(id,ib)
-    if ( ic /= id ) then 
-      gammaLR(ia,id) = gammaLR(ia,id) - h2b * rhoLR(ic,ib)
-    endif                
-    if ( ib /= ia ) then
-      gammaLR(ib,ic) = gammaLR(ib,ic) - h2b * rhoLR(id,ia)
-    endif                
-    if ( (ib /= ia) .and. (ic /= id) ) then 
-      gammaLR(ib,id) = gammaLR(ib,id) + h2b * rhoLR(ic,ia)
-    endif                
-    if ( (ia /= ic) .or. (ib /= id) ) then 
-      gammaLR(ic,ia) = gammaLR(ic,ia) + h2b * rhoLR(ib,id)
-    endif                
-    if ( (ia /= ib) .and. ((ia /= ic) .or. (ib /= id)) ) then 
-      gammaLR(ic,ib) = gammaLR(ic,ib) - h2b * rhoLR(ia,id)
-    endif                
-    if ( (ic /= id) .and. ((ia /= ic) .or. (ib /= id)) ) then 
-      gammaLR(id,ia) = gammaLR(id,ia) - h2b * rhoLR(ib,ic)
-    endif                
-    if ( (ia /= ib) .and. (ic /= id) .and. ((ia /= ic) .or. (ib /= id)) ) then 
-      gammaLR(id,ib) = gammaLR(id,ib) + h2b * rhoLR(ia,ic)
-    endif                
+    gammaLR(ia,id) = gammaLR(ia,id) - h2b * rhoLR(ic,ib)
+    gammaLR(ib,ic) = gammaLR(ib,ic) - h2b * rhoLR(id,ia)
+    gammaLR(ib,id) = gammaLR(ib,id) + h2b * rhoLR(ic,ia)
+
+    gammaLR(ic,ia) = gammaLR(ic,ia) + f2b * rhoLR(ib,id)
+    gammaLR(ic,ib) = gammaLR(ic,ib) - f2b * rhoLR(ia,id)
+    gammaLR(id,ia) = gammaLR(id,ia) - f2b * rhoLR(ib,ic)
+    gammaLR(id,ib) = gammaLR(id,ib) + f2b * rhoLR(ia,ic)
   
     !!! Calculation of Delta^10 and Delta^01  
     deltaLR(ib,ia) = deltaLR(ib,ia) + h2b * kappaLR(id,ic)
     deltaRL(ib,ia) = deltaRL(ib,ia) + h2b * kappaRL(id,ic)
   
-    if( (ia /= ic) .or. (ib /= id) ) then 
-      deltaLR(id,ic) = deltaLR(id,ic) + h2b * kappaLR(ib,ia)
-      deltaRL(id,ic) = deltaRL(id,ic) + h2b * kappaRL(ib,ia)
-    endif
+    deltaLR(id,ic) = deltaLR(id,ic) + f2b * kappaLR(ib,ia)
+    deltaRL(id,ic) = deltaRL(id,ic) + f2b * kappaRL(ib,ia)
 
   enddo
 enddo
@@ -221,8 +208,7 @@ integer, intent(in) :: ndim
 complex(r64), dimension(ndim,ndim), intent(in) :: rhoLR, kappaLR
 complex(r64), dimension(ndim,ndim), intent(out) :: gammaLR, hspLR, deltaLR
 complex(r64), dimension(ndim,ndim), intent(out), optional :: deltaRL
-integer :: i, j, ia, ib, ic, id, it
-integer :: perm
+integer :: i, j, ia, ib, ic, id, it, perm
 integer(i64) :: kk
 complex(r64) :: h2b
 complex(r64), dimension(ndim,ndim) :: delta_tmp
@@ -252,47 +238,34 @@ do kk = 1, hamil_H2dim
     endif
 
     !!! Calculation of Gamma
-    if ( ic == ia ) then 
-      gammaLR(ia,ic) = gammaLR(ia,ic) + h2b * rhoLR(id,ib)
-    endif                
-    if ( (ia /= ic) .or. (ib /= id) ) then 
+    gammaLR(ia,ic) = gammaLR(ia,ic) + h2b * rhoLR(id,ib)
+    gammaLR(ia,id) = gammaLR(ia,id) - h2b * rhoLR(ic,ib)
+ 
+    if ( (ic == ia) .and. (ib /= id) ) then 
       gammaLR(ic,ia) = gammaLR(ic,ia) + h2b * rhoLR(ib,id)
     endif                
-    if ( id == ia ) then 
-      if ( ic /= id ) then 
-        gammaLR(ia,id) = gammaLR(ia,id) - h2b * rhoLR(ic,ib)
-      endif                
-    endif                
-    if ( (ic /= id) .and. ((ia /= ic) .or. (ib /= id)) ) then 
-      gammaLR(id,ia) = gammaLR(id,ia) - h2b * rhoLR(ib,ic)
-    endif                
-    if ( id <= ib ) then 
-      if ( (ib /= ia) .and. (ic /= id) ) then 
-        gammaLR(ib,id) = gammaLR(ib,id) + h2b * rhoLR(ic,ia)
-      endif                
-    endif                
     if ( ib <= id ) then 
-      if ( (ia /= ib) .and. (ic /= id) .and. ((ia /= ic) .or. (ib /= id)) ) then 
-        gammaLR(id,ib) = gammaLR(id,ib) + h2b * rhoLR(ia,ic)
-      endif                
-    endif                
-    if ( ic <= ib ) then 
-      if ( ib /= ia ) then
-        gammaLR(ib,ic) = gammaLR(ib,ic) - h2b * rhoLR(id,ia)
-      endif                
+      gammaLR(ib,id) = gammaLR(ib,id) + h2b * rhoLR(ic,ia)
     endif                
     if ( ib <= ic ) then 
-      if ( (ia /= ib) .and. ((ia /= ic) .or. (ib /= id)) ) then 
+      gammaLR(ib,ic) = gammaLR(ib,ic) - h2b * rhoLR(id,ia)
+    endif                
+ 
+    if ( (ia /= ic) .or. (ib /= id) ) then 
+      if ( id <= ib ) then 
+        gammaLR(id,ib) = gammaLR(id,ib) + h2b * rhoLR(ia,ic)
+      endif                
+      if ( ic <= ib ) then 
         gammaLR(ic,ib) = gammaLR(ic,ib) - h2b * rhoLR(ia,id)
       endif                
     endif                
-
+ 
     !!! Calculation of Delta^10 and Delta^01  
     deltaLR(ib,ia) = deltaLR(ib,ia) + h2b * kappaLR(id,ic)
-
-    if( (ia /= ic) .or. (ib /= id) ) then 
+ 
+    if ( (ia /= ic) .or. (ib /= id) ) then 
       deltaLR(id,ic) = deltaLR(id,ic) + h2b * kappaLR(ib,ia)
-    endif
+    endif                
 
   enddo
 enddo
@@ -310,7 +283,7 @@ enddo
 
 !!! Hermicity 
 do j = 1, ndim
-  do i = 1, j-1   
+  do i = j+1, ndim  
     gammaLR(i,j) = conjg(gammaLR(j,i)) 
   enddo
 enddo

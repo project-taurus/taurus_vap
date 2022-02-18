@@ -17,7 +17,7 @@
 ! a11, i1                  Only com = 0                                        !
 !                                                                              !
 ! opt_only2b = 0 reads an extended file conaitining 0- and 1-body pieces       !
-!            = 1 reads the only 2-body piece (see format in the BoccaDorata    !
+!            = 1 reads only the 2-body piece (see format in the BoccaDorata    !
 !                manual)                                                       !
 ! opt_onlycom = 0 for the main part of the interaction                         !
 !             = 1 for the 2-body COM correction                                !
@@ -47,9 +47,12 @@ integer, parameter :: uti = input_unit,  &
                       uth = uti + uto, &
                       r64 = real64 
 
+!!! Nucleus
+integer :: core_Z=0, core_N=0
+
 !!! Basis
 real(r64) :: HO_hw
-integer :: HOsh_dim, HOsp_dim, HOsh_maxjj
+integer :: HOsh_dim, HOsp_dim, HOsh_maxjj, opt_hw=2
 integer, dimension(:), allocatable :: HOsh_n, HOsh_l, HOsh_2j, HOsh_na, &
                                       HOsp_n, HOsp_l, HOsp_2j, HOsp_2mj, &
                                       HOsp_2mt, HOsp_sh
@@ -80,7 +83,7 @@ character(2) :: emax_ch
 character(10) :: HO_hw_ch 
 character(len=*), parameter :: format1 = "(1a)", &
                                format2 = "(1i4,500i7)", &
-                               format3 = "(1es20.12)", &
+                               format3 = "(1i4,1es20.12)", &
                                format4 = "(2i4,1x,4i7,1x,2i4)", &
                                format5 = "(6es20.12)"
 
@@ -207,7 +210,8 @@ if ( opt_onlycom == 0 ) then
   write(uth+2,format1) hamil_name
   write(uth+2,format2) hamil_type
   write(uth+2,format2) HOsh_dim, (HOsh_na(i), i=1, HOsh_dim)
-  write(uth+2,format3) HO_hw
+  write(uth+2,format4) core_Z, core_N
+  write(uth+2,format3) opt_hw, HO_hw
 
   close(uth+2, status='keep')
 endif
@@ -305,6 +309,7 @@ DO
   phas34 = (-1.d0)**( xj3 + xj4 + xj + 1.d0 )
   phasJ  = (-1.d0)**( xj + 1.d0 )                                              
 
+  !Remark: ifs commented when using Mikael's interaction files
   delta_12 = 0.d0                                                          
   if ( (k1 == k2) .and. (t1 == t2) ) delta_12 = 1.d0 
   delta_34 = 0.d0                                                          
@@ -356,20 +361,20 @@ do i = 1, HOsh_dim
   n1 = HOsh_n(i)
   l1 = HOsh_l(i)
   j1 = HOsh_2j(i)
-  do k = i, HOsh_dim
-    n3 = HOsh_n(k)
-    l3 = HOsh_l(k)
-    j3 = HOsh_2j(k)
-    do l = k, HOsh_dim 
-      n4 = HOsh_n(l)
-      l4 = HOsh_l(l)
-      j4 = HOsh_2j(l)
+  do j = i, HOsh_dim
+    n2 = HOsh_n(j)
+    l2 = HOsh_l(j)
+    j2 = HOsh_2j(j)
+    do k = i, HOsh_dim
+      n3 = HOsh_n(k)
+      l3 = HOsh_l(k)
+      j3 = HOsh_2j(k)
       m = HOsh_dim 
-      if ( k == i ) m = l
-      do j = i, m    
-        n2 = HOsh_n(j)
-        l2 = HOsh_l(j)
-        j2 = HOsh_2j(j)
+      if ( k == i ) m = j
+      do l = k, m
+        n4 = HOsh_n(l)
+        l4 = HOsh_l(l)
+        j4 = HOsh_2j(l)
     
         if ( (-1)**(l1+l2) /= (-1)**(l3+l4) ) cycle 
  
@@ -383,7 +388,7 @@ do i = 1, HOsh_dim
         
         if ( jjmin <= jjmax ) then
           write(uth+4,format4) 0, 5, HOsh_na(i), HOsh_na(j), HOsh_na(k), &
-                           HOsh_na(l), jjmin, jjmax
+                               HOsh_na(l), jjmin, jjmax
           do jj = jjmin, jjmax
             write(uth+4,format5) hamil_H2(i,j,k,l,jj,0), &
                                  hamil_H2(i,j,k,l,jj,1), &

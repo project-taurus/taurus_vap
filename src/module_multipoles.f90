@@ -13,12 +13,13 @@ use Basis
 
 implicit none 
 
+!!! Qlm(i,j,k) with i=number matrix elem, j=isospin (1=p,2=n), k=0...m
 real(r64), dimension(:,:,:), allocatable :: multipole_Q1m, & ! Dipoles
                                             multipole_Q2m, & ! Quadrupoles
                                             multipole_Q3m, & ! Octupoles  
                                             multipole_Q4m    ! Hexadecapoles
 
-real(r64) :: coeff_betalm(3,4) ! Factor to convert from beta_lm to Qlm
+real(r64) :: coeff_betalm(4,4) ! Factor to convert from beta_lm to Qlm
 
 CONTAINS
 
@@ -42,7 +43,7 @@ CONTAINS
 subroutine set_multipoles    
 
 integer :: i, j, incr, ia, ib, la, lb, ja, jb, mja, mla, mlb, mjb, mta, mtb, &
-           ms, lambda, mu, tq, mq, ialloc=0
+           ms, lambda, mu, mt, mq, ialloc=0
 real(r64) :: sumcb, fac, cb1, cb2, cb3, coeff_1, coeff_2, numbpart
 
 allocate( multipole_Q1m(HOsp_dim2,2,0:1), multipole_Q2m(HOsp_dim2,2,0:2), &
@@ -52,7 +53,7 @@ if ( ialloc /= 0 ) stop 'Error during allocation of multipole operators'
 
 !!! Factors to convert from beta_lm to Qlm
 do j = 1, 4
-  do i = 1, 3
+  do i = 1, 4
     if ( i == 1 ) then
       numbpart = nucleus_Z
     elseif ( i == 2 ) then
@@ -87,7 +88,7 @@ do ia = 1, HOsp_dim
     do lambda = 2, 8, 2
       if ( mod(la+lb+lambda,4) /= 0 ) cycle
       call ClebschGordan (lb,lambda,la,0,0,0,cb1)
-      fac = cb1 * radial_even(ia,ib,lambda/2) * &
+      fac = cb1 * radial_integral_even(ia,ib,lambda/2) * &
             sqrt( ((lb+1)*(lambda+1)) / (4*pi*(la+1)) )
       do mu = -lambda, lambda, 2
         sumcb = zzero
@@ -106,17 +107,17 @@ do ia = 1, HOsp_dim
         if ( mu < 0 ) sumcb = (-1)**(mu/2) * sumcb
         if ( mu /= 0 ) sumcb = sumcb * 0.5d0
        
-        tq = (mta + 3)/2
+        mt = (mta + 3)/2
         mq = abs(mu/2) 
        
         if ( lambda == 2 ) then
-          multipole_Q1m(incr,tq,mq) = multipole_Q1m(incr,tq,mq) + sumcb 
+          multipole_Q1m(incr,mt,mq) = multipole_Q1m(incr,mt,mq) + sumcb 
         elseif ( lambda == 4 ) then                        
-          multipole_Q2m(incr,tq,mq) = multipole_Q2m(incr,tq,mq) + sumcb 
+          multipole_Q2m(incr,mt,mq) = multipole_Q2m(incr,mt,mq) + sumcb 
         elseif ( lambda == 6 ) then                        
-          multipole_Q3m(incr,tq,mq) = multipole_Q3m(incr,tq,mq) + sumcb 
+          multipole_Q3m(incr,mt,mq) = multipole_Q3m(incr,mt,mq) + sumcb 
         else                                               
-          multipole_Q4m(incr,tq,mq) = multipole_Q4m(incr,tq,mq) + sumcb 
+          multipole_Q4m(incr,mt,mq) = multipole_Q4m(incr,mt,mq) + sumcb 
         endif
       enddo
     enddo 

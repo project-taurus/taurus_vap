@@ -41,7 +41,7 @@ fi
 
 if [ $FC = "ifort" ] || [ $FC = "mpiifort" ]; then
   LIB=""
-  OPT="-O3 -mkl" 
+  OPT="-O3 -qmkl" 
 elif [ $FC = "gfortran" ] || [ $FC = "mpif90" ]; then
   LIB="-L/usr/lib -llapack -lblas"
   OPT="-O3" 
