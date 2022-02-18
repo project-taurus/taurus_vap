@@ -248,8 +248,8 @@ subroutine set_hamiltonian_2body
 
 integer(i16) :: ared, bred, cred, dred
 integer(i32) :: ht, j, t, tmax, uth6=uth+6, uth7=uth+7, fac_ht, ialloc=0, &
-                a, ma, la, ta, b, mb, lb, tb, bmax, &
-                c, mc, lc, tc, d, md, ld, td
+                a, ma, la, ta, b, mb, lb, tb, &
+                c, mc, lc, tc, d, md, ld, td, dmax
 integer(i64) :: kk
 real(r64) :: xja, xjb, xjc, xjd, xjtot, xttot, phasab, phascd, Vtmp, &
              Vcut, Vdec
@@ -331,25 +331,25 @@ do a = 1, HOsp_dim
   la = HOsp_l(a)
   ma = HOsp_2mj(a)
   ta = HOsp_2mt(a)
-  do c = a, HOsp_dim
-    lc = HOsp_l(c)
-    mc = HOsp_2mj(c)
-    tc = HOsp_2mt(c)
-    do d = c+1, HOsp_dim
-      ld = HOsp_l(d)
-      md = HOsp_2mj(d)
-      td = HOsp_2mt(d)
-      bmax = HOsp_dim
-      if ( c == a ) bmax = d
-      do b = a+1, bmax
-        lb = HOsp_l(b)
-        mb = HOsp_2mj(b)
-        tb = HOsp_2mt(b)
+  do b = a+1, HOsp_dim
+    lb = HOsp_l(b)
+    mb = HOsp_2mj(b)
+    tb = HOsp_2mt(b)
+    if ( ma + mb < 0 ) cycle
+    do c = a, HOsp_dim
+      lc = HOsp_l(c)
+      mc = HOsp_2mj(c)
+      tc = HOsp_2mt(c)
+      dmax = HOsp_dim
+      if ( c == a ) dmax = b
+      do d = c+1, dmax     
+        ld = HOsp_l(d)
+        md = HOsp_2mj(d)
+        td = HOsp_2mt(d)
 
         if ( (-1)**(la+lb) /= (-1)**(lc+ld) ) cycle
         if ( ta + tb /= tc + td ) cycle
         if ( ma + mb /= mc + md ) cycle
-        if ( ma + mb < 0 ) cycle
  
         if ( (hamil_type == 1) .or. (hamil_type == 2) ) then
           call uncouple_JT(a,b,c,d,Vdec) 

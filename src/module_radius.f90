@@ -14,7 +14,10 @@ use Basis
 implicit none 
 public
 
-real(r64), dimension(:), allocatable :: radius_r2 ! squared radius
+!!! r^2(i,j) with i=number matrix elem, j=isospin (1=p,2=n)
+real(r64), dimension(:,:), allocatable :: radius_r2 ! squared radius
+
+real(r64) :: coeff_r2(4) ! Factor to normalize wrt the number of particles
 
 CONTAINS
 
@@ -26,13 +29,18 @@ CONTAINS
 !------------------------------------------------------------------------------!
 subroutine set_radius        
 
-integer :: incr, ia, ib, ja, jb, mja, mjb, la, lb, mta, mtb, ialloc=0
+integer :: incr, ia, ib, ja, jb, mja, mjb, la, lb, mta, mtb, mt, ialloc=0
 
-allocate( radius_r2(HOsp_dim2), stat=ialloc )
+allocate( radius_r2(HOsp_dim2,2), source=zero, stat=ialloc )
 if ( ialloc /= 0 ) stop 'Error during allocation of square radius operator'
 
-radius_r2 = zero
+!!! Factors to normalize the radii with respect to the number of particles
+coeff_r2(1) = 1 / valence_Z
+coeff_r2(2) = 1 / valence_N
+coeff_r2(3) = 1 / valence_A
+coeff_r2(4) = 1 / valence_A
 
+!!! Matrix elements
 incr = 0
 
 do ia = 1, HOsp_dim
@@ -47,7 +55,8 @@ do ia = 1, HOsp_dim
     mtb = HOsp_2mt(ib)
     incr = incr + 1
     if ( (ja /= jb) .or. (mja /= mjb) .or. (mta /= mtb) .or. (la /= lb) ) cycle
-    radius_r2(incr) = radial(ib,ia,2)
+    mt = (mta + 3)/2
+    radius_r2(incr,mt) = radial_integral(ib,ia,2)
   enddo
 enddo
 

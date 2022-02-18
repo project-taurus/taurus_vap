@@ -21,6 +21,10 @@ Seed random number generation 0
 Read/write wf file as text    1
 Cutoff occupied s.-p. states  0.00E-00
 Include all empty sp states   0
+Spatial one-body density      0
+Discretization for x/r        0   0.00 
+Discretization for y/theta    0   0.00 
+Discretization for z/phi      0   0.00 
 
 Iterative Procedure
 -------------------
@@ -38,27 +42,28 @@ Force constraint N/Z          1
 Constraint beta_lm            2
 Pair coupling scheme          1
 Tolerence for constraints     1.000E-06
-Constraint multipole Q10      0 0.000
-Constraint multipole Q11      0 0.000
-Constraint multipole Q20      0 0.000
-Constraint multipole Q21      1 0.000
-Constraint multipole Q22      0 0.000
-Constraint multipole Q30      0 0.000
-Constraint multipole Q31      0 0.000
-Constraint multipole Q32      0 0.000
-Constraint multipole Q33      0 0.000
-Constraint multipole Q40      0 0.000
-Constraint multipole Q41      0 0.000
-Constraint multipole Q42      0 0.000
-Constraint multipole Q43      0 0.000
-Constraint multipole Q44      0 0.000
-Constraint ang. mom. Jx       0 0.000
-Constraint ang. mom. Jy       0 0.000
-Constraint ang. mom. Jz       0 0.000
-Constraint pair P_T00_J10     0 0.000
-Constraint pair P_T00_J1m1    0 0.000
-Constraint pair P_T00_J1p1    0 0.000
-Constraint pair P_T10_J00     0 0.000
-Constraint pair P_T1m1_J00    0 0.000
-Constraint pair P_T1p1_J00    0 0.000
-Constraint field Delta        0 0.000
+Constraint multipole Q10      0   0.000
+Constraint multipole Q11      0   0.000
+Constraint multipole Q20      0   0.000
+Constraint multipole Q21      1   0.000
+Constraint multipole Q22      0   0.000
+Constraint multipole Q30      0   0.000
+Constraint multipole Q31      0   0.000
+Constraint multipole Q32      0   0.000
+Constraint multipole Q33      0   0.000
+Constraint multipole Q40      0   0.000
+Constraint multipole Q41      0   0.000
+Constraint multipole Q42      0   0.000
+Constraint multipole Q43      0   0.000
+Constraint multipole Q44      0   0.000
+Constraint radius sqrt(r^2)   0   0.000
+Constraint ang. mom. Jx       0   0.000
+Constraint ang. mom. Jy       0   0.000
+Constraint ang. mom. Jz       0   0.000
+Constraint pair P_T00_J10     0   0.000
+Constraint pair P_T00_J1m1    0   0.000
+Constraint pair P_T00_J1p1    0   0.000
+Constraint pair P_T10_J00     0   0.000
+Constraint pair P_T1m1_J00    0   0.000
+Constraint pair P_T1p1_J00    0   0.000
+Constraint field Delta        0   0.000

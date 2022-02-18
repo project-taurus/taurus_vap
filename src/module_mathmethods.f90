@@ -6,11 +6,13 @@
 !                                                                              !
 ! List of routines and functions:                                              !
 ! - subroutine GaussLaguerre                                                   !
+! - subroutine GaussLegendre                                                   !
 ! - subroutine ClebschGordan                                                   !
 ! - function factorial                                                         !
 ! - function dfactorial                                                        !
 ! - function kdelta                                                            !
-! - function laguerre                                                          !
+! - function genlaguerre                                                       !
+! - function assolegendre                                                      !
 ! - function lapack_sel                                                        !
 !==============================================================================!
 MODULE MathMethods 
@@ -78,13 +80,13 @@ endif
 end function kdelta
 
 !------------------------------------------------------------------------------!
-! function laguerre                                                            !
+! function genlaguerre                                                         !
 !                                                                              !
 ! Calculates the value of the generalized Laguerre polynomial L^a_n(x)         !
 ! using the reccurence relation:                                               !
 ! L^a_n(x) = ( (2n-1+a-x)*L^a_n-1(x) - (n-1+a)*L^a_n-2(x) ) / n                !
 !------------------------------------------------------------------------------!
-function laguerre(x,n,a) result(l1)
+function genlaguerre(a,n,x) result(l1)
 
 integer, intent(in) :: n
 real(r64), intent(in) :: x, a
@@ -100,7 +102,74 @@ do i = 1, n
   l1 = ( (2*i-1+a-x)*l2 - (i-1+a)*l3 ) / i
 enddo
 
-end function laguerre
+end function genlaguerre
+
+!------------------------------------------------------------------------------!
+! function assolegendre                                                        !
+!                                                                              !
+! Calculates the value of the associated Legendre polynomial P^m_l(x) using the!
+! algorithm given in the Numerical Recipes in Fortran 90, which is based on the!
+! recurrence relations:                                                        !
+! P^m_m(x) = (-1)**m (2m-1)!! sqrt(1-x**2)  => build P^m_m for any m           !
+! P^m_m+1(x) = x (2m+1) P^m_m(x)            => build P^m_m+1 from previous one !
+! (l-m+1) P^m_l+1 = x (2l+1) P^m_l(x) - (l+m) P^m_l-1(x)                       !
+!                                           => build all other possible l      !
+!                                                                              !
+! In addition, I have added the symmetry for negative m:                       !
+! P^-m_l = (-1)**m (l-m)!/(l+m)!                                               !
+!------------------------------------------------------------------------------!
+function assolegendre(l,n,x) result(leg)
+
+integer, intent(in) :: l, n
+real(r64), intent(in) :: x
+integer :: ll, m
+real(r64) :: leg, phase, pll, pmm, pmmp1, somx2
+
+!!! Checks the validity of the arguments
+if ( (l < 0) .or. (abs(m) > l) .or. (abs(x) > 1) ) then 
+  print "(a)", "Wrong argument(s) in function assolegendre"
+endif
+
+!!! Transforms m in -m when m is negative
+m = n 
+phase = one
+
+if ( m < 0 ) then 
+  m = abs(n)
+  phase = (-1)**m * (one*factorial(l-m)) / (one*factorial(l+m))
+endif 
+
+!!! Compute P^m_m
+pmm = one
+
+if ( m > 0 ) then 
+  somx2 = sqrt( (one-x) * (one+x) )
+  pmm = dfactorial(2*m-1) * somx2**m
+  if ( mod(m,2) == 1 ) pmm = -pmm
+endif
+
+if ( l == m ) then 
+  leg = pmm
+else
+  pmmp1 = x * (2*m +1) * pmm
+
+  !!! Compute P^m_m+1
+  if ( l == m+1 ) then 
+    leg = pmmp1
+  !!! Compute P^m_l for l > m+1
+  else
+    do ll = m+2, l
+      pll = (x*(2*ll-1)*pmmp1 - (ll+m-1)*pmm) / (ll-m)
+      pmm = pmmp1
+      pmmp1 = pll 
+    enddo 
+    leg = pll
+  endif
+endif
+
+leg = phase * leg
+
+end function assolegendre
 
 !------------------------------------------------------------------------------!
 ! subroutine GaussLaguerre                                                     !
@@ -150,6 +219,56 @@ enddo
 
 end subroutine GaussLaguerre
 
+!------------------------------------------------------------------------------!
+! subroutine GaussLegendre                                                     !
+!                                                                              !
+! Computes the abscissas and weight for the Gauss-Legendre quadrature.         !
+! The algorithm is taken from the book: Numerical Recipe in Fortran 77         !
+! (ISBN: 978-0521430647).                                                      !
+!------------------------------------------------------------------------------!
+
+subroutine GaussLegendre(x1,x2,x,w,n)
+
+integer, intent(in) :: n
+real(r64), intent(in) :: x1, x2
+real(r64), intent(out) :: x(n), w(n)
+real(r64), parameter :: eps=3.d-14
+integer :: i, j, m
+real(r64) :: p1, p2, p3, pp, xl, xm, z, z1=1.5d0
+
+m = (n + 1) / 2
+xm = 0.5d0 * (x2 + x1)
+xl = 0.5d0 * (x2 - x1)
+
+do i = 1, m
+  z = cos( pi * (i-0.25d0) / (n+0.5d0) )
+  do while ( abs(z-z1) .gt. eps ) 
+    p1 = one 
+    p2 = zero
+    do j = 1, n
+      p3 = p2
+      p2 = p1
+      p1 = ( (2.d0*j-1.d0)*z*p2 - (j-1.d0)*p3 ) / j
+    enddo
+    pp = n*(z*p1-p2) / (z*z-1.d0)
+    z1 = z
+    z = z1 - p1/pp
+  enddo
+  x(i) = xm - xl*z
+  x(n+1-i) = xm + xl*z
+  w(i) = 2.d0 * xl / ( (1.d0-z*z)*pp*pp )
+  w(n+1-i) = w(i)
+enddo 
+
+end subroutine GaussLegendre
+
+!------------------------------------------------------------------------------!
+! subroutine ClebschGordan                                                     !
+!                                                                              !
+! Computes the ClebschGordan for the group SU(2). The algorithm used was taken !
+! from technical notes from NASA written by W. F. Ford and R. C. Bruley.       !
+! Ref: NASA TN D-6173                                                          !
+!                                                                              !
 !------------------------------------------------------------------------------!
 ! subroutine ClebschGordan                                                     !
 !                                                                              !

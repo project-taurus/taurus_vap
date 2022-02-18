@@ -7,8 +7,10 @@
 ! List of routines and functions:                                              !
 ! - subroutine set_basis                                                       !
 ! - subroutine print_basis                                                     !
-! - function radial                                                            !
-! - function radial_even                                                       !
+! - function radial_function                                                   !
+! - function radial_integral                                                   !
+! - function radial_integral_even                                              !
+! - function spherharmonic                                                     !
 !==============================================================================!
 MODULE Basis      
 
@@ -16,7 +18,8 @@ MODULE Basis
 !cmpi use Parallelization
 use Constants
 use MathMethods
-use Nucleus, only: valence_Z, valence_N, nucleus_Z, nucleus_N, nucleus_A
+use Nucleus, only: valence_Z, valence_N, valence_A, & 
+                   nucleus_Z, nucleus_N, nucleus_A
 
 implicit none
 public
@@ -273,7 +276,39 @@ enddo
 end subroutine print_basis       
 
 !------------------------------------------------------------------------------!
-! function radial                                                              !
+! function radial_function                                                     !
+!                                                                              ! 
+! Computes the radial function for the spherical HO single-particle states.    !
+! R_nl(r) = Anl * (r/b)^2 * exp(-0.5*(r/b)**2) * L^(l+0.5)_n((r/b)**2)         !
+!                                                                              !
+! where                                                                        ! 
+! A_nl = normalization factor                                                  ! 
+! b = oscillator length                                                        ! 
+! L^i_j = Laguerrre polynomial                                                 ! 
+!------------------------------------------------------------------------------!
+function radial_function(n,l,r) result(Rnl)
+
+integer, intent(in) :: n, l
+real(r64), intent(in) :: r
+real(r64) :: Rnl, Anl, rob
+
+!!! Checks the validity of the arguments
+if ( (l < 0) .or. (n < 0) ) then 
+  print "(a)", "Wrong argument(s) in function radial_function"
+endif
+
+!!! Computes the radial function
+rob = r / HO_b
+Anl = sqrt( (2**(n+l+2) * factorial(n)) / &
+             (sqrt(pi) * dfactorial(2*n+2*l+1)) )
+
+Rnl = Anl * (rob**l) * exp(-0.5d0 * rob**2) * genlaguerre(l+0.5d0,n,rob**2) / & 
+      sqrt(HO_b)**3
+
+end function radial_function
+
+!------------------------------------------------------------------------------!
+! function radial_integral                                                     !
 !                                                                              ! 
 ! Computes the radial integral of r^lambda in the HO basis in the general case !
 ! (still la=lb) using numerical Gauss-Laguerre integration.                    !
@@ -291,7 +326,7 @@ end subroutine print_basis
 ! w_i, x_i = weights and abcissas of the Gauss-Laguerre quadrature.            ! 
 ! u = (r/b)^2                                                                  ! 
 !------------------------------------------------------------------------------!
-function radial(a,b,lambda) result(integral)
+function radial_integral(a,b,lambda) result(integral)
 
 integer, intent(in) :: a, b, lambda
 integer :: na, nb, la, lb, nmax, np, i
@@ -326,23 +361,24 @@ call GaussLaguerre(xLag,wLag,np,alpha)
 integral = 0.0d0
 do i = 1, np
   integral = integral + wLag(i) * xLag(i)**(lambda/2) * &
-                        Laguerre(xLag(i),na,alpha) * Laguerre(xLag(i),nb,alpha)
+                        genlaguerre(alpha,na,xLag(i)) * &
+                        genlaguerre(alpha,nb,xLag(i))
 enddo
 
 integral = integral * Anla * Anlb * HO_b**lambda / 2.0d0
 
 deallocate(xLag, wLag)
 
-end function radial
+end function radial_integral
 
 !------------------------------------------------------------------------------!
-! function radial_even                                                         !
+! function radial_integral_even                                                !
 !                                                                              ! 
 ! Computes the radial integral of r^lambda in the HO basis in the case where   !
 ! lambda = even. The formula is the equation (6.41) in the book                !
 ! "From nucleons to nucleus" by J. Suhonen (ISBN:978-3-540-48859-0)            !
 !------------------------------------------------------------------------------!
-function radial_even(a,b,lambda) result(integral)
+function radial_integral_even(a,b,lambda) result(integral)
 
 integer, intent(in) :: a, b, lambda
 integer :: na, nb, la, lb, sigma, sigma_max, sigma_min, taua, taub
@@ -375,7 +411,37 @@ if ( mod(la+lb+lambda,2) == 0 ) then
   endif
 endif
 
-end function radial_even
+end function radial_integral_even
+
+!------------------------------------------------------------------------------!
+! function spherharmonic                                                       !
+!                                                                              !
+! Calculates the spherical harmonic Y_lm(theta,phi) using its relation to the  !
+! associated Legendre polynomials:                                             !
+! Y^m_l(theta,phi) = sqrt((2l+1) (l-m)! / 4pi (l+m)!) e^imphi P^_l(cos(theta)) !
+!------------------------------------------------------------------------------!
+function spherharmonic(l,m,theta,phi) result(Ylm)
+
+integer, intent(in) :: l, m
+real(r64), intent(in) :: theta, phi
+real(r64) :: factor1, factor2, factor3
+complex(r64) :: factor, Ylm
+
+!!! Checks the validity of the arguments
+if ( (l < 0) .or. (abs(m) > l) ) then 
+  print "(a)", "Wrong argument(s) in function spherharmonic"
+endif
+
+!!! Computes the value of the spherical harmonic
+factor1 = sqrt( (2*l+1) / (4*pi) )
+factor2 = sqrt( one * factorial(l-m) )
+factor3 = sqrt( one * factorial(l+m) )
+
+factor = (factor1 * factor2 / factor3) * exp(zimag * m * phi)
+
+Ylm = factor * assolegendre(l,m,cos(theta))
+
+end function spherharmonic
 
 END MODULE Basis      
 !==============================================================================!
