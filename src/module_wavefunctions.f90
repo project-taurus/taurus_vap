@@ -1140,8 +1140,8 @@ filename1 = adjustl('spatial_density_R.dat')
 filename2 = adjustl('spatial_density_RThetaPhi.dat')
 filename3 = adjustl('spatial_density_XYZ.dat')
 
-!!! If dens_spatial = 1: r1 = r, r2 = theta, r3 = phi
-!!! If dens_spatial = 2: r1 = x, r2 = y    , r3 = z  
+!!! If dens_spatial <= 2: r1 = r, r2 = theta, r3 = phi
+!!! If dens_spatial  = 3: r1 = x, r2 = y    , r3 = z  
 if ( dens_spatial <= 2 ) then
   r1min = 0 
   r1max = dens_nr(1) - 1
@@ -1223,7 +1223,7 @@ if ( dens_spatial == 2 ) then
 else
   open(utd, file=filename3, status='replace', action='write', form='formatted')        
   write(utd,*) "                             unprojected          projected   "
-  write(utd,*) "   r       y       z       rho_p     rho_n     rho_p     rho_n"
+  write(utd,*) "   x       y       z       rho_p     rho_n     rho_p     rho_n"
 endif
 
 do r1 = r1min, r1max
@@ -1241,7 +1241,8 @@ do r1 = r1min, r1max
 
         r = sqrt( x**2 + y**2 + z**2 )
         theta = acos( z / r )
-        phi = acos( x / sqrt(x**2 + y**2) )
+        phi = atan2(y,x)
+        if ( phi < 0 ) phi = phi + 2*pi
       endif
 
       rho_p = zero

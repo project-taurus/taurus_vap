@@ -501,7 +501,7 @@ if ( (abs(prot - valence_Z) > 0.5d0) .or. (abs(neut - valence_N) > 0.5d0) ) then
 endif
 
 if ( sum(control_NZ) >= 3 ) then
-  print '("Critical error: the numbers of particles were wrong three times in &
+  print '("Critical error: the numbers of particles were wrong three times &
          &in the last five iterations. The code will stop.")'
  stop
 endif  

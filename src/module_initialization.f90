@@ -364,7 +364,7 @@ do i = 3, constraint_types
     write(uto,format6) input_names(42+i), constraint_switch(i), &
                        constraint_read_ch(i,1)
   else
-    write(uto,format6) input_names(38+i), constraint_switch(i), &
+    write(uto,format6) input_names(42+i), constraint_switch(i), &
                        constraint_read_ch(i,1), constraint_read_ch(i,2)
   endif
 enddo
