@@ -14,17 +14,17 @@ No. of gauge angles neutrons  1
 
 Wave Function   
 -------------
-Type of seed wave function    2 
+Type of seed wave function    1 
 Number of QP to block         0
 No symmetry simplifications   0
 Seed random number generation 0
 Read/write wf file as text    0
 Cutoff occupied s.-p. states  0.00E-00
 Include all empty sp states   0
-Spatial one-body density      3
-Discretization for x/r        10  1.00 
-Discretization for y/theta    10  1.00 
-Discretization for z/phi      10  1.00 
+Spatial one-body density      2
+Discretization for x/r        101 0.05  
+Discretization for y/theta    41  0.25
+Discretization for z/phi      1   0.25 
 
 Iterative Procedure
 -------------------
@@ -44,7 +44,7 @@ Pair coupling scheme          1
 Tolerance for constraints     1.000E-06
 Constraint multipole Q10      1   0.000
 Constraint multipole Q11      1   0.000
-Constraint multipole Q20      0   1.000
+Constraint multipole Q20      1   1.000
 Constraint multipole Q21      1   0.000   0.000
 Constraint multipole Q22      0   0.000
 Constraint multipole Q30      0   1.200

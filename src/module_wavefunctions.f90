@@ -1153,12 +1153,12 @@ if ( dens_spatial <= 2 ) then
   dr2 =   pi / (r2max+1)
   dr3 = 2*pi / (r3max+1)
 else 
-  r1min = -dens_nr(1) + 1
-  r1max =  dens_nr(1)
-  r2min = -dens_nr(2) + 1
-  r2max =  dens_nr(2)
-  r3min = -dens_nr(3) + 1
-  r3max =  dens_nr(3)
+  r1min = -dens_nr(1) 
+  r1max =  dens_nr(1) - 1
+  r2min = -dens_nr(2)
+  r2max =  dens_nr(2) - 1
+  r3min = -dens_nr(3)
+  r3max =  dens_nr(3) - 1
   dr1 = dens_dr(1)
   dr2 = dens_dr(2)
   dr3 = dens_dr(3)
@@ -1270,12 +1270,13 @@ do r1 = r1min, r1max
           do mla = -la, la
             ms = mja - 2*mla
             mlb = (mjb - mja + 2*mla)/2
+            if ( abs(ms)  > 1  ) cycle
             if ( abs(mlb) > lb ) cycle
 
             Ylma = conjg(spherharmonic(la,mla,theta,phi))
             Ylmb = spherharmonic(lb,mlb,theta,phi)
-            call ClebschGordan(1,2*la,ja,ms,2*mla,mja,cga)
-            call ClebschGordan(1,2*lb,jb,ms,2*mlb,mjb,cgb)
+            call ClebschGordan(2*la,1,ja,2*mla,ms,mja,cga)
+            call ClebschGordan(2*lb,1,jb,2*mlb,ms,mjb,cgb)
             angular = angular + Ylma * Ylmb * cga * cgb 
           enddo
          
