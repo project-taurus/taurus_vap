@@ -63,7 +63,7 @@ print '("  _________________________________________________________ ",/, &
       & " | basis.                                                  |",/, &
       & " |                                                         |",/, &
       & " | Licence: GNU General Public License version 3 or later  |",/, &
-      & " | DOI: https://doi.org/10.5281/zenodo.6906571             |",/, &
+      & " | DOI: https://doi.org/10.5281/zenodo.6906647             |",/, &
       & " | Git: https://github.com/project-taurus/taurus_vap.git   |",/, &
       & " |_________________________________________________________|",/)' 
 !cmpi endif

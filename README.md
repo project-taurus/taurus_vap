@@ -1,6 +1,6 @@
 # TAURUS_vap 
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6906571.svg)](https://doi.org/10.5281/zenodo.6906571)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6906647.svg)](https://doi.org/10.5281/zenodo.6906647)
 [![License: GPL v3](https://img.shields.io/github/license/project-taurus/taurus_vap)](https://www.gnu.org/licenses/gpl-3.0)
 
 ## Presentation
