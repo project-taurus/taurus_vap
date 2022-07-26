@@ -34,7 +34,7 @@ More intermediate printing    0
 Type of gradient              1
 Parameter eta for gradient    0.100E-00
 Parameter mu  for gradient    0.300E-00
-Tolerance for gradient        5.00E-02
+Tolerance for gradient        1.00E-02
 
 Constraints             
 -----------

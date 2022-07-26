@@ -54,7 +54,7 @@ subroutine print_version
 print '("  _________________________________________________________ ",/, &
       & " |                                                         |",/, &
       & " |  (______)  TAURUS_vap                Benjamin Bally     |",/, &
-      & " |  <(0  0)>  2022.02.18                Tomás R. Rodríguez |",/, &
+      & " |  <(0  0)>  2022.07.26                Tomás R. Rodríguez |",/, &
       & " |    (°°)                              Adrián Sánchez-F.  |",/, &
       & " |                                                         |",/, &
       & " | This code performs the particle-number variation after  |",/, &
@@ -63,7 +63,7 @@ print '("  _________________________________________________________ ",/, &
       & " | basis.                                                  |",/, &
       & " |                                                         |",/, &
       & " | Licence: GNU General Public License version 3 or later  |",/, &
-      & " | DOI: https://doi.org/10.5281/zenodo.4130680             |",/, &
+      & " | DOI: https://doi.org/10.5281/zenodo.6906571             |",/, &
       & " | Git: https://github.com/project-taurus/taurus_vap.git   |",/, &
       & " |_________________________________________________________|",/)' 
 !cmpi endif

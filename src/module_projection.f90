@@ -1162,7 +1162,7 @@ enddo
 betaT(:) = sqrt( Qlm(:,0,2)**2 + 2.0d0*(Qlm(:,2,2)**2) ) * coeff_betalm(:,2)
 gammT(:) = atan( sqrt(2.0d0) * abs( Qlm(:,2,2) / Qlm(:,0,2) ) )
 
-where ( Qlm(:,0,2) <= epsilon0 ) gammT = 0.d0
+where ( abs(Qlm(:,0,2)) <= epsilon0 ) gammT = 0.d0
 where ( (Qlm(:,0,2) > 0.d0) .and. (Qlm(:,2,2) <  0.d0) ) gammT = 2.d0*pi - gammT
 where ( (Qlm(:,0,2) < 0.d0) .and. (Qlm(:,2,2) >= 0.d0) ) gammT = pi - gammT
 where ( (Qlm(:,0,2) < 0.d0) .and. (Qlm(:,2,2) <  0.d0) ) gammT = pi + gammT
