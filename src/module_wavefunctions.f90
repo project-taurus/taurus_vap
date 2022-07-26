@@ -1154,11 +1154,11 @@ if ( dens_spatial <= 2 ) then
   dr3 = 2*pi / (r3max+1)
 else 
   r1min = -dens_nr(1) 
-  r1max =  dens_nr(1) - 1
+  r1max =  dens_nr(1)
   r2min = -dens_nr(2)
-  r2max =  dens_nr(2) - 1
+  r2max =  dens_nr(2)
   r3min = -dens_nr(3)
-  r3max =  dens_nr(3) - 1
+  r3max =  dens_nr(3)
   dr1 = dens_dr(1)
   dr2 = dens_dr(2)
   dr3 = dens_dr(3)
@@ -1235,14 +1235,19 @@ do r1 = r1min, r1max
         theta = r2 * dr2 + dr2/2
         phi = r3 * dr3 + dr3/2
       else
-        x = r1 * dr1 + dr1/2
-        y = r2 * dr2 + dr2/2
-        z = r3 * dr3 + dr3/2
+        x = r1 * dr1 
+        y = r2 * dr2
+        z = r3 * dr3
 
         r = sqrt( x**2 + y**2 + z**2 )
-        theta = acos( z / r )
-        phi = atan2(y,x)
-        if ( phi < 0 ) phi = phi + 2*pi
+        if ( abs(r) > epsilon0 ) then
+          theta = acos( z / r )
+          phi = atan2(y,x)
+          if ( phi < 0 ) phi = phi + 2*pi
+        else 
+          theta = zero 
+          phi = zero
+        endif
       endif
 
       rho_p = zero
