@@ -31,7 +31,7 @@
 % 
 \begin{center}
  {\LARGE \textbf{\TAURUSvap: Manual for the input file}} \\
- {\large 18/02/2022}
+ {\large 26/07/2022}
 \end{center}
 
 %
@@ -253,7 +253,7 @@ where
  \ttt{= 1\:} computes the spatial density integrated over all angles, $\rho(r)$, and writes it into the file \ttt{spatial\_density\_R.dat} \\[0.05cm]
  \ttt{= 2\:} computes the spatial density in spherical coordinates, $\rho(r,\theta,\phi)$, and writes it into the file \ttt{spatial\_density\_RThetaPhi.dat}. Computes $\rho(r)$ as well. \\[0.05cm]
  \ttt{= 3\:} computes the spatial density in cartesian coordinates,  $\rho(x,y,z)$, and writes it into the file \ttt{spatial\_density\_XYZ.dat}. 
-\item \ttt{dens\_nr(i)}: number of mesh points along the direction $i$. ($1=r$ or $x$, $2=\theta$ or $y$, $3=\phi$ or $z$).
+\item \ttt{dens\_nr(i)}: number of mesh points along the direction $i$. ($1=r \ge 0$ or $x>0$, $2=\theta$ or $y>0$, $3=\phi$ or $z>0$).
 \item \ttt{dens\_dr(i)}: step size along the direction $i$. ($1=r$ or $x$, $2=\theta$ or $y$, $3=\phi$ or $z$). In case \ttt{dens\_spatial = 2}, the step size along direction $\theta$ is equal 
  to $\frac{\pi}{\ttt{dens\_nr(2)}}$ and the step size along the direction $\phi$ is equal to $\frac{2\pi}{\ttt{dens\_nr(3)}}$ and the input values are not used.
 \end{itemize}
