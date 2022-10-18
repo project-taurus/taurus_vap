@@ -54,7 +54,7 @@ subroutine print_version
 print '("  _________________________________________________________ ",/, &
       & " |                                                         |",/, &
       & " |  (______)  TAURUS_vap                Benjamin Bally     |",/, &
-      & " |  <(0  0)>  2022.07.26                Tomás R. Rodríguez |",/, &
+      & " |  <(0  0)>  2022.10.18                Tomás R. Rodríguez |",/, &
       & " |    (°°)                              Adrián Sánchez-F.  |",/, &
       & " |                                                         |",/, &
       & " | This code performs the particle-number variation after  |",/, &

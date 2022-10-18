@@ -181,7 +181,7 @@ do i = 1, constraint_types
   do m = 1, min(constraint_switch(i),2)
     j = j + 1
     k = (j - 1) * HOsp_dim2 
-    if ( (i >= 20) .and. (i < 26) ) constraint_pair = constraint_pair + 1
+    if ( (i >= 21) .and. (i < 27) ) constraint_pair = constraint_pair + 1
  
     constraint_id(j) = i 
  
@@ -246,7 +246,7 @@ do i = 1, constraint_types
         factor_delta = constraint_read(i,1)
     end select
    
-    if ( i < 26 ) then
+    if ( i < 27 ) then
       constraint_HO(k+1:k+HOsp_dim2) = Q(1:HOsp_dim2)
       constraint_val(j) = constraint_read(i,m)
     endif
