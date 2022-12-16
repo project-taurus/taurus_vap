@@ -226,7 +226,6 @@ end subroutine GaussLaguerre
 ! The algorithm is taken from the book: Numerical Recipe in Fortran 77         !
 ! (ISBN: 978-0521430647).                                                      !
 !------------------------------------------------------------------------------!
-
 subroutine GaussLegendre(x1,x2,x,w,n)
 
 integer, intent(in) :: n
@@ -262,13 +261,6 @@ enddo
 
 end subroutine GaussLegendre
 
-!------------------------------------------------------------------------------!
-! subroutine ClebschGordan                                                     !
-!                                                                              !
-! Computes the ClebschGordan for the group SU(2). The algorithm used was taken !
-! from technical notes from NASA written by W. F. Ford and R. C. Bruley.       !
-! Ref: NASA TN D-6173                                                          !
-!                                                                              !
 !------------------------------------------------------------------------------!
 ! subroutine ClebschGordan                                                     !
 !                                                                              !

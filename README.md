@@ -11,7 +11,7 @@ The variational procedure can be performed under several constraints on the expe
 In addition, no number parity is assumed for the Bogoliubov quasi-particle states such that the code can be used
 to describe even-even, odd-even and odd-odd nuclei. Finally, the code can also be used to carry out simpler Hartree-Fock (HF) and Hartree-Fock-Bogoliubov (HFB) calculations.
 
-This code is part of the larger project TAURUS that aims at developing a numerical suite centered around the concept of symmetry-projected variational calculations and is supported by the the European Union’s Horizon 2020 research and innovation programme.
+This code is part of the larger project TAURUS that aims at developing a numerical suite centered around the concept of symmetry-projected variational calculations and was initially supported by the the European Union’s Horizon 2020 research and innovation programme.
 
 ## Compilation
 We provide scripts to compile the code in two alternative ways. The first one is based on `Bash` scripting whereas the second one is relying on the `Make` compilation tool.

@@ -31,7 +31,7 @@
 % 
 \begin{center}
  {\LARGE \textbf{\TAURUSvap: Manual for the input file}} \\
- {\large 26/07/2022}
+ {\large 16/12/2022}
 \end{center}
 
 %
@@ -473,8 +473,8 @@ The physical correspondance for the indices \ttt{j} is the following:
 \subsubsection*{Remarks}
 
 \begin{itemize}
-  \item To minimize the contamination coming from motion of the center of mass, the average values of $\tilde{Q}_{10}$ and $\tilde{Q}_{11}$
-  should be constrained to zero, both for protons and neutrons (i.e.\ using \ttt{constraint\_switch(j) = 2}).
+  \item To minimize the contamination coming from motion of the center of mass, the isoscalar average values of $\tilde{Q}_{10}$ and $\tilde{Q}_{11}$
+  should be constrained to zero.
   \item To fix the orientation of the nucleus in the basis, the average value of $\tilde{Q}_{21}$ should be constrained to zero, both for protons and neutrons 
   (i.e.\ using \ttt{constraint\_switch(j) = 2}).
   \item When imposing a constraint on states that are exact eigenstates for a related operator, the code may not be able to 
