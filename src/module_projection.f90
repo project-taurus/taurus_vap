@@ -1273,6 +1273,8 @@ endif
 !!!
 !!! Complementary informations    
 !!!
+if ( max(Mphip,Mphin) > 1 ) return
+
 select case (seed_text)
   case(0,3)
     filename = 'final_wf.bin'

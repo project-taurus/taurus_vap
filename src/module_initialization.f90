@@ -51,21 +51,23 @@ CONTAINS
 subroutine print_version
 
 !cmpi if ( paral_myrank == 0 ) then        
-print '("  _________________________________________________________ ",/, &
-      & " |                                                         |",/, &
-      & " |  (______)  TAURUS_vap                Benjamin Bally     |",/, &
-      & " |  <(0  0)>  2022.10.18                Tomás R. Rodríguez |",/, &
-      & " |    (°°)                              Adrián Sánchez-F.  |",/, &
-      & " |                                                         |",/, &
-      & " | This code performs the particle-number variation after  |",/, &
-      & " | projection of real general Bogoliubov quasi-particle    |",/, &
-      & " | states represented in a spherical harmonic oscillator   |",/, &
-      & " | basis.                                                  |",/, &
-      & " |                                                         |",/, &
-      & " | Licence: GNU General Public License version 3 or later  |",/, &
-      & " | DOI: https://doi.org/10.5281/zenodo.6906647             |",/, &
-      & " | Git: https://github.com/project-taurus/taurus_vap.git   |",/, &
-      & " |_________________________________________________________|",/)' 
+print '(" __________________________________________________________ ",/, &
+      & "|                                                          |",/, &
+      & "|  (______)                                                |",/, &
+      & "|  <(0  0)>   TAURUS_vap, version 2022.12.22               |",/, &
+      & "|    (°°)                                                  |",/, &
+      & "|                                                          |",/, &
+      & "| This code performs the particle-number variation after   |",/, &
+      & "| projection of real general Bogoliubov quasi-particle     |",/, &
+      & "| states represented in a spherical harmonic oscillator    |",/, &
+      & "| basis.                                                   |",/, &
+      & "|                                                          |",/, &
+      & "| Licence: GNU General Public License version 3 or later   |",/, &
+      & "| DOI: https://doi.org/XXXXXXXXXXXXXXXXXXXXXX              |",/, &
+      & "| Git: https://github.com/project-taurus/taurus_pav.git    |",/, &
+      & "|                                                          |",/, &
+      & "| Contributors: B. Bally, T. Rodríguez, A. Sánchez-F.      |",/, &
+      & "|__________________________________________________________|",/)' 
 !cmpi endif
 
 end subroutine print_version
@@ -828,7 +830,7 @@ select case ( htype*(1-hamil_read) )
       endif
     else 
       ierror = ierror + 1
-      print "(a,a,a)", "The 2-body file (hamil_f1) = ",hamil_f2b, &
+      print "(a,a,a)", "The 2-body file (hamil_f2b) = ",hamil_f2b, &
             " can not be found."
     endif
 

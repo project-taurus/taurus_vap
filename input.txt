@@ -9,8 +9,8 @@ Particle Number
 ---------------
 Number of active protons      4.00
 Number of active neutrons     4.00  
-No. of gauge angles protons   1
-No. of gauge angles neutrons  1
+No. of gauge angles protons   5
+No. of gauge angles neutrons  5
 
 Wave Function   
 -------------
