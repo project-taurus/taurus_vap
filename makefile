@@ -6,7 +6,6 @@
 # BLAS/LAPACK libraries. When using the intel compiler "ifort", we recommend
 # to use of their specific Math Kernel Library (MKL).
 
-# and the directories of the libraries.
 # This script is only given as an example and we do not guarantee that it will
 # work on your system. In particular, check the version of your compiler and
 # the directories of the libraries.

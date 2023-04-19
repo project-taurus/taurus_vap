@@ -38,7 +38,7 @@ CONTAINS
 !------------------------------------------------------------------------------!
 subroutine set_parallel_teams            
 
-integer :: angles, divide, rest, ierr=0
+integer :: divide, rest, ierr=0
 
 !!! Determines the number of teams and creates a new communicator
 divide = paral_worldsize / paral_teamssize

@@ -14,7 +14,7 @@ No. of gauge angles neutrons  5
 
 Wave Function   
 -------------
-Type of seed wave function    0 
+Type of seed wave function    1 
 Number of QP to block         0
 No symmetry simplifications   0
 Seed random number generation 0
