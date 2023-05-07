@@ -670,11 +670,12 @@ end subroutine read_wavefunction
 !                                                                              !
 ! Input: iopt = 0 writes "final_wf.bin/txt"                                    !
 !             = 1   "    "intermediate_wf.bin/txt"                             !
-!        ener = particle-number projected energy (optional)                    !
+!        iter = iteraction number                                              !
+!        ener = particle-number projected energy                               !
 !------------------------------------------------------------------------------!
-subroutine write_wavefunction(iopt,ener)           
+subroutine write_wavefunction(iopt,iter,ener)           
 
-integer, intent(in) :: iopt
+integer, intent(in) :: iopt, iter
 real(r64), intent(in) :: ener 
 integer :: i, j
 real(r64) :: absener
@@ -685,13 +686,15 @@ logical :: is_binary
 
 !!! Determines the label of the state based on a random number and the 
 !!! particle-number projected energy.
-absener = abs(ener)
+if ( iter > 0 ) then
+  absener = abs(ener)
 
-do while (absener >= one) 
-  absener = absener / 10.d0
-enddo
+  do while (absener >= one) 
+    absener = absener / 10.d0
+  enddo
 
-bogo_label = int(absener*(1.0d18),i64)
+  bogo_label = int(absener*(1.0d18),i64)
+endif
 
 !!! Opens the file depending if intermediate or final writing and if binary
 !!! or text writing

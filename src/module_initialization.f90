@@ -54,7 +54,7 @@ subroutine print_version
 print '(" __________________________________________________________ ",/, &
       & "|                                                          |",/, &
       & "|  (______)                                                |",/, &
-      & "|  <(0  0)>   TAURUS_vap, version 2022.12.22               |",/, &
+      & "|  <(0  0)>   TAURUS_vap, version 2022.05.07               |",/, &
       & "|    (°°)                                                  |",/, &
       & "|                                                          |",/, &
       & "| This code performs the particle-number variation after   |",/, &
@@ -63,7 +63,7 @@ print '(" __________________________________________________________ ",/, &
       & "| basis.                                                   |",/, &
       & "|                                                          |",/, &
       & "| Licence: GNU General Public License version 3 or later   |",/, &
-      & "| DOI: https://doi.org/XXXXXXXXXXXXXXXXXXXXXX              |",/, &
+      & "| DOI: https://doi.org/10.5281/zenodo.6906647              |",/, &
       & "| Git: https://github.com/project-taurus/taurus_pav.git    |",/, &
       & "|                                                          |",/, &
       & "| Contributors: B. Bally, T. Rodríguez, A. Sánchez-F.      |",/, &

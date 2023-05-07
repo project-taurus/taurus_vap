@@ -108,8 +108,8 @@ select case (opt_grad)
     mu = ( (sqrt(cond_numb)-1) / (sqrt(cond_numb)+1) )**2
 
   !!! Heavy Ball with approximate optimal parameters + approximating the Hessian
-  !!! eigenvalues by twice the single-particles energies (seems to work better                              
-  !!! for odd-mass nuclei)                                                                              
+  !!! eigenvalues by twice the single-particles energies (seems to work better  
+  !!! for odd-mass nuclei)                                                     
   case (2)
     eigen_max = 2.0d0 * maxval(abs(eigen_hsp))
     eigen_min = 2.0d0 * minval(abs(eigen_hsp))
@@ -377,12 +377,12 @@ endif
 !!! Diaonalizes H11
 call dsyev('v','u',ndim,field_H11,ndim,eigen_H11,work,3*ndim-1,info_H11)
 
-!!! Writes the properties of the quasi-particle states in a file                                        
+!!! Writes the properties of the quasi-particle states in a file  
 if ( opt == 1 ) then                                                             
   open(ute, file='eigenbasis_H11.dat', status='replace', action='write', &       
            form='formatted')                                                     
   write(ute,format2) "   #      Z        N        n        l        p & 
-                     &       j       jz         H11"                                              
+                     &       j       jz         H11" 
   do i = 1, ndim                                                                 
     xneut = zero                                                                 
     xprot = zero                                                                 
