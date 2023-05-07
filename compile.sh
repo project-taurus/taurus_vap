@@ -170,7 +170,7 @@ if [ $wrkc = 1 ]; then
  rm -rf $wrkdir
  echo "directory '$wrkdir' deleted"
 else 
-  for file in $filef90 $fileo $filemod
+  for file in $filef90 $fileo $filemod ${code}.f90
   do 
     rm -f $wrkdir/$file
   done

@@ -47,6 +47,7 @@ complex(r64) :: rot_over,    & ! overlap
                 rot_neut2,   & ! neutron variance
                 rot_amj(3),  & ! angular momentum J_i (1=x, 2=y, 3=z)
                 rot_amj2(3), & ! angular momentum J_i^2 (1=x, 2=y, 3=z) 
+                rot_spor(2), & ! spin-orbit (1=p,2=n)
                 rot_Qlm(2,0:4,4) ! multipole Qlm (1=p,2=n), m, l
 complex(r64), dimension(12) :: rot_ecomp ! "components" of the rotated energy    
 complex(r64), dimension(:,:), allocatable :: rot_occnum, & ! occupation numbers
@@ -64,6 +65,7 @@ complex(r64) :: pnp_over,    & ! overlap
                 pnp_neut2,   & ! neutron variance
                 pnp_amj(3),  & ! angular momentum J_i (1=x, 2=y, 3=z)
                 pnp_amj2(3), & ! angular momentum J_i^2 (1=x, 2=y, 3=z) 
+                pnp_spor(2), & ! spin-orbit (1=p,2=n) 
                 pnp_Qlm(2,0:4,4) ! multipole Qlm (1=p,2=n), m, l
 complex(r64), dimension(12) :: pnp_ecomp ! "components" of the projected energy  
 complex(r64), dimension(:,:), allocatable :: pnp_occnum, & ! occupation numbers
@@ -205,7 +207,7 @@ real(r64), dimension(:), allocatable :: voveru0
 complex(r64) :: weip, wein, amjx_p, amjx_n, amjy_p, amjy_n, amjz_p, amjz_n
 complex(r64), dimension(ndim,ndim) :: bogo_zU0bar, bogo_zV0bar, & 
                                       bogo_zU0tilde, bogo_zV0tilde, ROTG
-complex(r64), dimension(ndim**2) :: Qlm, rad2
+complex(r64), dimension(ndim**2) :: Qlm, rad2, spor   
 
 !!! Initialization: sets most gauge-dependent quantity to zero
 call reset_pnp(iopt)
@@ -321,6 +323,11 @@ do nangle = nangle_min, nangle_max
     call calculate_expectval_obos_cplx(dens_rhoLR,dens_kappaLR,dens_kappaRL, &
                                        zone*angumome_Jz,zone*angumome_Jz2, &
                                        rot_amj2(3),ndim)
+
+    !!! spin orbit
+    spor(:) = zone * (angumome_so(:,1) + angumome_so(:,2))
+    call calculate_expectval_obo_cplx(dens_rhoLR,spor,rot_spor(1),rot_spor(2), &
+                                      ndim)
     
     !!! Multipole Qlm
     do i = 1, 4
@@ -395,6 +402,7 @@ else
   pnp_rad2 = zzero  
   pnp_amj = zzero
   pnp_amj2 = zzero
+  pnp_spor = zzero  
   pnp_Qlm = zzero
   pnp_occnum = zzero
   pnp_ecomp = zzero
@@ -441,6 +449,7 @@ else
   pnp_rad2 = pnp_rad2 + rot_rad2 * factor1
   pnp_amj = pnp_amj + rot_amj * factor1
   pnp_amj2 = pnp_amj2 + rot_amj2 * factor1
+  pnp_spor = pnp_spor + rot_spor * factor1
   pnp_Qlm = pnp_Qlm + rot_Qlm * factor1
   pnp_occnum = pnp_occnum + rot_occnum * factor1
   pnp_ecomp = pnp_ecomp + rot_ecomp * factor1
@@ -465,7 +474,7 @@ end subroutine sum_gauge
 !cmpi complex(r64) :: pnp_over_red, pnp_ener_red, pnp_pari_red, & 
 !cmpi                 pnp_rad2_red(2), pnp_prot_red, pnp_neut_red, &
 !cmpi                 pnp_prot2_red, pnp_neut2_red, &
-!cmpi                 pnp_amj_red(3), pnp_amj2_red(3),  &
+!cmpi                 pnp_amj_red(3), pnp_amj2_red(3), pnp_spor_red(2), &
 !cmpi                 pnp_Qlm_red(2,0:4,4) 
 !cmpi complex(r64), dimension(12) :: pnp_ecomp_red
 !cmpi complex(r64), dimension(:,:), allocatable :: pnp_occnum_red, pnp_H20_red, &
@@ -519,6 +528,8 @@ end subroutine sum_gauge
 !cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
 !cmpi    call mpi_reduce(pnp_amj2,pnp_amj2_red,3,mpi_double_complex, &
 !cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
+!cmpi    call mpi_reduce(pnp_spor,pnp_spor_red,2,mpi_double_complex, &
+!cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
 !cmpi    call mpi_reduce(pnp_Qlm,pnp_Qlm_red,40,mpi_double_complex, &
 !cmpi                    mpi_sum,0,mpi_comm_peers,ierr)
 !cmpi    call mpi_reduce(pnp_occnum,pnp_occnum_red,ndim2,mpi_double_complex, & 
@@ -530,6 +541,7 @@ end subroutine sum_gauge
 !cmpi    pnp_rad2 = pnp_rad2_red
 !cmpi    pnp_amj = pnp_amj_red
 !cmpi    pnp_amj2 = pnp_amj2_red
+!cmpi    pnp_spor = pnp_spor_red
 !cmpi    pnp_Qlm = pnp_Qlm_red
 !cmpi    pnp_occnum = pnp_occnum_red
 !cmpi    pnp_rho = pnp_rho_red
@@ -982,7 +994,8 @@ integer, intent(in) :: Mphip, Mphin
 integer :: i, j, ialloc=0
 real(r64) :: over, pari, prot, neut, prot2, neut2,& 
              rad2_p, rad2_n, rad2_ch, rad2_is, rad2_iv, &
-             amj(3), amj2(3), Qlm(4,0:4,4), betalm(4,0:4,4), betaT(4), &
+             amj(3), amj2(3), spor_p, spor_n, & 
+             Qlm(4,0:4,4), betalm(4,0:4,4), betaT(4), &
              gammT(4), P_T00_J1m1, P_T00_J10, P_T00_J1p1, &
              P_T1m1_J00, P_T10_J00, P_T1p1_J00, ener_0b, ener_1b_p, ener_1b_n, & 
              ener_2bPH_pp, ener_2bPH_pn, ener_2bPH_np, ener_2bPH_nn,&
@@ -1182,9 +1195,14 @@ rad2_n = real( pnp_rad2(2) / pnp_neut )
 rad2_is = real( ( pnp_rad2(1) + pnp_rad2(2)) / (pnp_prot + pnp_neut) )
 rad2_iv = real( (-pnp_rad2(1) + pnp_rad2(2)) / (pnp_prot + pnp_neut) )
 
+spor_p = real( pnp_spor(1) ) 
+spor_n = real( pnp_spor(2) ) 
+
 ! The correction is taken from Cipollone.2015.PhysRevC.92.014306
-rad2_ch = rad2_p + 0.88d0 - 0.11d0 * (prot / neut ) & 
-                 + 0.75d0 * (hbarc / mass_mp)**2
+! and Reinhard.2021.PhysRevC.103.054310
+rad2_ch = rad2_p + 0.848d0 - 0.1161d0 * (neut / prot) & 
+          + (3 + (magmome_mup - 0.5d0) * spor_p + & 
+             magmome_mun * (neut / prot) * spor_n) * (hbarc / (2*mass_ma))**2
 
 print '(/,"RADIUS",/,6("="),/, &
        & 40x,"Nucleons",/, &
@@ -1194,8 +1212,7 @@ write(uto,format7) '  r    ', sqrt(rad2_p), sqrt(rad2_n), sqrt(rad2_is), &
                               sign(sqrt(abs(rad2_iv)),rad2_iv), sqrt(rad2_ch)
 write(uto,format7) '  r^2  ', rad2_p, rad2_n, rad2_is, rad2_iv, rad2_ch
 
-!print '(/,"Corrections for the charge radius: &
-!      &Cipollone.2015.PhysRevC.92.014306")'
+print '(/,"Warning: no center-of-mass correction.")'
 
 !!!
 !!! Angular momentum
