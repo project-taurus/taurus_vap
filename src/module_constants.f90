@@ -47,8 +47,8 @@ real(r64), parameter :: pi = 4.0d0 * atan(1.0d0), & ! 3.14159265...
                         mass_mp = 938.27208816d0, & ! proton mass
                         mass_mn = 939.56542052d0, & ! neutron mass
                         mass_ma = (mass_mp + mass_mn)/2, & ! nucleon mass
-                        magmome_mup = +2.79284739, & ! magnetic moment proton
-                        magmome_mun = -1.91304275, & ! magnetic moment neutron
+                        magmome_mup = +2.79284739d0, & ! magnetic moment proton
+                        magmome_mun = -1.91304275d0, & ! magnetic moment neutron
                         hbarmass = hbarc**2 / (2*mass_ma) ! factor kin. energy
 
 END MODULE Constants

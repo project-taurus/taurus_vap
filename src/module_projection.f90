@@ -1194,12 +1194,12 @@ rad2_n = real( pnp_rad2(2) / pnp_neut )
 rad2_is = real( ( pnp_rad2(1) + pnp_rad2(2)) / (pnp_prot + pnp_neut) )
 rad2_iv = real( (-pnp_rad2(1) + pnp_rad2(2)) / (pnp_prot + pnp_neut) )
 
-spor_p = real( pnp_spor(1) ) 
-spor_n = real( pnp_spor(2) ) 
+spor_p = real( pnp_spor(1) / pnp_over ) 
+spor_n = real( pnp_spor(2) / pnp_over ) 
 
 ! The correction is taken from Cipollone.2015.PhysRevC.92.014306
 ! and Reinhard.2021.PhysRevC.103.054310
-rad2_ch = rad2_p + 0.848d0 - 0.1161d0 * (neut / prot) & 
+rad2_ch = rad2_p + 0.8775d0 - 0.1161d0 * (neut / prot) & 
           + (3 + (magmome_mup - 0.5d0) * spor_p + & 
              magmome_mun * (neut / prot) * spor_n) * (hbarc / (2*mass_ma))**2
 
