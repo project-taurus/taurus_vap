@@ -207,7 +207,7 @@ real(r64), dimension(:), allocatable :: voveru0
 complex(r64) :: weip, wein, amjx_p, amjx_n, amjy_p, amjy_n, amjz_p, amjz_n
 complex(r64), dimension(ndim,ndim) :: bogo_zU0bar, bogo_zV0bar, & 
                                       bogo_zU0tilde, bogo_zV0tilde, ROTG
-complex(r64), dimension(ndim**2) :: Qlm, rad2, spor   
+complex(r64), dimension(ndim**2) :: Qlm, rad2
 
 !!! Initialization: sets most gauge-dependent quantity to zero
 call reset_pnp(iopt)
@@ -325,9 +325,8 @@ do nangle = nangle_min, nangle_max
                                        rot_amj2(3),ndim)
 
     !!! spin orbit
-    spor(:) = zone * (angumome_so(:,1) + angumome_so(:,2))
-    call calculate_expectval_obo_cplx(dens_rhoLR,spor,rot_spor(1),rot_spor(2), &
-                                      ndim)
+    call calculate_expectval_obo_cplx(dens_rhoLR,zone*angumome_so,rot_spor(1), &
+                                      rot_spor(2),ndim)
     
     !!! Multipole Qlm
     do i = 1, 4
