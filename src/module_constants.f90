@@ -41,14 +41,16 @@ complex(r64), parameter :: zone  = (1.0d0,0.0d0), &
                            zimag = (0.0d0,1.0d0)
 
 !!! Definition of physical constants
-real(r64), parameter :: pi = 4.0d0 * atan(1.0d0), & ! 3.14159265...
-                        hbarc = 197.327053d0,     & ! hbar*c in Mev.fm
-                        radius_r0 = 1.2d0,        & ! radius factor 
-                        mass_mp = 938.27208816d0, & ! proton mass
-                        mass_mn = 939.56542052d0, & ! neutron mass
+real(r64), parameter :: pi = 4.0d0 * atan(1.0d0),  & ! 3.14159265...
+                        hbarc = 197.3269788d0,     & ! hbar*c in Mev.fm
+                        radius_r0 = 1.2d0,         & ! radius factor 
+                        radius_r2p = +0.8414d0**2, & ! ms charge radius proton 
+                        radius_r2n = -0.1161d0,    & ! ms charge radius neutron
+                        mass_mp = 938.27208816d0,  & ! proton mass
+                        mass_mn = 939.56542052d0,  & ! neutron mass
                         mass_ma = (mass_mp + mass_mn)/2, & ! nucleon mass
-                        magmome_mup = +2.79284739d0, & ! magnetic moment proton
-                        magmome_mun = -1.91304275d0, & ! magnetic moment neutron
+                        magmome_mup = +2.79284734d0, & ! magnetic moment proton
+                        magmome_mun = -1.91304273d0, & ! magnetic moment neutron
                         hbarmass = hbarc**2 / (2*mass_ma) ! factor kin. energy
 
 END MODULE Constants
