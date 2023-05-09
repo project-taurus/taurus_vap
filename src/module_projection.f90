@@ -1198,7 +1198,7 @@ spor_p = real( pnp_spor(1) / pnp_over )
 spor_n = real( pnp_spor(2) / pnp_over ) 
 
 ! RMS charge radius with corrections
-rad2_ch = rad2_p + radius_r2p + (neut / prot) * radius_r2n & 
+rad2_ch = rad2_p + radius_rp2 + (neut / prot) * radius_rn2 & 
           + 0.75d0 * (hbarc / mass_ma)**2 &
           + (1 / prot) * ((hbarc / mass_ma)**2) * ( magmome_mup * spor_p + &
                                                     magmome_mun * spor_n ) 
