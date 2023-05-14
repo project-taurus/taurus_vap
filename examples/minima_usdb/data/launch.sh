@@ -18,7 +18,7 @@ nprocess=4
 heredir=$(pwd)
 exedir=$heredir/../../exe
 wrkdir=$heredir/wrk
-intdir=$heredir/../../extras/hamiltonians
+intdir=$heredir/../../int 
 
 code=taurus_vap.exe
 
@@ -35,7 +35,6 @@ cd $wrkdir
 cp $exedir/$code .
 cp $intdir/$inter .
 cp $heredir/$input .        
-cp $heredir/auxiliaries/initial_wf.txt .
 
 # For OpenMP calculations
 if [ $omp = "yes" ] && [ $nthreads -ne 0 ]; then

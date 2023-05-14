@@ -24,7 +24,7 @@ To compile the code, go to the main directory and enter the command
 bash compile.sh FC TH
 ```
 where `FC` and `TH` are the two following arguments
-* `FC` = `gfortran`, `ifort`, `mpiifort` or `mpif90`  
+* `FC` = `gfortran`, `ifort`, `mpiifort` or `mpif90` 
 Fortran compiler.  
 * `TH` = `omp` or `none`  
 Option to enable OpenMP threading.
@@ -108,9 +108,7 @@ bash launch.sh > ouput.txt
 
 Additionally, the code will produce other files containing relevant informations such as the occupation numbers or the eigenvalues of the single-particle hamiltonian.
 More importantly, the code will write the final wave function obtained at the end of the iterative procedure in a file.
-The names of all the files produced during a run are recalled in the STDOUT.
-
-See the file `extras/manual_input.pdf` for more details.
+The names of all the files produced during a run are recalled at the end of the STDOUT.
 
 ## Examples
 We provide 2 examples of simple calculations in the `examples` directory:
@@ -131,13 +129,13 @@ In particular, the results we obtained performing these calculations can be foun
 ## Citation
 If you use this code in your research work and publications, please cite us:
 
-> B. Bally, Adrían Sánchez-Fernández and Tomás R. Rodríguez  
+> B. Bally, A. Sánchez-Fernández and T. R. Rodríguez  
 > Symmetry-projected variational calculations with the numerical suite TAURUS  
 > I. Variation after particle-number projection  
 > Eur. Phys. J. A 57, 69 (2021)   
 > https://doi.org/10.1140/epja/s10050-021-00369-z
 
-## Additional informations
+## Additional information 
 
 ### License
 TAURUS_vap is licensed under GNU General Public License version 3 (see LICENSE.txt).
@@ -149,7 +147,7 @@ https://cordis.europa.eu/project/id/839847
 ### Contributors 
 For the time being, the people that contributed to the code are:
 * Benjamin Bally (CEA Paris-Saclay)
-* Tomás R. Rodríguez Frutos (Universidad Autónoma de Madrid)
+* Tomás R. Rodríguez Frutos (Universidad Complutense de Madrid)
 * Adrián Sánchez-Fernández (Universidad Autónoma de Madrid)
 
 We also thank the people that helped us benchmark and test the code in its early versions.

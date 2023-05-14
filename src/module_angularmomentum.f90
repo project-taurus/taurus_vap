@@ -114,7 +114,7 @@ do ia = 1, HOsp_dim
   do ib = 1, HOsp_dim
     incr = incr + 1
     if ( ia /= ib ) cycle
-    angumome_so(incr) = (xja*(xja+1) - la*(la+1) - 0.75d0) 
+    angumome_so(incr) = xja*(xja+1) - la*(la+1) - 0.75d0 
   enddo
 enddo
 
