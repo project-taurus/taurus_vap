@@ -9,12 +9,12 @@ Particle Number
 ---------------
 Number of active protons      4.00
 Number of active neutrons     4.00  
-No. of gauge angles protons   5
-No. of gauge angles neutrons  5
+No. of gauge angles protons   0
+No. of gauge angles neutrons  0
 
 Wave Function   
 -------------
-Type of seed wave function    0 
+Type of seed wave function    3 
 Number of QP to block         0
 No symmetry simplifications   0
 Seed random number generation 0

@@ -18,7 +18,7 @@ nprocess=6
 heredir=$(pwd)
 exedir=$heredir/exe
 wrkdir=$heredir/wrk
-intdir=$heredir/extras/hamiltonians
+intdir=$heredir/int
 
 code=taurus_vap.exe
 

@@ -158,9 +158,9 @@ end subroutine calculate_gradient
 subroutine diagonalize_hsp_and_H11(opt,ndim)
 
 integer, intent(in) :: opt, ndim
-integer :: i, j, k, l, m, nocc0, nemp0
+integer :: i, j, k, l, m, nocc0, nemp0, evnum
 integer, dimension(1) :: tabmin
-integer, dimension(ndim) :: eigenh_order
+integer, dimension(ndim) :: eigenh_order, evdeg
 real(r64), dimension(ndim) :: eigenh_tmp
 real(r64), dimension(3*ndim-1) :: work
 real(r64), dimension(ndim,ndim) :: D0, rhoc, hspc, A1, A2
@@ -297,6 +297,46 @@ endif
 
 !!! Diagonalizes hsp                               
 call dsyev('v','u',ndim,field_hspRR,ndim,eigen_hsp,work,3*ndim-1,info_hsp)
+
+! In the case of axial symmetry, further diagonalizes Jz in this basis
+if ( (opt == 1) .and. (is_good_K) ) then
+
+  ! counts the number of eigenspaces and their degeneracy
+  evnum = 1
+  evdeg = 0
+  evdeg(1) = 1
+
+  do i = 2, ndim
+    if ( abs(eigen_hsp(i-1) - eigen_hsp(i)) < 1.0d-6 ) then
+      evdeg(evnum) = evdeg(evnum) + 1
+    else
+      evnum = evnum + 1
+      evdeg(evnum) = evdeg(evnum) + 1
+    endif
+  enddo
+
+  ! Jz in the matrix that diagonalizes h
+  D0 = field_hspRR
+  call dgemm('t','n',ndim,ndim,ndim,one,D0,ndim,angumome_Jz(1:ndim**2),ndim, &
+             zero,A1,ndim)
+  call dgemm('n','n',ndim,ndim,ndim,one,A1,ndim,D0,ndim,zero,A2,ndim)
+
+  ! block diagonalization
+  j = 0
+  A1 = zero
+
+  do i = 1, evnum
+    k = evdeg(i)
+    allocate( hspr(k,k), eigenr(k), workr(3*k-1) )
+    hspr(:,:) = A2(1+j:j+k,1+j:j+k)
+    call dsyev('v','u',k,hspr,k,eigenr,workr,3*k-1,info_hsp)
+    A1(1+j:j+k,1+j:j+k) = hspr(1:k,1:k)
+    j = j + k
+    deallocate( hspr, eigenr, workr )
+  enddo
+
+  call dgemm('n','n',ndim,ndim,ndim,one,D0,ndim,A1,ndim,zero,field_hspRR,ndim)
+endif
 
 !!! Writes the properties of the single-particle states in a file
 if ( opt == 1 ) then                                                             
