@@ -1200,8 +1200,8 @@ spor_n = real( pnp_spor(2) / pnp_over )
 ! RMS charge radius with corrections
 rad2_ch = rad2_p + radius_rp2 + (neut / prot) * radius_rn2 & 
           + 0.75d0 * (hbarc / mass_ma)**2 &
-          + (1 / prot) * ((hbarc / mass_ma)**2) * ( magmome_mup * spor_p + &
-                                                    magmome_mun * spor_n ) 
+          + (1 / prot) * ((hbarc / mass_ma)**2) * &
+            ( (magmome_mup - 0.5d0) * spor_p +  magmome_mun * spor_n )
 
 print '(/,"RADIUS",/,6("="),/, &
        & 40x,"Nucleons",/, &
