@@ -24,12 +24,12 @@ use Nucleus, only: valence_Z, valence_N, valence_A, &
 implicit none
 public
 
-!!! OH parameters
+!!! HO parameters
 real(r64) :: HO_hw, & ! hbar*omega 
              HO_b     ! b = sqrt(hbar/(m*omega)) 
                       !   = hbar*c / sqrt((m*c**2)*(hbar*omega)) 
 
-!!! OH single-particle states
+!!! HO single-particle states
 integer :: HOsp_dim       ! dimension of the basis
 integer(i64) :: HOsp_dim2 ! dimension squared (64bits)
 integer, dimension(:), allocatable :: HOsp_n,   & ! quantum number    n 
@@ -40,14 +40,14 @@ integer, dimension(:), allocatable :: HOsp_n,   & ! quantum number    n
                                       HOsp_sh, &  ! shell where the sp is  
                                       HOsp_tr     ! time-reversal of indices
 
-!!! OH shells
-integer :: HOsh_dim 
+!!! HO shells
+integer :: HOsh_dim ! dimension of the basis
 integer, dimension(:), allocatable :: HOsh_n,  & ! quantum number  n
                                       HOsh_l,  & !     "      "    l
                                       HOsh_2j, & !     "      "   2j
                                       HOsh_na    ! label of the shell
 
-!!! Other OH quantities
+!!! Other HO quantities
 integer :: HO_Nmax, & ! maximum value of N = 2n + l + 1 
            HO_lmax, & !    "      "   "  l                 
            HO_2jmax   !    "      "   "  j1+j2 

@@ -9,7 +9,7 @@
 ! DOI: 10.5281/zenodo.4130680                                                  !
 ! Repository: github.com/project-taurus/taurus_vap                             !
 !                                                                              !
-! Article describing the code: arXiv:2010.14169                                !
+! Article describing the code: Bally et al. EPJA 57, 69 (2021)                 !
 !==============================================================================!
 PROGRAM TAURUS_vap
 
