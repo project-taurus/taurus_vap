@@ -54,7 +54,7 @@ subroutine print_version
 print '(" __________________________________________________________ ",/, &
       & "|                                                          |",/, &
       & "|  (______)                                                |",/, &
-      & "|  <(0  0)>   TAURUS_vap, version 2022.05.22               |",/, &
+      & "|  <(0  0)>   TAURUS_vap, version 2022.05.28               |",/, &
       & "|    (°°)                                                  |",/, &
       & "|                                                          |",/, &
       & "| This code performs the particle-number variation after   |",/, &

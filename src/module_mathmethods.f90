@@ -126,7 +126,7 @@ integer :: ll, m
 real(r64) :: leg, phase, pll, pmm, pmmp1, somx2
 
 !!! Checks the validity of the arguments
-if ( (l < 0) .or. (abs(m) > l) .or. (abs(x) > 1) ) then 
+if ( (l < 0) .or. (abs(n) > l) .or. (abs(x) > 1) ) then 
   print "(a)", "Wrong argument(s) in function assolegendre"
 endif
 
