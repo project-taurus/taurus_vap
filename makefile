@@ -77,7 +77,7 @@ all: $(code)
 
 $(code): $(OBJ90) $(OBJ77) | $(OBJDIR)/ $(MODDIR)/ $(EXEDIR)/
 	$(FC) $(OPT) -o $(EXEDIR)/$(exec) $^ $(LIB)
-	@echo "Compilation finished."
+	@echo "compilation finished."
 
 # General rules 
 #==============
