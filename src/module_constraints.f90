@@ -183,7 +183,7 @@ do i = 1, constraint_types
     k = (j - 1) * HOsp_dim2 
     if ( (i >= 21) .and. (i < 27) ) constraint_pair = constraint_pair + 1
  
-    constraint_id(j) = i 
+    constraint_id(j) = i + m - 1
  
     select case (i)
       case (1)
