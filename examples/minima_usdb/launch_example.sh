@@ -8,7 +8,7 @@ outdir=$heredir/out
 
 if [ ! -d $outdir ]; then mkdir $outdir; fi 
 
-cp $heredir/auxiliaries/launch.sh .
+cp $heredir/data/launch.sh .
 
 # Get the line numbers and then the values
 echo "* Z = number of protons " > results
@@ -30,7 +30,7 @@ echo "  Z     N    M    Energy      Epair      Beta      Gamma  " >> results
 for nucl in 1 2 3
 do
 
-  cp $heredir/auxiliaries/template_input.txt temp
+  cp $heredir/data/template_input.txt temp
 
   if [ $nucl -eq 1 ]; then
     zzz=4.00
@@ -109,7 +109,8 @@ do
   done
 done
 
-echo The results can be found in the file: results
+echo "The results can be found in the file: results"
+echo "They can be compared to the benchmark calculation: diff results data/results_benchmark"
 
 # Clean up
 rm -f launch.sh temp input.txt

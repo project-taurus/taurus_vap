@@ -8,7 +8,7 @@ outdir=$heredir/out
 
 if [ ! -d $outdir ]; then mkdir $outdir; fi 
 
-cp $heredir/auxiliaries/launch.sh .
+cp $heredir/data/launch.sh .
 
 echo "* Eta = factor for the gradient " > results_hfb
 echo "* Mu = factor for the momentum " >> results_hfb
@@ -55,7 +55,7 @@ do
     for ieta in {0..30}      
     do
 
-      cp $heredir/auxiliaries/template_input.txt temp
+      cp $heredir/data/template_input.txt temp
       
       # Defining eta in the correct format
       let eta=5*$ieta*$feta
@@ -130,7 +130,8 @@ done
     
 #Find the minimum
    
-echo The results can be found in the files: results_hfb  results_vap
+echo "The results can be found in the files: results_hfb  results_vap"
+echo "They can be compared to the benchmark calculation: diff results_hfb data/results_hfb_benchmark || diff results_vap data/results_vap_benchmark"
 
 # Clean up
 rm -f launch.sh temp input.txt
