@@ -129,9 +129,9 @@ In particular, the results we obtained performing these calculations can be foun
 ## Citation
 If you use this code in your research work and publications, please cite us:
 
-> B. Bally, A. Sánchez-Fernández and T. R. Rodríguez  
 > Symmetry-projected variational calculations with the numerical suite TAURUS  
 > I. Variation after particle-number projection  
+> B. Bally, A. Sánchez-Fernández and T. R. Rodríguez  
 > Eur. Phys. J. A 57, 69 (2021)   
 > https://doi.org/10.1140/epja/s10050-021-00369-z
 
