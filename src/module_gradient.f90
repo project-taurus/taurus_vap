@@ -189,34 +189,32 @@ endif
 call calculate_H11_real(ndim)
 
 !!! Takes into account the constraints
-if ( opt == 0 ) then 
-  do m = 1, constraint_dim-constraint_pair
-  k = (m-1)*(ndim**2) + 1
-  if ( m <= constraint_dim-constraint_pair ) then
-    call set_operator_qpbasis('f11',bogo_U0,bogo_V0,constraint_HO(k), &
-                              constraint_11(k),ndim) 
-  else
-    call set_operator_qpbasis('g11',bogo_U0,bogo_V0,constraint_HO(k), &
-                              constraint_11(k),ndim)
-    endif
-  enddo
+do m = 1, constraint_dim-constraint_pair
+k = (m-1)*(ndim**2) + 1
+if ( m <= constraint_dim-constraint_pair ) then
+  call set_operator_qpbasis('f11',bogo_U0,bogo_V0,constraint_HO(k), &
+                            constraint_11(k),ndim) 
+else
+  call set_operator_qpbasis('g11',bogo_U0,bogo_V0,constraint_HO(k), &
+                            constraint_11(k),ndim)
+  endif
+enddo
 
-  l = 0
-  do j = 1, ndim
-   do i = 1, ndim
-      l = l + 1 
-      q11_aux = zero
-      q00_aux = zero 
-      do m = 1, constraint_dim
-        k = (m-1)*(ndim**2)
-        q11_aux = q11_aux + lagrange_lambda1(m) * constraint_11(k+l)
-        q00_aux = q00_aux + lagrange_lambda1(m) * constraint_HO(k+l)
-      enddo
-      field_H11(i,j) = field_H11(i,j) - q11_aux
-      field_hspRR(i,j) = field_hspRR (i,j) - q00_aux
-   enddo 
-  enddo 
-endif
+l = 0
+do j = 1, ndim
+ do i = 1, ndim
+    l = l + 1 
+    q11_aux = zero
+    q00_aux = zero 
+    do m = 1, constraint_dim
+      k = (m-1)*(ndim**2)
+      q11_aux = q11_aux + lagrange_lambda1(m) * constraint_11(k+l)
+      q00_aux = q00_aux + lagrange_lambda1(m) * constraint_HO(k+l)
+    enddo
+    field_H11(i,j) = field_H11(i,j) - q11_aux
+    field_hspRR(i,j) = field_hspRR (i,j) - q00_aux
+ enddo 
+enddo 
 
 !!! hsp in canonical basis
 if ( opt == 1 ) then
